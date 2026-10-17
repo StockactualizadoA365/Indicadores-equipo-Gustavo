@@ -32,9 +32,9 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="font-black text-lg md:text-xl tracking-tight text-white">Dashboard de Ventas & Rendimiento Diario</h1>
-            <span class="text-[10px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded-md border border-blue-500/30 uppercase">Entel Webform</span>
+            <span class="text-[10px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded-md border border-blue-500/30 uppercase">Entel Tienda</span>
           </div>
-          <p class="text-xs text-slate-400">Cruce automático por CODIGO USUARIO REG. LINEA en tiempo real</p>
+          <p class="text-xs text-slate-400">Filtrado por Supervisor y Exclusión de Renovaciones/Migraciones/Fibra</p>
         </div>
       </div>
 
@@ -48,17 +48,12 @@
 
         <button onclick="cargarDatosEjemplo()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
           <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-400"></i>
-          <span>Limpiar / Ejemplo</span>
+          <span>Restablecer</span>
         </button>
 
         <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
           <i data-lucide="download" class="w-4 h-4"></i>
           <span>Exportar</span>
-        </button>
-
-        <button onclick="abrirModalManual()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5">
-          <i data-lucide="user-plus" class="w-4 h-4"></i>
-          <span>Nuevo Ejecutivo</span>
         </button>
       </div>
 
@@ -77,6 +72,23 @@
       <button onclick="document.getElementById('statusAlert').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold text-base">&times;</button>
     </div>
 
+    <!-- SELECTOR DE SUPERVISOR -->
+    <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="p-2 bg-blue-500/10 text-blue-400 rounded-xl"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Supervisor Asignado</span>
+          <select id="selectSupervisor" onchange="cambiarSupervisor()" class="bg-slate-900 border border-slate-700 text-white font-bold text-sm rounded-xl px-3 py-2 mt-1 focus:outline-none focus:border-blue-500 w-full md:w-96">
+            <option value="todos">Todos los Supervisores</option>
+          </select>
+        </div>
+      </div>
+      <div class="text-right hidden md:block">
+        <span class="text-[11px] text-slate-400 block font-medium">Criterio Operativo</span>
+        <span class="text-xs font-bold text-emerald-400">Nuevas, 2da Línea & Portabilidades (Sin Renovable/Fibra/Migración)</span>
+      </div>
+    </div>
+
     <!-- TARJETAS DE INDICADORES GLOBALES (KPIs) -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
       
@@ -86,16 +98,16 @@
           <div class="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><i data-lucide="target" class="w-4 h-4"></i></div>
         </div>
         <div id="kpiMetaTotal" class="text-2xl font-black text-white">0</div>
-        <span class="text-[10px] text-slate-500 font-medium">Acumulada del día</span>
+        <span class="text-[10px] text-slate-500 font-medium">Acumulada del equipo</span>
       </div>
 
       <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
         <div class="flex justify-between items-start mb-2">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ventas Hoy (Avance)</span>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ventas Válidas (Avance)</span>
           <div class="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg"><i data-lucide="shopping-bag" class="w-4 h-4"></i></div>
         </div>
         <div id="kpiVentasTotal" class="text-2xl font-black text-emerald-400">0</div>
-        <span class="text-[10px] text-slate-500 font-medium">Líneas registradas</span>
+        <span class="text-[10px] text-slate-500 font-medium">Líneas nuevas / Portas / 2da</span>
       </div>
 
       <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
@@ -136,12 +148,12 @@
       </div>
 
       <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-        <label class="text-slate-400 font-bold">Estado Cumplimiento:</label>
+        <label class="text-slate-400 font-bold">Estado:</label>
         <select id="filterEstado" onchange="filtrarTabla()" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 focus:outline-none font-semibold">
           <option value="todos">Todos los estados</option>
-          <option value="100">Completado (100% o más)</option>
-          <option value="50">En Progreso (50% a 99%)</option>
-          <option value="0">Bajo Performance (&lt; 50%)</option>
+          <option value="100">Completado (100%+)</option>
+          <option value="50">En Progreso (50%-99%)</option>
+          <option value="0">Bajo (&lt;50%)</option>
         </select>
 
         <button onclick="toggleGrafica()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 ml-2">
@@ -157,7 +169,7 @@
       <div class="flex justify-between items-center border-b border-slate-700/60 pb-3">
         <h3 class="font-extrabold text-sm text-slate-200 uppercase tracking-wider flex items-center gap-2">
           <i data-lucide="trending-up" class="w-4 h-4 text-blue-400"></i>
-          Comparativa de Avance vs Meta por Asesor
+          Comparativa de Avance (Ventas Válidas) vs Meta por Asesor
         </h3>
         <span class="text-[11px] text-slate-400 italic">Actualización automática</span>
       </div>
@@ -174,16 +186,16 @@
             <tr>
               <th class="p-3.5 border-r border-slate-800">USUARIO WEB</th>
               <th class="p-3.5 border-r border-slate-800">Nombre y Apellidos</th>
+              <th class="p-3.5 border-r border-slate-800">Supervisor</th>
               <th class="p-3.5 border-r border-slate-800 text-center">Meta Aco</th>
               <th class="p-3.5 border-r border-slate-800 text-center bg-blue-900/30 text-blue-300">Avance (Ventas)</th>
               <th class="p-3.5 border-r border-slate-800 text-center">% Cump</th>
               <th class="p-3.5 border-r border-slate-800 text-center">Llamadas</th>
-              <th class="p-3.5 border-r border-slate-800 text-center">Efectividad</th>
-              <th class="p-3.5 text-center">Acciones</th>
+              <th class="p-3.5 text-center">Efectividad</th>
             </tr>
           </thead>
           <tbody id="tablaCuerpo" class="divide-y divide-slate-700/60 font-semibold text-slate-200">
-            <!-- Filas dinámicas generadas mediante JavaScript -->
+            <!-- Filas dinámicas -->
           </tbody>
         </table>
       </div>
@@ -191,81 +203,195 @@
 
   </main>
 
-  <!-- MODAL MANUAL PARA AÑADIR/EDITAR EJECUTIVO -->
-  <div id="modalEjecutivo" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="font-extrabold text-white text-base">Registrar / Editar Ejecutivo</h3>
-        <button onclick="cerrarModalManual()" class="text-slate-400 hover:text-white font-bold text-xl">&times;</button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-300 mb-1 font-bold">USUARIO WEB (Código):</label>
-          <input type="text" id="mUsuario" placeholder="ej: illanquim" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white font-medium focus:outline-none focus:border-blue-500">
-        </div>
-
-        <div>
-          <label class="block text-slate-300 mb-1 font-bold">Nombre y Apellidos:</label>
-          <input type="text" id="mNombre" placeholder="ej: Isabel Llanqui Masias" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white font-medium focus:outline-none focus:border-blue-500">
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-slate-300 mb-1 font-bold">Meta Aco:</label>
-            <input type="number" id="mMeta" value="5" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white font-bold text-center focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="block text-slate-300 mb-1 font-bold">Avance:</label>
-            <input type="number" id="mAvance" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white font-bold text-center focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="block text-slate-300 mb-1 font-bold">Llamadas:</label>
-            <input type="number" id="mLlamadas" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white font-bold text-center focus:outline-none focus:border-blue-500">
-          </div>
-        </div>
-      </div>
-
-      <div class="pt-2 flex gap-2">
-        <button onclick="guardarEjecutivoManual()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs py-3 rounded-xl uppercase tracking-wider">
-          Guardar Ejecutivo
-        </button>
-        <button onclick="cerrarModalManual()" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 rounded-xl">
-          Cancelar
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // DATOS INICIALES (Plantilla de los 8 ejecutivos de la imagen)
-    let ejecutivos = [
-      { usuario: "illanquim", nombre: "Isabel Llanqui Masias", meta: 5, avance: 0, llamadas: 0 },
-      { usuario: "cnoriegaf", nombre: "NORIEGA FONSECA CARLA CAROLINA", meta: 5, avance: 0, llamadas: 0 },
-      { usuario: "fcampost", nombre: "Flavio Diego Campos Tapia", meta: 5, avance: 0, llamadas: 0 },
-      { usuario: "gguerreroe", nombre: "Gypsi Giannina Guerrero Eyzaguirre", meta: 5, avance: 0, llamadas: 0 },
-      { usuario: "sdionicioj", nombre: "DIONICIO JAUREGUI STEPHANO SEBASTIAN", meta: 5, avance: 0, llamadas: 0 },
-      { usuario: "glopeza", nombre: "Guillermo Antonio Lopez Abanto", meta: 5, avance: 0, llamadas: 0 },
-      { usuario: "msolero", nombre: "Soler Oberto Maritriny Patricia", meta: 5, avance: 0, llamadas: 0 },
-      { usuario: "mhernandezb1", nombre: "Hernandez Banda Maria Tania", meta: 5, avance: 0, llamadas: 0 }
-    ];
-
+    let registrosExcelBrutos = [];
+    let ejecutivosMap = {};
+    let supervisoresDisponibles = new Set();
+    let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
     let miChart = null;
+
+    // PLANTILLA INICIAL DE ASESORES DE GUSTAVO
+    let ejecutivosBase = [
+      { usuario: "galatat", nombre: "Alata Toledo Gonzalo andres", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "gguerreroe", nombre: "Guerrero Eyzaguirre Gypsi", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "msolero", nombre: "Soler Oberto Maritriny Patricia", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "illanquim", nombre: "Llanqui masias Isabel Veronica", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "cnoriegaf", nombre: "Noriega Fonseca Carla carolina", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "glopeza", nombre: "Lopez Abanto Guillermo antonio", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "rtorresh", nombre: "Torres Heredia Roberto baruc", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 }
+    ];
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       inicializarChart();
-      renderizarTabla();
+      inicializarDatosBase();
     });
 
-    // RENDERIZAR TABLA DE DATOS Y KPIs
+    function inicializarDatosBase() {
+      ejecutivosMap = {};
+      supervisoresDisponibles.clear();
+
+      ejecutivosBase.forEach(e => {
+        ejecutivosMap[e.usuario.toLowerCase()] = {
+          usuario: e.usuario,
+          nombre: e.nombre,
+          supervisor: e.supervisor,
+          meta: e.meta,
+          avance: 0,
+          llamadas: e.llamadas
+        };
+        supervisoresDisponibles.add(e.supervisor);
+      });
+
+      actualizarSelectorSupervisores();
+      renderizarTabla();
+    }
+
+    function actualizarSelectorSupervisores() {
+      const select = document.getElementById('selectSupervisor');
+      let html = '<option value="todos">Todos los Supervisores</option>';
+      
+      supervisoresDisponibles.forEach(sup => {
+        const selected = (sup === supervisorSeleccionado) ? 'selected' : '';
+        html += `<option value="${sup}" ${selected}>${sup}</option>`;
+      });
+
+      select.innerHTML = html;
+    }
+
+    function cambiarSupervisor() {
+      supervisorSeleccionado = document.getElementById('selectSupervisor').value;
+      renderizarTabla();
+    }
+
+    // PROCESAR EXCEL DE ENTEL
+    function procesarExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
+
+          if (!rawRows || rawRows.length === 0) {
+            alert("El archivo Excel está vacío.");
+            return;
+          }
+
+          // Buscar la fila de encabezados
+          let colUser = -1, colNom = -1, colSup = -1, colTipoOp = -1, headerRow = -1;
+
+          for (let r = 0; r < Math.min(25, rawRows.length); r++) {
+            const row = rawRows[r];
+            if (!row) continue;
+            for (let c = 0; c < row.length; c++) {
+              const val = String(row[c] || '').toUpperCase().trim();
+              if (val.includes('CODIGO USUARIO') || val === 'USUARIO WEB') colUser = c, headerRow = r;
+              if (val.includes('NOMBRE USUARIO') || val === 'NOMBRE Y APELLIDOS') colNom = c;
+              if (val === 'SUPERVISOR') colSup = c;
+              if (val === 'TIPO OPERACION') colTipoOp = c;
+            }
+            if (colUser !== -1) break;
+          }
+
+          if (colUser === -1 || colTipoOp === -1) {
+            alert("No se encontraron las columnas necesarias en el Excel (CODIGO USUARIO / TIPO OPERACION).");
+            return;
+          }
+
+          registrosExcelBrutos = [];
+          supervisoresDisponibles.clear();
+
+          for (let r = headerRow + 1; r < rawRows.length; r++) {
+            const row = rawRows[r];
+            if (!row) continue;
+
+            const usuario = String(row[colUser] || '').trim().toLowerCase();
+            const nombre = colNom !== -1 ? String(row[colNom] || '').trim() : '';
+            const supervisor = colSup !== -1 ? String(row[colSup] || '').trim() : 'Sin Supervisor';
+            const tipoOperacion = String(row[colTipoOp] || '').toUpperCase().trim();
+
+            if (usuario && usuario !== 'undefined' && usuario !== '0') {
+              supervisoresDisponibles.add(supervisor);
+              registrosExcelBrutos.push({ usuario, nombre, supervisor, tipoOperacion });
+            }
+          }
+
+          // Rellenar ejecutivos con los datos del Excel
+          registrosExcelBrutos.forEach(reg => {
+            if (!ejecutivosMap[reg.usuario]) {
+              ejecutivosMap[reg.usuario] = {
+                usuario: reg.usuario,
+                nombre: reg.nombre || reg.usuario,
+                supervisor: reg.supervisor,
+                meta: 5,
+                avance: 0,
+                llamadas: 0
+              };
+            } else {
+              if (reg.nombre && (!ejecutivosMap[reg.usuario].nombre || ejecutivosMap[reg.usuario].nombre === reg.usuario)) {
+                ejecutivosMap[reg.usuario].nombre = reg.nombre;
+              }
+              if (reg.supervisor) {
+                ejecutivosMap[reg.usuario].supervisor = reg.supervisor;
+              }
+            }
+          });
+
+          actualizarSelectorSupervisores();
+          recalcularAvances();
+
+          document.getElementById('inputExcel').value = '';
+          const alertBox = document.getElementById('statusAlert');
+          document.getElementById('statusMessage').innerText = `¡Reporte cargado con éxito! Se filtraron las operaciones válidas (excluyendo renovaciones, fibras y migraciones).`;
+          alertBox.classList.remove('hidden');
+
+        } catch (err) {
+          console.error(err);
+          alert("Error al procesar el archivo Excel.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function recalcularAvances() {
+      // Resetear avances
+      Object.keys(ejecutivosMap).forEach(k => ejecutivosMap[k].avance = 0);
+
+      // Criterio exacto: Solo sumar ventas válidas (NUEVA LINEA, 2DA LINEA, PORTA SS-SS)
+      // Excluir: RENOVACION DE EQUIPO, FIBRA, MIGRACION
+      registrosExcelBrutos.forEach(reg => {
+        const tipo = reg.tipoOperacion;
+        const esValido = tipo.includes('NUEVA') || tipo.includes('2DA') || tipo.includes('PORTA');
+        const esExcluido = tipo.includes('RENOVACION') || tipo.includes('FIBRA') || tipo.includes('MIGRACION');
+
+        if (esValido && !esExcluido) {
+          if (ejecutivosMap[reg.usuario]) {
+            ejecutivosMap[reg.usuario].avance++;
+          }
+        }
+      });
+
+      renderizarTabla();
+    }
+
     function renderizarTabla() {
       const tbody = document.getElementById('tablaCuerpo');
       tbody.innerHTML = '';
 
       let sumMeta = 0, sumAvance = 0, sumLlamadas = 0;
+      const arrEjecutivos = Object.values(ejecutivosMap);
 
-      ejecutivos.forEach((item, index) => {
+      arrEjecutivos.forEach((item, index) => {
+        // Filtrar por supervisor seleccionado
+        if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) {
+          return;
+        }
+
         sumMeta += parseInt(item.meta) || 0;
         sumAvance += parseInt(item.avance) || 0;
         sumLlamadas += parseInt(item.llamadas) || 0;
@@ -273,7 +399,6 @@
         const pctCump = item.meta > 0 ? ((item.avance / item.meta) * 100).toFixed(1) : 0;
         const efectividad = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) : '-';
 
-        // Determinar color del semáforo para el % de cumplimiento
         let badgeColor = "bg-red-500/20 text-red-400 border-red-500/30";
         if (pctCump >= 100) badgeColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-black";
         else if (pctCump >= 50) badgeColor = "bg-amber-500/20 text-amber-300 border-amber-500/30";
@@ -283,11 +408,12 @@
         tr.innerHTML = `
           <td class="p-3.5 border-r border-slate-800 font-mono text-blue-400 font-bold">${item.usuario}</td>
           <td class="p-3.5 border-r border-slate-800 text-slate-100 font-medium">${item.nombre}</td>
+          <td class="p-3.5 border-r border-slate-800 text-slate-300 text-[11px]">${item.supervisor}</td>
           <td class="p-3.5 border-r border-slate-800 text-center font-bold">
-            <input type="number" min="0" value="${item.meta}" onchange="actualizarDato(${index}, 'meta', this.value)" class="w-16 bg-slate-950 border border-slate-700 rounded-lg text-center p-1 font-bold text-slate-200 focus:outline-none focus:border-blue-500">
+            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-slate-950 border border-slate-700 rounded-lg text-center p-1 font-bold text-slate-200 focus:outline-none focus:border-blue-500">
           </td>
-          <td class="p-3.5 border-r border-slate-800 text-center bg-blue-950/20">
-            <input type="number" min="0" value="${item.avance}" onchange="actualizarDato(${index}, 'avance', this.value)" class="w-16 bg-slate-950 border border-blue-500/50 rounded-lg text-center p-1 font-black text-emerald-400 focus:outline-none focus:border-blue-400">
+          <td class="p-3.5 border-r border-slate-800 text-center bg-blue-950/25 font-black text-emerald-400 text-sm">
+            ${item.avance}
           </td>
           <td class="p-3.5 border-r border-slate-800 text-center">
             <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold border ${badgeColor}">
@@ -295,21 +421,16 @@
             </span>
           </td>
           <td class="p-3.5 border-r border-slate-800 text-center">
-            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarDato(${index}, 'llamadas', this.value)" class="w-16 bg-slate-950 border border-slate-700 rounded-lg text-center p-1 font-medium text-amber-300 focus:outline-none focus:border-blue-500">
+            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-slate-950 border border-slate-700 rounded-lg text-center p-1 font-medium text-amber-300 focus:outline-none focus:border-blue-500">
           </td>
-          <td class="p-3.5 border-r border-slate-800 text-center font-bold text-cyan-400">
+          <td class="p-3.5 text-center font-bold text-cyan-400">
             ${efectividad}${efectividad !== '-' ? '%' : ''}
-          </td>
-          <td class="p-3.5 text-center space-x-1">
-            <button onclick="eliminarEjecutivo(${index})" class="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors" title="Eliminar fila">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
           </td>
         `;
         tbody.appendChild(tr);
       });
 
-      // Actualizar Indicadores Globales
+      // KPIs
       document.getElementById('kpiMetaTotal').innerText = sumMeta;
       document.getElementById('kpiVentasTotal').innerText = sumAvance;
       document.getElementById('kpiLlamadasTotal').innerText = sumLlamadas;
@@ -324,129 +445,21 @@
       actualizarChart();
     }
 
-    // ACTUALIZAR DATO INDIVIDUAL DE LA TABLA
-    function actualizarDato(index, campo, valor) {
-      ejecutivos[index][campo] = parseInt(valor) || 0;
-      renderizarTabla();
+    function actualizarMeta(usuario, val) {
+      if (ejecutivosMap[usuario]) {
+        ejecutivosMap[usuario].meta = parseInt(val) || 0;
+        renderizarTabla();
+      }
     }
 
-    // PROCESAR EXCEL CARGADO (Robusto para Entel Webform)
-    function procesarExcel(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-
-          // Convertir hoja a matriz de filas con valores crudos
-          const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
-
-          if (!rawRows || rawRows.length === 0) {
-            alert("El archivo Excel no contiene filas con datos.");
-            return;
-          }
-
-          // Buscar en qué fila se encuentran las columnas de Entel
-          let colIndexUsuario = -1;
-          let colIndexNombre = -1;
-          let headerRowIndex = -1;
-
-          for (let r = 0; r < Math.min(25, rawRows.length); r++) {
-            const row = rawRows[r];
-            if (!row) continue;
-            for (let c = 0; c < row.length; c++) {
-              const val = String(row[c] || '').toUpperCase().trim();
-              if (val.includes('CODIGO USUARIO') || val.includes('USUARIO WEB') || val === 'USUARIO REG. OPERACION') {
-                colIndexUsuario = c;
-                headerRowIndex = r;
-              }
-              if (val.includes('NOMBRE USUARIO') || val.includes('NOMBRE Y APELLIDOS')) {
-                colIndexNombre = c;
-              }
-            }
-            if (colIndexUsuario !== -1) break;
-          }
-
-          if (colIndexUsuario === -1) {
-            alert("No se encontró la columna 'CODIGO USUARIO REG. LINEA' en el archivo cargado.");
-            return;
-          }
-
-          // Mapeo para contar ventas (filas) por cada usuario web
-          const conteoVentas = {};
-          const nombresEncontrados = {};
-
-          for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
-            const row = rawRows[r];
-            if (!row) continue;
-
-            const userVal = String(row[colIndexUsuario] || '').trim().toLowerCase();
-            const nombreVal = colIndexNombre !== -1 ? String(row[colIndexNombre] || '').trim() : '';
-
-            if (userVal && userVal !== 'undefined' && userVal !== 'null' && userVal !== '0') {
-              conteoVentas[userVal] = (conteoVentas[userVal] || 0) + 1;
-              if (nombreVal && !nombresEncontrados[userVal]) {
-                nombresEncontrados[userVal] = nombreVal;
-              }
-            }
-          }
-
-          // Cruzar datos con la lista actual o agregar usuarios si no existen
-          let procesados = 0;
-          ejecutivos.forEach(item => {
-            const userKey = item.usuario.toLowerCase().trim();
-            if (conteoVentas[userKey] !== undefined) {
-              item.avance = conteoVentas[userKey];
-              procesados++;
-            } else {
-              item.avance = 0;
-            }
-          });
-
-          // Agregar usuarios nuevos del Excel si no estaban en la lista inicial
-          Object.keys(conteoVentas).forEach(userKey => {
-            const existe = ejecutivos.some(e => e.usuario.toLowerCase().trim() === userKey);
-            if (!existe) {
-              ejecutivos.push({
-                usuario: userKey,
-                nombre: nombresEncontrados[userKey] || userKey,
-                meta: 5,
-                avance: conteoVentas[userKey],
-                llamadas: 0
-              });
-              procesados++;
-            }
-          });
-
-          renderizarTabla();
-
-          // Resetear el input para permitir volver a cargar el mismo archivo si es necesario
-          document.getElementById('inputExcel').value = '';
-
-          // Mostrar Alerta de Éxito
-          const alertBox = document.getElementById('statusAlert');
-          document.getElementById('statusMessage').innerText = `¡Éxito! Se procesó el reporte Excel correctamente. Se actualizaron ${procesados} ejecutivo(s).`;
-          alertBox.classList.remove('hidden');
-
-        } catch (err) {
-          console.error(err);
-          alert("Error al procesar la estructura del Excel. Asegúrate de subir el reporte oficial de Entel Tienda.");
-        }
-      };
-
-      reader.onerror = function() {
-        alert("Error al leer el archivo desde el navegador.");
-      };
-
-      reader.readAsArrayBuffer(file);
+    function actualizarLlamadas(usuario, val) {
+      if (ejecutivosMap[usuario]) {
+        ejecutivosMap[usuario].llamadas = parseInt(val) || 0;
+        renderizarTabla();
+      }
     }
 
-    // GRÁFICA COMPARATIVAS CHART.JS
+    // GRÁFICA
     function inicializarChart() {
       const ctx = document.getElementById('chartVentas').getContext('2d');
       miChart = new Chart(ctx, {
@@ -454,30 +467,14 @@
         data: {
           labels: [],
           datasets: [
-            {
-              label: 'Meta Aco',
-              data: [],
-              backgroundColor: 'rgba(148, 163, 184, 0.3)',
-              borderColor: 'rgba(148, 163, 184, 0.8)',
-              borderWidth: 1,
-              borderRadius: 6
-            },
-            {
-              label: 'Avance Ventas',
-              data: [],
-              backgroundColor: 'rgba(0, 46, 255, 0.85)',
-              borderColor: '#002EFF',
-              borderWidth: 1,
-              borderRadius: 6
-            }
+            { label: 'Meta Aco', data: [], backgroundColor: 'rgba(148, 163, 184, 0.3)', borderColor: 'rgba(148, 163, 184, 0.8)', borderWidth: 1, borderRadius: 6 },
+            { label: 'Ventas Válidas', data: [], backgroundColor: 'rgba(0, 46, 255, 0.85)', borderColor: '#002EFF', borderWidth: 1, borderRadius: 6 }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: '#cbd5e1', font: { size: 11, weight: 'bold' } } }
-          },
+          plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11, weight: 'bold' } } } },
           scales: {
             x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
             y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(51, 65, 85, 0.4)' }, beginAtZero: true }
@@ -488,20 +485,21 @@
 
     function actualizarChart() {
       if (!miChart) return;
-      miChart.data.labels = ejecutivos.map(e => e.usuario);
-      miChart.data.datasets[0].data = ejecutivos.map(e => e.meta);
-      miChart.data.datasets[1].data = ejecutivos.map(e => e.avance);
+      const filtrados = Object.values(ejecutivosMap).filter(e => supervisorSeleccionado === "todos" || e.supervisor === supervisorSeleccionado);
+      miChart.data.labels = filtrados.map(e => e.usuario);
+      miChart.data.datasets[0].data = filtrados.map(e => e.meta);
+      miChart.data.datasets[1].data = filtrados.map(e => e.avance);
       miChart.update();
     }
 
-    // FILTROS Y BÚSQUEDA
     function filtrarTabla() {
       const query = document.getElementById('searchInput').value.toLowerCase();
       const estado = document.getElementById('filterEstado').value;
       const rows = document.querySelectorAll('#tablaCuerpo tr');
+      const filtrados = Object.values(ejecutivosMap).filter(e => supervisorSeleccionado === "todos" || e.supervisor === supervisorSeleccionado);
 
       rows.forEach((row, idx) => {
-        const item = ejecutivos[idx];
+        const item = filtrados[idx];
         if (!item) return;
 
         const matchQuery = item.usuario.toLowerCase().includes(query) || item.nombre.toLowerCase().includes(query);
@@ -512,11 +510,8 @@
         else if (estado === '50') matchEstado = pctCump >= 50 && pctCump < 100;
         else if (estado === '0') matchEstado = pctCump < 50;
 
-        if (matchQuery && matchEstado) {
-          row.classList.remove('hidden');
-        } else {
-          row.classList.add('hidden');
-        }
+        if (matchQuery && matchEstado) row.classList.remove('hidden');
+        else row.classList.add('hidden');
       });
     }
 
@@ -532,87 +527,28 @@
       }
     }
 
-    // EXPORTAR TABLA A EXCEL
     function exportarExcel() {
-      const dataExport = ejecutivos.map(item => {
-        const pct = item.meta > 0 ? ((item.avance / item.meta) * 100).toFixed(1) + '%' : '0%';
-        const efec = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) + '%' : '-';
-        return {
-          "USUARIO WEB": item.usuario,
-          "Nombre y Apellidos": item.nombre,
-          "Meta Aco": item.meta,
-          "Avance": item.avance,
-          "% Cump": pct,
-          "Llamadas": item.llamadas,
-          "Efectividad": efec
-        };
-      });
+      const filtrados = Object.values(ejecutivosMap).filter(e => supervisorSeleccionado === "todos" || e.supervisor === supervisorSeleccionado);
+      const dataExport = filtrados.map(item => ({
+        "USUARIO WEB": item.usuario,
+        "Nombre y Apellidos": item.nombre,
+        "Supervisor": item.supervisor,
+        "Meta Aco": item.meta,
+        "Avance Válido": item.avance,
+        "% Cump": item.meta > 0 ? ((item.avance / item.meta) * 100).toFixed(1) + '%' : '0%',
+        "Llamadas": item.llamadas,
+        "Efectividad": item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) + '%' : '-'
+      }));
 
       const ws = XLSX.utils.json_to_sheet(dataExport);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Reporte_Diario");
-      XLSX.writeFile(wb, `Reporte_Ventas_Equipo_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-
-    // MODAL Y MANTENEDOR MANUAL
-    function abrirModalManual() {
-      document.getElementById('mUsuario').value = '';
-      document.getElementById('mNombre').value = '';
-      document.getElementById('mMeta').value = 5;
-      document.getElementById('mAvance').value = 0;
-      document.getElementById('mLlamadas').value = 0;
-      document.getElementById('modalEjecutivo').classList.remove('hidden');
-    }
-
-    function cerrarModalManual() {
-      document.getElementById('modalEjecutivo').classList.add('hidden');
-    }
-
-    function guardarEjecutivoManual() {
-      const usr = document.getElementById('mUsuario').value.trim();
-      const nom = document.getElementById('mNombre').value.trim();
-      const meta = parseInt(document.getElementById('mMeta').value) || 5;
-      const av = parseInt(document.getElementById('mAvance').value) || 0;
-      const llam = parseInt(document.getElementById('mLlamadas').value) || 0;
-
-      if (!usr) {
-        alert("Por favor ingresa un USUARIO WEB.");
-        return;
-      }
-
-      const idx = ejecutivos.findIndex(e => e.usuario.toLowerCase() === usr.toLowerCase());
-      if (idx !== -1) {
-        ejecutivos[idx].nombre = nom || ejecutivos[idx].nombre;
-        ejecutivos[idx].meta = meta;
-        ejecutivos[idx].avance = av;
-        ejecutivos[idx].llamadas = llam;
-      } else {
-        ejecutivos.push({ usuario: usr, nombre: nom || usr, meta, avance: av, llamadas: llam });
-      }
-
-      cerrarModalManual();
-      renderizarTabla();
-    }
-
-    function eliminarEjecutivo(index) {
-      if (confirm(`¿Seguro que deseas eliminar al usuario ${ejecutivos[index].usuario}?`)) {
-        ejecutivos.splice(index, 1);
-        renderizarTabla();
-      }
+      XLSX.utils.book_append_sheet(wb, ws, "Reporte_Filtrado");
+      XLSX.writeFile(wb, `Reporte_Supervisor_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
     function cargarDatosEjemplo() {
-      ejecutivos = [
-        { usuario: "illanquim", nombre: "Isabel Llanqui Masias", meta: 5, avance: 4, llamadas: 12 },
-        { usuario: "cnoriegaf", nombre: "NORIEGA FONSECA CARLA CAROLINA", meta: 5, avance: 3, llamadas: 15 },
-        { usuario: "fcampost", nombre: "Flavio Diego Campos Tapia", meta: 5, avance: 0, llamadas: 8 },
-        { usuario: "gguerreroe", nombre: "Gypsi Giannina Guerrero Eyzaguirre", meta: 5, avance: 2, llamadas: 10 },
-        { usuario: "sdionicioj", nombre: "DIONICIO JAUREGUI STEPHANO SEBASTIAN", meta: 5, avance: 2, llamadas: 9 },
-        { usuario: "glopeza", nombre: "Guillermo Antonio Lopez Abanto", meta: 5, avance: 3, llamadas: 11 },
-        { usuario: "msolero", nombre: "Soler Oberto Maritriny Patricia", meta: 5, avance: 3, llamadas: 14 },
-        { usuario: "mhernandezb1", nombre: "Hernandez Banda Maria Tania", meta: 5, avance: 0, llamadas: 4 }
-      ];
-      renderizarTabla();
+      inicializarDatosBase();
+      document.getElementById('statusAlert').classList.add('hidden');
     }
   </script>
 </body>
