@@ -19,39 +19,39 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-900 min-h-screen text-slate-100 font-sans pb-12">
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12">
 
-  <!-- HEADER / BARRA SUPERIOR -->
-  <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-50">
+  <!-- HEADER / BARRA SUPERIOR (AZUL MARINO Y NARANJA) -->
+  <header class="bg-[#0b132b] text-white border-b-4 border-[#ff6b00] sticky top-0 z-50 shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col md:flex-row justify-between items-center gap-4">
       
       <div class="flex items-center space-x-3">
-        <div class="bg-[#002EFF] text-white p-2.5 rounded-2xl shadow-lg shadow-blue-600/30">
+        <div class="bg-[#002EFF] text-white p-2.5 rounded-2xl shadow-md">
           <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="font-black text-lg md:text-xl tracking-tight text-white">Dashboard de Ventas & Rendimiento Diario</h1>
-            <span class="text-[10px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded-md border border-blue-500/30 uppercase">Entel Tienda</span>
+            <span class="text-[10px] bg-[#ff6b00] text-white font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Entel Tienda</span>
           </div>
-          <p class="text-xs text-slate-400">Filtrado por Supervisor y Exclusión de Renovaciones/Migraciones/Fibra</p>
+          <p class="text-xs text-blue-200">Filtrado por Supervisor y Exclusión de Renovaciones/Migraciones/Fibra</p>
         </div>
       </div>
 
       <!-- BOTONES DE ACCIÓN -->
       <div class="flex items-center gap-2 flex-wrap">
-        <label class="bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shadow-md shadow-blue-600/20">
+        <label class="bg-[#002EFF] hover:bg-blue-700 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shadow-sm">
           <i data-lucide="upload" class="w-4 h-4"></i>
           <span>Importar Excel Webform</span>
           <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="hidden" onchange="procesarExcel(event)">
         </label>
 
-        <button onclick="cargarDatosEjemplo()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
+        <button onclick="cargarDatosEjemplo()" class="bg-slate-800 hover:bg-slate-900 text-slate-200 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
           <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-400"></i>
           <span>Restablecer</span>
         </button>
 
-        <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+        <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
           <i data-lucide="download" class="w-4 h-4"></i>
           <span>Exportar</span>
         </button>
@@ -64,99 +64,99 @@
   <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
 
     <!-- ALERTA DE ESTADO DEL ARCHIVO -->
-    <div id="statusAlert" class="hidden p-4 rounded-2xl bg-blue-950/80 border border-blue-500/40 text-blue-200 text-xs flex items-center justify-between">
+    <div id="statusAlert" class="hidden p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-2">
-        <i data-lucide="file-check" class="w-5 h-5 text-blue-400"></i>
+        <i data-lucide="file-check" class="w-5 h-5 text-[#002EFF]"></i>
         <span id="statusMessage">Archivo cargado exitosamente.</span>
       </div>
-      <button onclick="document.getElementById('statusAlert').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold text-base">&times;</button>
+      <button onclick="document.getElementById('statusAlert').classList.add('hidden')" class="text-blue-500 hover:text-blue-900 font-bold text-base">&times;</button>
     </div>
 
     <!-- SELECTOR DE SUPERVISOR -->
-    <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="flex items-center gap-3 w-full md:w-auto">
-        <div class="p-2 bg-blue-500/10 text-blue-400 rounded-xl"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
+        <div class="p-2 bg-blue-50 text-[#002EFF] rounded-xl"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
         <div>
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Supervisor Asignado</span>
-          <select id="selectSupervisor" onchange="cambiarSupervisor()" class="bg-slate-900 border border-slate-700 text-white font-bold text-sm rounded-xl px-3 py-2 mt-1 focus:outline-none focus:border-blue-500 w-full md:w-96">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Supervisor Asignado</span>
+          <select id="selectSupervisor" onchange="cambiarSupervisor()" class="bg-slate-50 border border-slate-300 text-slate-900 font-bold text-sm rounded-xl px-3 py-2 mt-1 focus:outline-none focus:border-[#002EFF] w-full md:w-96">
             <option value="todos">Todos los Supervisores</option>
           </select>
         </div>
       </div>
       <div class="text-right hidden md:block">
-        <span class="text-[11px] text-slate-400 block font-medium">Criterio Operativo</span>
-        <span class="text-xs font-bold text-emerald-400">Nuevas, 2da Línea & Portabilidades (Sin Renovable/Fibra/Migración)</span>
+        <span class="text-[11px] text-slate-500 block font-medium">Criterio Operativo</span>
+        <span class="text-xs font-bold text-[#ff6b00]">Nuevas, 2da Línea & Portabilidades (Sin Renovable/Fibra/Migración)</span>
       </div>
     </div>
 
     <!-- TARJETAS DE INDICADORES GLOBALES (KPIs) -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
       
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex justify-between items-start mb-2">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Meta Total</span>
-          <div class="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><i data-lucide="target" class="w-4 h-4"></i></div>
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Meta Total</span>
+          <div class="p-1.5 bg-blue-50 text-[#002EFF] rounded-lg"><i data-lucide="target" class="w-4 h-4"></i></div>
         </div>
-        <div id="kpiMetaTotal" class="text-2xl font-black text-white">0</div>
-        <span class="text-[10px] text-slate-500 font-medium">Acumulada del equipo</span>
+        <div id="kpiMetaTotal" class="text-2xl font-black text-slate-900">0</div>
+        <span class="text-[10px] text-slate-400 font-medium">Acumulada del equipo</span>
       </div>
 
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex justify-between items-start mb-2">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ventas Válidas (Avance)</span>
-          <div class="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg"><i data-lucide="shopping-bag" class="w-4 h-4"></i></div>
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ventas Válidas (Avance)</span>
+          <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="shopping-bag" class="w-4 h-4"></i></div>
         </div>
-        <div id="kpiVentasTotal" class="text-2xl font-black text-emerald-400">0</div>
-        <span class="text-[10px] text-slate-500 font-medium">Líneas nuevas / Portas / 2da</span>
+        <div id="kpiVentasTotal" class="text-2xl font-black text-emerald-600">0</div>
+        <span class="text-[10px] text-slate-400 font-medium">Líneas nuevas / Portas / 2da</span>
       </div>
 
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex justify-between items-start mb-2">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">% Cumplimiento</span>
-          <div class="p-1.5 bg-purple-500/10 text-purple-400 rounded-lg"><i data-lucide="award" class="w-4 h-4"></i></div>
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">% Cumplimiento</span>
+          <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="award" class="w-4 h-4"></i></div>
         </div>
-        <div id="kpiCumplimientoGlobal" class="text-2xl font-black text-purple-300">0.0%</div>
-        <span class="text-[10px] text-slate-500 font-medium">Promedio del equipo</span>
+        <div id="kpiCumplimientoGlobal" class="text-2xl font-black text-purple-700">0.0%</div>
+        <span class="text-[10px] text-slate-400 font-medium">Promedio del equipo</span>
       </div>
 
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex justify-between items-start mb-2">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Llamadas</span>
-          <div class="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg"><i data-lucide="phone-call" class="w-4 h-4"></i></div>
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Llamadas</span>
+          <div class="p-1.5 bg-orange-50 text-[#ff6b00] rounded-lg"><i data-lucide="phone-call" class="w-4 h-4"></i></div>
         </div>
-        <div id="kpiLlamadasTotal" class="text-2xl font-black text-amber-300">0</div>
-        <span class="text-[10px] text-slate-500 font-medium">Gestión del día</span>
+        <div id="kpiLlamadasTotal" class="text-2xl font-black text-[#ff6b00]">0</div>
+        <span class="text-[10px] text-slate-400 font-medium">Gestión del día</span>
       </div>
 
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-lg col-span-2 md:col-span-1">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm col-span-2 md:col-span-1">
         <div class="flex justify-between items-start mb-2">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Efectividad Global</span>
-          <div class="p-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg"><i data-lucide="percent" class="w-4 h-4"></i></div>
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Efectividad Global</span>
+          <div class="p-1.5 bg-cyan-50 text-cyan-600 rounded-lg"><i data-lucide="percent" class="w-4 h-4"></i></div>
         </div>
-        <div id="kpiEfectividadGlobal" class="text-2xl font-black text-cyan-400">0.0%</div>
-        <span class="text-[10px] text-slate-500 font-medium">Ventas / Llamadas</span>
+        <div id="kpiEfectividadGlobal" class="text-2xl font-black text-cyan-700">0.0%</div>
+        <span class="text-[10px] text-slate-400 font-medium">Ventas / Llamadas</span>
       </div>
 
     </div>
 
     <!-- CONTROLES Y BÚSQUEDA -->
-    <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50 flex flex-col md:flex-row justify-between items-center gap-3 text-xs">
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-3 text-xs">
       
       <div class="relative w-full md:w-80">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-        <input type="text" id="searchInput" onkeyup="filtrarTabla()" placeholder="Buscar por USUARIO WEB o Nombre..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-medium">
+        <input type="text" id="searchInput" onkeyup="filtrarTabla()" placeholder="Buscar por USUARIO WEB o Nombre..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#002EFF] font-medium">
       </div>
 
       <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-        <label class="text-slate-400 font-bold">Estado:</label>
-        <select id="filterEstado" onchange="filtrarTabla()" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 focus:outline-none font-semibold">
+        <label class="text-slate-600 font-bold">Estado:</label>
+        <select id="filterEstado" onchange="filtrarTabla()" class="bg-slate-50 border border-slate-300 text-slate-800 rounded-xl px-3 py-2 focus:outline-none font-semibold">
           <option value="todos">Todos los estados</option>
           <option value="100">Completado (100%+)</option>
           <option value="50">En Progreso (50%-99%)</option>
           <option value="0">Bajo (&lt;50%)</option>
         </select>
 
-        <button onclick="toggleGrafica()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 ml-2">
+        <button onclick="toggleGrafica()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 ml-2 border border-slate-300">
           <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
           <span id="btnGraficaText">Ocultar Gráfica</span>
         </button>
@@ -165,10 +165,10 @@
     </div>
 
     <!-- GRÁFICO COMPARATIVO -->
-    <div id="secGrafica" class="bg-slate-800/80 p-5 rounded-3xl border border-slate-700/60 shadow-xl space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-700/60 pb-3">
-        <h3 class="font-extrabold text-sm text-slate-200 uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="trending-up" class="w-4 h-4 text-blue-400"></i>
+    <div id="secGrafica" class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-sm text-[#0b132b] uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="trending-up" class="w-4 h-4 text-[#002EFF]"></i>
           Comparativa de Avance (Ventas Válidas) vs Meta por Asesor
         </h3>
         <span class="text-[11px] text-slate-400 italic">Actualización automática</span>
@@ -179,22 +179,22 @@
     </div>
 
     <!-- TABLA PRINCIPAL DE DATOS -->
-    <div class="bg-slate-800/90 rounded-3xl border border-slate-700/70 shadow-2xl overflow-hidden">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
-          <thead class="bg-slate-950 text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-700/80">
+          <thead class="bg-[#0b132b] text-white font-extrabold uppercase tracking-wider">
             <tr>
               <th class="p-3.5 border-r border-slate-800">USUARIO WEB</th>
               <th class="p-3.5 border-r border-slate-800">Nombre y Apellidos</th>
               <th class="p-3.5 border-r border-slate-800">Supervisor</th>
               <th class="p-3.5 border-r border-slate-800 text-center">Meta Aco</th>
-              <th class="p-3.5 border-r border-slate-800 text-center bg-blue-900/30 text-blue-300">Avance (Ventas)</th>
+              <th class="p-3.5 border-r border-slate-800 text-center bg-[#002EFF]/10 text-[#002EFF]">Avance (Ventas)</th>
               <th class="p-3.5 border-r border-slate-800 text-center">% Cump</th>
               <th class="p-3.5 border-r border-slate-800 text-center">Llamadas</th>
               <th class="p-3.5 text-center">Efectividad</th>
             </tr>
           </thead>
-          <tbody id="tablaCuerpo" class="divide-y divide-slate-700/60 font-semibold text-slate-200">
+          <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-semibold text-slate-700">
             <!-- Filas dinámicas -->
           </tbody>
         </table>
@@ -210,7 +210,6 @@
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
     let miChart = null;
 
-    // PLANTILLA INICIAL DE ASESORES DE GUSTAVO
     let ejecutivosBase = [
       { usuario: "galatat", nombre: "Alata Toledo Gonzalo andres", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
       { usuario: "gguerreroe", nombre: "Guerrero Eyzaguirre Gypsi", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
@@ -264,7 +263,6 @@
       renderizarTabla();
     }
 
-    // PROCESAR EXCEL DE ENTEL
     function procesarExcel(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -282,7 +280,6 @@
             return;
           }
 
-          // Buscar la fila de encabezados
           let colUser = -1, colNom = -1, colSup = -1, colTipoOp = -1, headerRow = -1;
 
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
@@ -321,7 +318,6 @@
             }
           }
 
-          // Rellenar ejecutivos con los datos del Excel
           registrosExcelBrutos.forEach(reg => {
             if (!ejecutivosMap[reg.usuario]) {
               ejecutivosMap[reg.usuario] = {
@@ -359,11 +355,8 @@
     }
 
     function recalcularAvances() {
-      // Resetear avances
       Object.keys(ejecutivosMap).forEach(k => ejecutivosMap[k].avance = 0);
 
-      // Criterio exacto: Solo sumar ventas válidas (NUEVA LINEA, 2DA LINEA, PORTA SS-SS)
-      // Excluir: RENOVACION DE EQUIPO, FIBRA, MIGRACION
       registrosExcelBrutos.forEach(reg => {
         const tipo = reg.tipoOperacion;
         const esValido = tipo.includes('NUEVA') || tipo.includes('2DA') || tipo.includes('PORTA');
@@ -387,7 +380,6 @@
       const arrEjecutivos = Object.values(ejecutivosMap);
 
       arrEjecutivos.forEach((item, index) => {
-        // Filtrar por supervisor seleccionado
         if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) {
           return;
         }
@@ -399,38 +391,37 @@
         const pctCump = item.meta > 0 ? ((item.avance / item.meta) * 100).toFixed(1) : 0;
         const efectividad = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) : '-';
 
-        let badgeColor = "bg-red-500/20 text-red-400 border-red-500/30";
-        if (pctCump >= 100) badgeColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-black";
-        else if (pctCump >= 50) badgeColor = "bg-amber-500/20 text-amber-300 border-amber-500/30";
+        let badgeColor = "bg-red-100 text-red-700 border-red-200";
+        if (pctCump >= 100) badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-300 font-black";
+        else if (pctCump >= 50) badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
 
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-800/50 transition-colors";
+        tr.className = "hover:bg-slate-50 transition-colors";
         tr.innerHTML = `
-          <td class="p-3.5 border-r border-slate-800 font-mono text-blue-400 font-bold">${item.usuario}</td>
-          <td class="p-3.5 border-r border-slate-800 text-slate-100 font-medium">${item.nombre}</td>
-          <td class="p-3.5 border-r border-slate-800 text-slate-300 text-[11px]">${item.supervisor}</td>
-          <td class="p-3.5 border-r border-slate-800 text-center font-bold">
-            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-slate-950 border border-slate-700 rounded-lg text-center p-1 font-bold text-slate-200 focus:outline-none focus:border-blue-500">
+          <td class="p-3.5 border-r border-slate-100 font-mono text-[#002EFF] font-bold">${item.usuario}</td>
+          <td class="p-3.5 border-r border-slate-100 text-slate-800 font-medium">${item.nombre}</td>
+          <td class="p-3.5 border-r border-slate-100 text-slate-500 text-[11px]">${item.supervisor}</td>
+          <td class="p-3.5 border-r border-slate-100 text-center font-bold">
+            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-bold text-slate-800 focus:outline-none focus:border-[#002EFF]">
           </td>
-          <td class="p-3.5 border-r border-slate-800 text-center bg-blue-950/25 font-black text-emerald-400 text-sm">
+          <td class="p-3.5 border-r border-slate-100 text-center bg-blue-50/50 font-black text-[#002EFF] text-sm">
             ${item.avance}
           </td>
-          <td class="p-3.5 border-r border-slate-800 text-center">
+          <td class="p-3.5 border-r border-slate-100 text-center">
             <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold border ${badgeColor}">
               ${pctCump}%
             </span>
           </td>
-          <td class="p-3.5 border-r border-slate-800 text-center">
-            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-slate-950 border border-slate-700 rounded-lg text-center p-1 font-medium text-amber-300 focus:outline-none focus:border-blue-500">
+          <td class="p-3.5 border-r border-slate-100 text-center">
+            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-medium text-slate-800 focus:outline-none focus:border-[#002EFF]">
           </td>
-          <td class="p-3.5 text-center font-bold text-cyan-400">
+          <td class="p-3.5 text-center font-bold text-cyan-700">
             ${efectividad}${efectividad !== '-' ? '%' : ''}
           </td>
         `;
         tbody.appendChild(tr);
       });
 
-      // KPIs
       document.getElementById('kpiMetaTotal').innerText = sumMeta;
       document.getElementById('kpiVentasTotal').innerText = sumAvance;
       document.getElementById('kpiLlamadasTotal').innerText = sumLlamadas;
@@ -459,7 +450,6 @@
       }
     }
 
-    // GRÁFICA
     function inicializarChart() {
       const ctx = document.getElementById('chartVentas').getContext('2d');
       miChart = new Chart(ctx, {
@@ -467,17 +457,17 @@
         data: {
           labels: [],
           datasets: [
-            { label: 'Meta Aco', data: [], backgroundColor: 'rgba(148, 163, 184, 0.3)', borderColor: 'rgba(148, 163, 184, 0.8)', borderWidth: 1, borderRadius: 6 },
-            { label: 'Ventas Válidas', data: [], backgroundColor: 'rgba(0, 46, 255, 0.85)', borderColor: '#002EFF', borderWidth: 1, borderRadius: 6 }
+            { label: 'Meta Aco', data: [], backgroundColor: 'rgba(203, 213, 225, 0.7)', borderColor: 'rgba(148, 163, 184, 1)', borderWidth: 1, borderRadius: 6 },
+            { label: 'Ventas Válidas', data: [], backgroundColor: '#002EFF', borderColor: '#001bb3', borderWidth: 1, borderRadius: 6 }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11, weight: 'bold' } } } },
+          plugins: { legend: { labels: { color: '#334155', font: { size: 11, weight: 'bold' } } } },
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(51, 65, 85, 0.4)' }, beginAtZero: true }
+            x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(226, 232, 240, 1)' }, beginAtZero: true }
           }
         }
       });
