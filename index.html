@@ -330,110 +330,123 @@
       renderizarTabla();
     }
 
-    // PROCESAR EXCEL CARGADO (Estructura Entel Webform)
+    // PROCESAR EXCEL CARGADO (Robusto para Entel Webform)
     function procesarExcel(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
 
-        // Convertir hoja a matriz de filas
-        const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          // Convertir hoja a matriz de filas con valores crudos
+          const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
 
-        if (!rawRows || rawRows.length === 0) {
-          alert("El archivo Excel está vacío.");
-          return;
-        }
+          if (!rawRows || rawRows.length === 0) {
+            alert("El archivo Excel no contiene filas con datos.");
+            return;
+          }
 
-        // Buscar en qué fila se encuentran las columnas de Entel
-        let colIndexUsuario = -1;
-        let colIndexNombre = -1;
-        let headerRowIndex = -1;
+          // Buscar en qué fila se encuentran las columnas de Entel
+          let colIndexUsuario = -1;
+          let colIndexNombre = -1;
+          let headerRowIndex = -1;
 
-        for (let r = 0; r < Math.min(20, rawRows.length); r++) {
-          const row = rawRows[r];
-          if (!row) continue;
-          for (let c = 0; c < row.length; c++) {
-            const val = String(row[c] || '').toUpperCase().trim();
-            if (val === 'CODIGO USUARIO REG. LINEA' || val === 'USUARIO WEB' || val === 'USUARIO REG. OPERACION') {
-              colIndexUsuario = c;
-              headerRowIndex = r;
+          for (let r = 0; r < Math.min(25, rawRows.length); r++) {
+            const row = rawRows[r];
+            if (!row) continue;
+            for (let c = 0; c < row.length; c++) {
+              const val = String(row[c] || '').toUpperCase().trim();
+              if (val.includes('CODIGO USUARIO') || val.includes('USUARIO WEB') || val === 'USUARIO REG. OPERACION') {
+                colIndexUsuario = c;
+                headerRowIndex = r;
+              }
+              if (val.includes('NOMBRE USUARIO') || val.includes('NOMBRE Y APELLIDOS')) {
+                colIndexNombre = c;
+              }
             }
-            if (val === 'NOMBRE USUARIO REG. LINEA' || val === 'NOMBRE Y APELLIDOS') {
-              colIndexNombre = c;
+            if (colIndexUsuario !== -1) break;
+          }
+
+          if (colIndexUsuario === -1) {
+            alert("No se encontró la columna 'CODIGO USUARIO REG. LINEA' en el archivo cargado.");
+            return;
+          }
+
+          // Mapeo para contar ventas (filas) por cada usuario web
+          const conteoVentas = {};
+          const nombresEncontrados = {};
+
+          for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
+            const row = rawRows[r];
+            if (!row) continue;
+
+            const userVal = String(row[colIndexUsuario] || '').trim().toLowerCase();
+            const nombreVal = colIndexNombre !== -1 ? String(row[colIndexNombre] || '').trim() : '';
+
+            if (userVal && userVal !== 'undefined' && userVal !== 'null' && userVal !== '0') {
+              conteoVentas[userVal] = (conteoVentas[userVal] || 0) + 1;
+              if (nombreVal && !nombresEncontrados[userVal]) {
+                nombresEncontrados[userVal] = nombreVal;
+              }
             }
           }
-          if (colIndexUsuario !== -1) break;
-        }
 
-        if (colIndexUsuario === -1) {
-          alert("No se encontró la columna 'CODIGO USUARIO REG. LINEA' o 'USUARIO WEB' en las primeras filas del Excel.");
-          return;
-        }
-
-        // Mapeo para contar ventas (filas) por cada usuario web
-        const conteoVentas = {};
-        const nombresEncontrados = {};
-
-        for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
-          const row = rawRows[r];
-          if (!row) continue;
-
-          const userVal = String(row[colIndexUsuario] || '').trim().toLowerCase();
-          const nombreVal = colIndexNombre !== -1 ? String(row[colIndexNombre] || '').trim() : '';
-
-          if (userVal && userVal !== 'undefined' && userVal !== 'null') {
-            conteoVentas[userVal] = (conteoVentas[userVal] || 0) + 1;
-            if (nombreVal && !nombresEncontrados[userVal]) {
-              nombresEncontrados[userVal] = nombreVal;
+          // Cruzar datos con la lista actual o agregar usuarios si no existen
+          let procesados = 0;
+          ejecutivos.forEach(item => {
+            const userKey = item.usuario.toLowerCase().trim();
+            if (conteoVentas[userKey] !== undefined) {
+              item.avance = conteoVentas[userKey];
+              procesados++;
+            } else {
+              item.avance = 0;
             }
-          }
+          });
+
+          // Agregar usuarios nuevos del Excel si no estaban en la lista inicial
+          Object.keys(conteoVentas).forEach(userKey => {
+            const existe = ejecutivos.some(e => e.usuario.toLowerCase().trim() === userKey);
+            if (!existe) {
+              ejecutivos.push({
+                usuario: userKey,
+                nombre: nombresEncontrados[userKey] || userKey,
+                meta: 5,
+                avance: conteoVentas[userKey],
+                llamadas: 0
+              });
+              procesados++;
+            }
+          });
+
+          renderizarTabla();
+
+          // Resetear el input para permitir volver a cargar el mismo archivo si es necesario
+          document.getElementById('inputExcel').value = '';
+
+          // Mostrar Alerta de Éxito
+          const alertBox = document.getElementById('statusAlert');
+          document.getElementById('statusMessage').innerText = `¡Éxito! Se procesó el reporte Excel correctamente. Se actualizaron ${procesados} ejecutivo(s).`;
+          alertBox.classList.remove('hidden');
+
+        } catch (err) {
+          console.error(err);
+          alert("Error al procesar la estructura del Excel. Asegúrate de subir el reporte oficial de Entel Tienda.");
         }
+      };
 
-        // Cruzar datos con la lista actual o agregar usuarios si no existen
-        let procesados = 0;
-        ejecutivos.forEach(item => {
-          const userKey = item.usuario.toLowerCase().trim();
-          if (conteoVentas[userKey] !== undefined) {
-            item.avance = conteoVentas[userKey];
-            procesados++;
-          } else {
-            item.avance = 0;
-          }
-        });
-
-        // Si hay usuarios en el Excel que no estaban en la plantilla inicial, se agregan automáticamente
-        Object.keys(conteoVentas).forEach(userKey => {
-          const existe = ejecutivos.some(e => e.usuario.toLowerCase().trim() === userKey);
-          if (!existe) {
-            ejecutivos.push({
-              usuario: userKey,
-              nombre: nombresEncontrados[userKey] || userKey,
-              meta: 5,
-              avance: conteoVentas[userKey],
-              llamadas: 0
-            });
-            procesados++;
-          }
-        });
-
-        renderizarTabla();
-
-        // Mostrar Alerta de Éxito
-        const alertBox = document.getElementById('statusAlert');
-        document.getElementById('statusMessage').innerText = `¡Éxito! Se procesó el reporte Excel correctamente. Se actualizaron las ventas de ${procesados} usuario(s) web.`;
-        alertBox.classList.remove('hidden');
+      reader.onerror = function() {
+        alert("Error al leer el archivo desde el navegador.");
       };
 
       reader.readAsArrayBuffer(file);
     }
 
-    // GRÁFICA COMPARATIVA CHART.JS
+    // GRÁFICA COMPARATIVAS CHART.JS
     function inicializarChart() {
       const ctx = document.getElementById('chartVentas').getContext('2d');
       miChart = new Chart(ctx, {
