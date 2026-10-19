@@ -22,36 +22,36 @@
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
 
   <!-- HEADER / BARRA SUPERIOR -->
-  <header class="bg-[#0b132b] text-white border-b-4 border-[#ff6b00] sticky top-0 z-50 shadow-md">
+  <header class="bg-[#0b132b] text-white border-b border-slate-700 sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
       
       <div class="flex items-center space-x-3">
-        <div class="bg-[#002EFF] text-white p-2 rounded-2xl shadow-md">
-          <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+        <div class="bg-slate-800 text-slate-200 p-2 rounded-xl border border-slate-700">
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-black text-lg md:text-xl tracking-tight text-white">Dashboard de Ventas & Rendimiento Diario</h1>
-            <span class="text-[10px] bg-[#ff6b00] text-white font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Entel Tienda</span>
+            <h1 class="font-bold text-base md:text-lg tracking-tight text-white">Dashboard de Ventas & Rendimiento Diario</h1>
+            <span class="text-[10px] bg-slate-800 text-slate-300 font-bold px-2 py-0.5 rounded-md uppercase border border-slate-700">Entel Tienda</span>
           </div>
         </div>
       </div>
 
       <!-- BOTONES DE ACCIÓN -->
       <div class="flex items-center gap-2 flex-wrap">
-        <label class="bg-[#002EFF] hover:bg-blue-700 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shadow-sm">
+        <label class="bg-[#002EFF] hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shadow-sm">
           <i data-lucide="upload" class="w-4 h-4"></i>
           <span>Importar Excel Webform</span>
           <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="hidden" onchange="procesarExcel(event)">
         </label>
 
-        <button onclick="cargarDatosEjemplo()" class="bg-slate-800 hover:bg-slate-900 text-slate-200 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
+        <button onclick="cargarDatosEjemplo()" class="bg-slate-800 hover:bg-slate-900 text-slate-200 font-bold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
           <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-400"></i>
           <span>Restablecer</span>
         </button>
 
-        <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
-          <i data-lucide="download" class="w-4 h-4"></i>
+        <button onclick="exportarExcel()" class="bg-slate-800 hover:bg-slate-900 text-slate-200 font-bold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
+          <i data-lucide="download" class="w-4 h-4 text-slate-300"></i>
           <span>Exportar</span>
         </button>
       </div>
@@ -64,20 +64,20 @@
 
     <!-- COLUMNA IZQUIERDA: PANEL DE FILTROS -->
     <aside class="lg:col-span-1 space-y-4">
-      <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4 sticky top-20">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 sticky top-20">
         
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div class="flex items-center gap-2 font-black text-slate-900 text-sm uppercase tracking-wider">
-            <i data-lucide="filter" class="w-4 h-4 text-[#002EFF]"></i>
-            <span>Filtros</span>
+          <div class="flex items-center gap-2 font-bold text-slate-900 text-xs uppercase tracking-wider">
+            <i data-lucide="filter" class="w-4 h-4 text-slate-600"></i>
+            <span>Filtros y Fechas</span>
           </div>
-          <button onclick="limpiarFiltros()" class="text-[11px] text-[#002EFF] hover:underline font-bold">Limpiar</button>
+          <button onclick="limpiarFiltros()" class="text-[11px] text-slate-500 hover:text-slate-900 font-bold">Limpiar</button>
         </div>
 
         <!-- FILTRO 1: SUPERVISOR -->
         <div class="space-y-1">
           <label class="text-xs font-bold text-slate-700 block">Supervisor:</label>
-          <select id="selectSupervisor" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 font-bold text-xs rounded-xl p-2.5 focus:outline-none focus:border-[#002EFF]">
+          <select id="selectSupervisor" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 font-semibold text-xs rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
             <option value="todos">Todos los Supervisores</option>
           </select>
         </div>
@@ -85,19 +85,19 @@
         <!-- FILTRO 2: FECHA DESDE -->
         <div class="space-y-1">
           <label class="text-xs font-bold text-slate-700 block">Fecha Desde:</label>
-          <input type="date" id="filterFechaDesde" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-xl p-2.5 focus:outline-none focus:border-[#002EFF]">
+          <input type="date" id="filterFechaDesde" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
         </div>
 
         <!-- FILTRO 3: FECHA HASTA -->
         <div class="space-y-1">
           <label class="text-xs font-bold text-slate-700 block">Fecha Hasta:</label>
-          <input type="date" id="filterFechaHasta" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-xl p-2.5 focus:outline-none focus:border-[#002EFF]">
+          <input type="date" id="filterFechaHasta" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
         </div>
 
         <!-- FILTRO 4: ESTADO DE CUMPLIMIENTO -->
         <div class="space-y-1">
           <label class="text-xs font-bold text-slate-700 block">Cumplimiento:</label>
-          <select id="filterEstado" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-xs rounded-xl p-2.5 focus:outline-none focus:border-[#002EFF]">
+          <select id="filterEstado" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-xs rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
             <option value="todos">Todos los estados</option>
             <option value="100">Completado (100%+)</option>
             <option value="50">En Progreso (50%-99%)</option>
@@ -110,7 +110,7 @@
           <label class="text-xs font-bold text-slate-700 block">Buscar Asesor:</label>
           <div class="relative">
             <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
-            <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Usuario o nombre..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#002EFF] font-medium">
+            <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Usuario o nombre..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-500 font-medium">
           </div>
         </div>
 
@@ -131,7 +131,7 @@
         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-start mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Meta Total</span>
-            <div class="p-1.5 bg-blue-50 text-[#002EFF] rounded-lg"><i data-lucide="target" class="w-4 h-4"></i></div>
+            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="target" class="w-4 h-4"></i></div>
           </div>
           <div id="kpiMetaTotal" class="text-2xl font-black text-slate-900">0</div>
           <span class="text-[10px] text-slate-400 font-medium">Acumulada</span>
@@ -140,47 +140,47 @@
         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-start mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ventas Válidas</span>
-            <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="shopping-bag" class="w-4 h-4"></i></div>
+            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="shopping-bag" class="w-4 h-4"></i></div>
           </div>
-          <div id="kpiVentasTotal" class="text-2xl font-black text-emerald-600">0</div>
+          <div id="kpiVentasTotal" class="text-2xl font-black text-slate-900">0</div>
           <span class="text-[10px] text-slate-400 font-medium">Líneas / Portas</span>
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-start mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">% Cump</span>
-            <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="award" class="w-4 h-4"></i></div>
+            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="award" class="w-4 h-4"></i></div>
           </div>
-          <div id="kpiCumplimientoGlobal" class="text-2xl font-black text-purple-700">0.0%</div>
+          <div id="kpiCumplimientoGlobal" class="text-2xl font-black text-slate-900">0.0%</div>
           <span class="text-[10px] text-slate-400 font-medium">Promedio</span>
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-start mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Llamadas</span>
-            <div class="p-1.5 bg-orange-50 text-[#ff6b00] rounded-lg"><i data-lucide="phone-call" class="w-4 h-4"></i></div>
+            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="phone-call" class="w-4 h-4"></i></div>
           </div>
-          <div id="kpiLlamadasTotal" class="text-2xl font-black text-[#ff6b00]">0</div>
+          <div id="kpiLlamadasTotal" class="text-2xl font-black text-slate-900">0</div>
           <span class="text-[10px] text-slate-400 font-medium">Gestión del día</span>
         </div>
 
         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm col-span-2 md:col-span-1">
           <div class="flex justify-between items-start mb-2">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Efectividad</span>
-            <div class="p-1.5 bg-cyan-50 text-cyan-600 rounded-lg"><i data-lucide="percent" class="w-4 h-4"></i></div>
+            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="percent" class="w-4 h-4"></i></div>
           </div>
-          <div id="kpiEfectividadGlobal" class="text-2xl font-black text-cyan-700">0.0%</div>
+          <div id="kpiEfectividadGlobal" class="text-2xl font-black text-slate-900">0.0%</div>
           <span class="text-[10px] text-slate-400 font-medium">Ventas / Llamadas</span>
         </div>
 
       </div>
 
       <!-- GRÁFICO COMPARATIVO -->
-      <div id="secGrafica" class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+      <div id="secGrafica" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-          <h3 class="font-extrabold text-sm text-[#0b132b] uppercase tracking-wider flex items-center gap-2">
-            <i data-lucide="trending-up" class="w-4 h-4 text-[#002EFF]"></i>
-            Comparativa de Avance vs Meta por Asesor
+          <h3 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="trending-up" class="w-4 h-4 text-slate-600"></i>
+            Comparativa de Avance vs Meta (Ordenado de Mayor a Menor)
           </h3>
           <span class="text-[11px] text-slate-400 italic">Actualización automática</span>
         </div>
@@ -190,23 +190,23 @@
       </div>
 
       <!-- TABLA PRINCIPAL DE DATOS -->
-      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-[#0b132b] text-white font-extrabold uppercase tracking-wider">
+            <thead class="bg-slate-800 text-white font-bold uppercase tracking-wider">
               <tr>
-                <th class="p-3.5 border-r border-slate-800">USUARIO WEB</th>
-                <th class="p-3.5 border-r border-slate-800">Nombre y Apellidos</th>
-                <th class="p-3.5 border-r border-slate-800">Supervisor</th>
-                <th class="p-3.5 border-r border-slate-800 text-center">Meta Aco</th>
-                <th class="p-3.5 border-r border-slate-800 text-center bg-[#002EFF]/10 text-[#002EFF]">Avance</th>
-                <th class="p-3.5 border-r border-slate-800 text-center">% Cump</th>
-                <th class="p-3.5 border-r border-slate-800 text-center">Llamadas</th>
+                <th class="p-3.5 border-r border-slate-700">USUARIO WEB</th>
+                <th class="p-3.5 border-r border-slate-700">Nombre y Apellidos</th>
+                <th class="p-3.5 border-r border-slate-700">Supervisor</th>
+                <th class="p-3.5 border-r border-slate-700 text-center">Meta Aco</th>
+                <th class="p-3.5 border-r border-slate-700 text-center bg-slate-900 text-white">Avance</th>
+                <th class="p-3.5 border-r border-slate-700 text-center">% Cump</th>
+                <th class="p-3.5 border-r border-slate-700 text-center">Llamadas</th>
                 <th class="p-3.5 text-center">Efectividad</th>
               </tr>
             </thead>
-            <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-semibold text-slate-700">
-              <!-- Filas dinámicas -->
+            <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-700">
+              <!-- Filas dinámicas ordenadas -->
             </tbody>
           </table>
         </div>
@@ -223,8 +223,8 @@
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
     let miChart = null;
 
+    // Sin Gonzalo Alata (galatat)
     let ejecutivosBase = [
-      { usuario: "galatat", nombre: "Alata Toledo Gonzalo andres", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
       { usuario: "gguerreroe", nombre: "Guerrero Eyzaguirre Gypsi", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
       { usuario: "msolero", nombre: "Soler Oberto Maritriny Patricia", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
       { usuario: "illanquim", nombre: "Llanqui masias Isabel Veronica", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
@@ -317,6 +317,9 @@
             if (!row) continue;
 
             const usuario = String(row[colUser] || '').trim().toLowerCase();
+            // Ignorar explícitamente a galatat si viene en el Excel
+            if (usuario === 'galatat') continue;
+
             const nombre = colNom !== -1 ? String(row[colNom] || '').trim() : '';
             const supervisor = colSup !== -1 ? String(row[colSup] || '').trim() : 'Sin Supervisor';
             const tipoOperacion = String(row[colTipoOp] || '').toUpperCase().trim();
@@ -362,7 +365,6 @@
 
     function parseFechaExcel(fStr) {
       if (!fStr) return null;
-      // Formato DD/MM/YYYY o YYYY-MM-DD
       const partes = fStr.split(' ')[0].split(/[\/\-]/);
       if (partes.length === 3) {
         if (partes[2].length === 4) {
@@ -409,7 +411,7 @@
 
     function aplicarFiltrosGlobales() {
       supervisorSeleccionado = document.getElementById('selectSupervisor').value;
-      recalcularAvances();
+      renderizarTabla();
     }
 
     function renderizarTabla() {
@@ -420,12 +422,12 @@
       const estado = document.getElementById('filterEstado').value;
 
       let sumMeta = 0, sumAvance = 0, sumLlamadas = 0;
-      const arrEjecutivos = Object.values(ejecutivosMap);
-
-      arrEjecutivos.forEach((item) => {
-        if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) {
-          return;
-        }
+      
+      // Filtrar y ordenar de MAYOR A MENOR en base a ventas (avance)
+      let arrEjecutivos = Object.values(ejecutivosMap).filter(item => {
+        if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) return false;
+        // Ignorar galatat por seguridad
+        if (item.usuario.toLowerCase() === 'galatat') return false;
 
         const matchQuery = item.usuario.toLowerCase().includes(query) || item.nombre.toLowerCase().includes(query);
         const pctCump = item.meta > 0 ? (item.avance / item.meta) * 100 : 0;
@@ -435,29 +437,35 @@
         else if (estado === '50') matchEstado = pctCump >= 50 && pctCump < 100;
         else if (estado === '0') matchEstado = pctCump < 50;
 
-        if (!matchQuery || !matchEstado) return;
+        return matchQuery && matchEstado;
+      });
 
+      // ORDENAMIENTO DE MAYOR A MENOR VENTA
+      arrEjecutivos.sort((a, b) => b.avance - a.avance);
+
+      arrEjecutivos.forEach((item) => {
         sumMeta += parseInt(item.meta) || 0;
         sumAvance += parseInt(item.avance) || 0;
         sumLlamadas += parseInt(item.llamadas) || 0;
 
+        const pctCump = item.meta > 0 ? (item.avance / item.meta) * 100 : 0;
         const pctFormateado = pctCump.toFixed(1);
         const efectividad = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) : '-';
 
-        let badgeColor = "bg-red-100 text-red-700 border-red-200";
-        if (pctCump >= 100) badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-300 font-black";
-        else if (pctCump >= 50) badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
+        let badgeColor = "bg-slate-100 text-slate-700 border-slate-200";
+        if (pctCump >= 100) badgeColor = "bg-emerald-50 text-emerald-800 border-emerald-200 font-bold";
+        else if (pctCump >= 50) badgeColor = "bg-amber-50 text-amber-800 border-amber-200";
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition-colors";
         tr.innerHTML = `
-          <td class="p-3.5 border-r border-slate-100 font-mono text-[#002EFF] font-bold">${item.usuario}</td>
+          <td class="p-3.5 border-r border-slate-100 font-mono text-slate-900 font-bold">${item.usuario}</td>
           <td class="p-3.5 border-r border-slate-100 text-slate-800 font-medium">${item.nombre}</td>
           <td class="p-3.5 border-r border-slate-100 text-slate-500 text-[11px]">${item.supervisor}</td>
           <td class="p-3.5 border-r border-slate-100 text-center font-bold">
-            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-bold text-slate-800 focus:outline-none focus:border-[#002EFF]">
+            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-bold text-slate-800 focus:outline-none focus:border-slate-500">
           </td>
-          <td class="p-3.5 border-r border-slate-100 text-center bg-blue-50/50 font-black text-[#002EFF] text-sm">
+          <td class="p-3.5 border-r border-slate-100 text-center bg-slate-50 font-black text-slate-900 text-sm">
             ${item.avance}
           </td>
           <td class="p-3.5 border-r border-slate-100 text-center">
@@ -466,9 +474,9 @@
             </span>
           </td>
           <td class="p-3.5 border-r border-slate-100 text-center">
-            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-medium text-slate-800 focus:outline-none focus:border-[#002EFF]">
+            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-medium text-slate-800 focus:outline-none focus:border-slate-500">
           </td>
-          <td class="p-3.5 text-center font-bold text-cyan-700">
+          <td class="p-3.5 text-center font-bold text-slate-700">
             ${efectividad}${efectividad !== '-' ? '%' : ''}
           </td>
         `;
@@ -486,7 +494,7 @@
       document.getElementById('kpiEfectividadGlobal').innerText = `${efecGlobal}%`;
 
       lucide.createIcons();
-      actualizarChart();
+      actualizarChart(arrEjecutivos);
     }
 
     function actualizarMeta(usuario, val) {
@@ -511,7 +519,7 @@
           labels: [],
           datasets: [
             { label: 'Meta Aco', data: [], backgroundColor: 'rgba(203, 213, 225, 0.7)', borderColor: 'rgba(148, 163, 184, 1)', borderWidth: 1, borderRadius: 6 },
-            { label: 'Ventas Válidas', data: [], backgroundColor: '#002EFF', borderColor: '#001bb3', borderWidth: 1, borderRadius: 6 }
+            { label: 'Ventas Válidas', data: [], backgroundColor: '#334155', borderColor: '#1e293b', borderWidth: 1, borderRadius: 6 }
           ]
         },
         options: {
@@ -526,25 +534,11 @@
       });
     }
 
-    function actualizarChart() {
+    function actualizarChart(arrFiltrados) {
       if (!miChart) return;
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const estado = document.getElementById('filterEstado').value;
-
-      const filtrados = Object.values(ejecutivosMap).filter(e => {
-        if (supervisorSeleccionado !== "todos" && e.supervisor !== supervisorSeleccionado) return false;
-        const matchQuery = e.usuario.toLowerCase().includes(query) || e.nombre.toLowerCase().includes(query);
-        const pctCump = e.meta > 0 ? (e.avance / e.meta) * 100 : 0;
-        let matchEstado = true;
-        if (estado === '100') matchEstado = pctCump >= 100;
-        else if (estado === '50') matchEstado = pctCump >= 50 && pctCump < 100;
-        else if (estado === '0') matchEstado = pctCump < 50;
-        return matchQuery && matchEstado;
-      });
-
-      miChart.data.labels = filtrados.map(e => e.usuario);
-      miChart.data.datasets[0].data = filtrados.map(e => e.meta);
-      miChart.data.datasets[1].data = filtrados.map(e => e.avance);
+      miChart.data.labels = arrFiltrados.map(e => e.usuario);
+      miChart.data.datasets[0].data = arrFiltrados.map(e => e.meta);
+      miChart.data.datasets[1].data = arrFiltrados.map(e => e.avance);
       miChart.update();
     }
 
@@ -570,7 +564,9 @@
     }
 
     function exportarExcel() {
-      const filtrados = Object.values(ejecutivosMap).filter(e => supervisorSeleccionado === "todos" || e.supervisor === supervisorSeleccionado);
+      const filtrados = Object.values(ejecutivosMap).filter(e => (supervisorSeleccionado === "todos" || e.supervisor === supervisorSeleccionado) && e.usuario.toLowerCase() !== 'galatat');
+      filtrados.sort((a, b) => b.avance - a.avance);
+
       const dataExport = filtrados.map(item => ({
         "USUARIO WEB": item.usuario,
         "Nombre y Apellidos": item.nombre,
