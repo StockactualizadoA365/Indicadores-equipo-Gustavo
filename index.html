@@ -102,7 +102,7 @@
     <!-- ESTRUCTURA PRINCIPAL: COLUMNA DE FILTROS Y TABLA DE DATOS -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 
-      <!-- COLUMNA IZQUIERDA: PANEL DE FILTROS CON ESTILO DE LA TABLA -->
+      <!-- COLUMNA IZQUIERDA: PANEL DE FILTROS -->
       <aside class="lg:col-span-1 space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden sticky top-6">
           
@@ -116,6 +116,16 @@
           </div>
 
           <div class="p-5 space-y-4 text-xs font-medium text-slate-700">
+
+            <!-- FILTRO POR ESTADO DEL AGENTE (ACTIVO / INACTIVO) -->
+            <div>
+              <label class="font-bold text-slate-800 block mb-1">Estado del Agente:</label>
+              <select id="selectEstadoAgente" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
+                <option value="activos" selected>Solo Activos</option>
+                <option value="inactivos">Solo Inactivos</option>
+                <option value="todos">Todos los Agentes</option>
+              </select>
+            </div>
 
             <!-- FILTRO POR SUPERVISOR -->
             <div>
@@ -224,6 +234,17 @@
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
 
+    // NOMINA OFICIAL DE USUARIOS ACTIVOS
+    const usuariosActivosSet = new Set([
+      "illanquim",
+      "cnoriegaf",
+      "fcampost",
+      "gguerreroe",
+      "sdionicioj",
+      "glopeza",
+      "msolero"
+    ]);
+
     // FERIADOS OFICIALES CHILE (MM-DD)
     const feriadosChile = [
       "01-01", "04-03", "04-04", "05-01", "05-21", "06-07", "06-20", 
@@ -232,11 +253,12 @@
     ];
 
     let ejecutivosBase = [
-      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10 },
+      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 3 },
       { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8 },
+      { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
+      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10 },
+      { usuario: "sdionicioj", nombre: "Dionicio Julca Stephany", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "glopeza", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5 },
-      { usuario: "rtorresh", nombre: "Roberto Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
-      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
     ];
 
@@ -261,6 +283,7 @@
           usuario: e.usuario,
           nombre: e.nombre,
           supervisor: e.supervisor,
+          activo: true,
           metaCalculada: 0,
           avance: 0,
           llamadas: e.llamadas
@@ -273,10 +296,11 @@
           const parsed = JSON.parse(savedEjec);
           Object.keys(parsed).forEach(k => {
             if (k !== 'galatat') {
+              const esActivo = usuariosActivosSet.has(k);
               if (ejecutivosMap[k]) {
                 ejecutivosMap[k].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[k].llamadas;
               } else {
-                ejecutivosMap[k] = parsed[k];
+                ejecutivosMap[k] = { ...parsed[k], activo: esActivo };
               }
               if (parsed[k].supervisor) supervisoresDisponibles.add(parsed[k].supervisor);
             }
@@ -364,16 +388,20 @@
               nuevos++;
             }
 
+            const esActivo = usuariosActivosSet.has(usuario);
+
             if (!ejecutivosMap[usuario]) {
               ejecutivosMap[usuario] = {
                 usuario,
                 nombre: nombre || usuario,
                 supervisor,
+                activo: esActivo,
                 metaCalculada: 0,
                 avance: 0,
                 llamadas: 0
               };
             } else {
+              ejecutivosMap[usuario].activo = esActivo;
               if (nombre && (!ejecutivosMap[usuario].nombre || ejecutivosMap[usuario].nombre === usuario)) {
                 ejecutivosMap[usuario].nombre = nombre;
               }
@@ -411,7 +439,6 @@
       return null;
     }
 
-    // CÁLCULO DE META ACUMULADA SEGÚN EL RANGO DE FECHAS SELECCIONADO
     function calcularMetaAcumuladaParaRango(fInicio, fFin, metaDiaria) {
       if (!fInicio || !fFin || fInicio > fFin) return metaDiaria;
 
@@ -425,13 +452,10 @@
         const fechaKey = `${mm}-${dd}`;
 
         if (dayOfWeek === 0) {
-          // Día de descanso semanal
           metaTotal += 0;
         } else if (feriadosChile.includes(fechaKey)) {
-          // Feriado Chileno (Cuota 0.5)
           metaTotal += (metaDiaria * 0.5);
         } else {
-          // Día Hábil Normal
           metaTotal += metaDiaria;
         }
 
@@ -450,11 +474,10 @@
       const mesVal = document.getElementById('selectMes').value;
       const semanaVal = document.getElementById('selectSemana').value;
 
-      // Determinar rango efectivo de fechas para calcular la meta acumulada
       let añoBase = 2026;
-      let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : 9; // Octubre por defecto
+      let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : 9;
       let fInicioRango = new Date(añoBase, mesIndex, 1);
-      let fFinRango = new Date(añoBase, mesIndex, 19); // 19 de Octubre por defecto
+      let fFinRango = new Date(añoBase, mesIndex, 19);
 
       if (fDesdeVal) {
         const dSplit = fDesdeVal.split('-');
@@ -472,14 +495,12 @@
         if (semanaVal === "sem5") { fInicioRango.setDate(26); fFinRango.setDate(31); }
       }
 
-      // Calcular meta total acumulada del periodo
       const metaPeriodo = calcularMetaAcumuladaParaRango(fInicioRango, fFinRango, metaDiaria);
 
       Object.keys(ejecutivosMap).forEach(k => {
         ejecutivosMap[k].metaCalculada = metaPeriodo;
       });
 
-      // Recalcular avances
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
       const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
 
@@ -532,12 +553,18 @@
       tbody.innerHTML = '';
 
       const query = document.getElementById('searchInput').value.toLowerCase();
+      const estadoAgente = document.getElementById('selectEstadoAgente').value;
 
       let sumMeta = 0, sumAvance = 0, sumLlamadas = 0;
 
       let arrEjecutivos = Object.values(ejecutivosMap).filter(item => {
         if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) return false;
         if (item.usuario.toLowerCase() === 'galatat') return false;
+
+        // FILTRO POR ESTADO DEL AGENTE (ACTIVOS / INACTIVOS)
+        const esActivo = item.activo || usuariosActivosSet.has(item.usuario.toLowerCase());
+        if (estadoAgente === "activos" && !esActivo) return false;
+        if (estadoAgente === "inactivos" && esActivo) return false;
 
         const matchQuery = item.usuario.toLowerCase().includes(query) || item.nombre.toLowerCase().includes(query);
         return matchQuery;
@@ -557,7 +584,6 @@
         const efecNum = item.llamadas > 0 ? (item.avance / item.llamadas) * 100 : 0;
         const efectividad = item.llamadas > 0 ? efecNum.toFixed(1) : '0.0';
 
-        // BARRA DE PROGRESO DE CUMPLIMIENTO (% CUMP)
         let dotColor = "bg-rose-400";
         let barColorCump = "bg-rose-400";
         
@@ -569,7 +595,6 @@
           barColorCump = "bg-amber-400";
         }
 
-        // BARRA DE PROGRESO DE EFECTIVIDAD
         let barColorEfec = "bg-rose-400";
         if (efecNum >= 40) {
           barColorEfec = "bg-emerald-400";
@@ -599,7 +624,7 @@
             </div>
           </td>
 
-          <!-- META ACO (ACUMULADA SEGÚN FECHAS) -->
+          <!-- META ACO -->
           <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900">
             ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
           </td>
@@ -609,7 +634,7 @@
             ${item.avance}
           </td>
 
-          <!-- % CUMP CON BARRA DE PROGRESO -->
+          <!-- % CUMP -->
           <td class="p-4 border-r border-slate-100 text-center">
             <div class="space-y-1.5 w-24 mx-auto">
               <span class="font-bold text-slate-800 block text-xs">${pctFormateado}%</span>
@@ -624,7 +649,7 @@
             <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
           </td>
 
-          <!-- EFECTIVIDAD CON BARRA DE PROGRESO -->
+          <!-- EFECTIVIDAD -->
           <td class="p-4 text-center">
             <div class="space-y-1.5 w-24 mx-auto">
               <span class="font-bold text-slate-800 block text-xs">${efectividad}%</span>
@@ -657,6 +682,7 @@
     }
 
     function limpiarFiltros() {
+      document.getElementById('selectEstadoAgente').value = "activos";
       document.getElementById('selectSupervisor').value = "Eguilas Morales Gustavo ernesto";
       document.getElementById('selectMes').value = "10";
       document.getElementById('selectSemana').value = "todos";
@@ -668,13 +694,23 @@
     }
 
     function exportarExcel() {
-      const filtrados = Object.values(ejecutivosMap).filter(e => (supervisorSeleccionado === "todos" || e.supervisor === supervisorSeleccionado) && e.usuario.toLowerCase() !== 'galatat');
+      const estadoAgente = document.getElementById('selectEstadoAgente').value;
+      const filtrados = Object.values(ejecutivosMap).filter(e => {
+        if (supervisorSeleccionado !== "todos" && e.supervisor !== supervisorSeleccionado) return false;
+        if (e.usuario.toLowerCase() === 'galatat') return false;
+        const esActivo = e.activo || usuariosActivosSet.has(e.usuario.toLowerCase());
+        if (estadoAgente === "activos" && !esActivo) return false;
+        if (estadoAgente === "inactivos" && esActivo) return false;
+        return true;
+      });
+
       filtrados.sort((a, b) => b.avance - a.avance);
 
       const dataExport = filtrados.map(item => ({
         "ASESOR": item.nombre,
         "USUARIO": item.usuario,
         "SUPERVISOR": item.supervisor,
+        "ESTADO": (item.activo || usuariosActivosSet.has(item.usuario.toLowerCase())) ? "Activo" : "Inactivo",
         "META ACO": item.metaCalculada,
         "AVANCE": item.avance,
         "% CUMP": item.metaCalculada > 0 ? ((item.avance / item.metaCalculada) * 100).toFixed(1) + '%' : '0%',
