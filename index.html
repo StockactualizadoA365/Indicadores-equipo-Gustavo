@@ -9,8 +9,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js para gráficos -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- SheetJS para lectura/escritura de Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -90,7 +88,7 @@
       </div>
     </div>
 
-    <!-- TARJETAS DE INDICADORES GLOBALES (KPIs EXACTOS A LA IMAGEN) -->
+    <!-- TARJETAS DE INDICADORES GLOBALES (KPIs) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       
       <!-- KPI 1: TOTAL DE ASESORES -->
@@ -156,7 +154,7 @@
               <th class="p-4 border-r border-slate-700/60 text-center w-28">AVANCE</th>
               <th class="p-4 border-r border-slate-700/60 text-center w-36">% CUMP</th>
               <th class="p-4 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
-              <th class="p-4 text-center w-32">EFECTIVIDAD</th>
+              <th class="p-4 text-center w-36">EFECTIVIDAD</th>
             </tr>
           </thead>
           <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-800">
@@ -174,7 +172,6 @@
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
 
-    // ASESORES BASE DE GUSTAVO
     let ejecutivosBase = [
       { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 10 },
       { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 8 },
@@ -420,18 +417,27 @@
 
         const pctCump = item.meta > 0 ? (item.avance / item.meta) * 100 : 0;
         const pctFormateado = Math.min(pctCump, 100).toFixed(1);
-        const efectividad = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) : '0.0';
+        const efecNum = item.llamadas > 0 ? (item.avance / item.llamadas) * 100 : 0;
+        const efectividad = item.llamadas > 0 ? efecNum.toFixed(1) : '0.0';
 
-        // COLOR Y BARRA DE PROGRESO COMO LA IMAGEN
+        // BARRA DE PROGRESO DE CUMPLIMIENTO (% CUMP)
         let dotColor = "bg-rose-400";
-        let barColor = "bg-rose-400";
+        let barColorCump = "bg-rose-400";
         
         if (item.avance >= 4 || pctCump >= 80) {
           dotColor = "bg-emerald-400";
-          barColor = "bg-emerald-400";
+          barColorCump = "bg-emerald-400";
         } else if (item.avance >= 1 || pctCump >= 40) {
           dotColor = "bg-amber-400";
-          barColor = "bg-amber-400";
+          barColorCump = "bg-amber-400";
+        }
+
+        // BARRA DE PROGRESO DE EFECTIVIDAD
+        let barColorEfec = "bg-rose-400";
+        if (efecNum >= 40) {
+          barColorEfec = "bg-emerald-400";
+        } else if (efecNum >= 20) {
+          barColorEfec = "bg-amber-400";
         }
 
         const tr = document.createElement('tr');
@@ -471,7 +477,7 @@
             <div class="space-y-1.5 w-24 mx-auto">
               <span class="font-bold text-slate-800 block text-xs">${pctFormateado}%</span>
               <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div class="${barColor} h-1.5 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
+                <div class="${barColorCump} h-1.5 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
               </div>
             </div>
           </td>
@@ -481,9 +487,14 @@
             <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
           </td>
 
-          <!-- EFECTIVIDAD -->
-          <td class="p-4 text-center font-bold text-slate-800">
-            ${efectividad}%
+          <!-- EFECTIVIDAD CON BARRA DE PROGRESO -->
+          <td class="p-4 text-center">
+            <div class="space-y-1.5 w-24 mx-auto">
+              <span class="font-bold text-slate-800 block text-xs">${efectividad}%</span>
+              <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div class="${barColorEfec} h-1.5 rounded-full" style="width: ${Math.min(efecNum, 100)}%"></div>
+              </div>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
