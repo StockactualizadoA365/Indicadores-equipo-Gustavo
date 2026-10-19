@@ -106,7 +106,7 @@
       <aside class="lg:col-span-1 space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden sticky top-6">
           
-          <!-- ENCABEZADO PANEL DE FILTROS (MISMAS LÍNEAS QUE LA TABLA) -->
+          <!-- ENCABEZADO PANEL DE FILTROS -->
           <div class="bg-[#1e293b] text-white p-4 font-bold tracking-wider uppercase text-xs flex items-center justify-between border-b border-slate-700/60">
             <div class="flex items-center gap-2">
               <i data-lucide="filter" class="w-4 h-4 text-slate-300"></i>
@@ -139,13 +139,13 @@
                 <option value="7">Julio</option>
                 <option value="8">Agosto</option>
                 <option value="9">Septiembre</option>
-                <option value="10">Octubre</option>
+                <option value="10" selected>Octubre</option>
                 <option value="11">Noviembre</option>
                 <option value="12">Diciembre</option>
               </select>
             </div>
 
-            <!-- FILTRO POR SEMANA (SEGÚN REGLA EXACTA) -->
+            <!-- FILTRO POR SEMANA -->
             <div>
               <label class="font-bold text-slate-800 block mb-1">Semana del Mes:</label>
               <select id="selectSemana" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -177,6 +177,13 @@
                 <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
                 <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre o @usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl pl-8 pr-2.5 py-2 focus:outline-none focus:border-slate-500 shadow-sm">
               </div>
+            </div>
+
+            <!-- META DIARIA DE REFERENCIA -->
+            <div class="pt-2 border-t border-slate-100">
+              <label class="font-bold text-slate-800 block mb-1">Meta Diaria Base:</label>
+              <input type="number" id="metaDiariaBase" value="5" min="1" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-bold text-center rounded-xl p-2 focus:outline-none focus:border-slate-500 shadow-sm">
+              <span class="text-[10px] text-slate-400 block mt-1">Acumula automáticamente descensos y feriados (50%).</span>
             </div>
 
           </div>
@@ -217,13 +224,20 @@
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
 
+    // FERIADOS OFICIALES CHILE (MM-DD)
+    const feriadosChile = [
+      "01-01", "04-03", "04-04", "05-01", "05-21", "06-07", "06-20", 
+      "06-29", "07-16", "08-15", "09-18", "09-19", "10-12", "10-31", 
+      "11-01", "12-08", "12-25"
+    ];
+
     let ejecutivosBase = [
-      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 10 },
-      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 8 },
-      { usuario: "glopeza", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 5 },
-      { usuario: "rtorresh", nombre: "Roberto Torres", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
-      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
-      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 }
+      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10 },
+      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8 },
+      { usuario: "glopeza", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5 },
+      { usuario: "rtorresh", nombre: "Roberto Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
+      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
+      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -247,7 +261,7 @@
           usuario: e.usuario,
           nombre: e.nombre,
           supervisor: e.supervisor,
-          meta: e.meta,
+          metaCalculada: 0,
           avance: 0,
           llamadas: e.llamadas
         };
@@ -260,7 +274,6 @@
           Object.keys(parsed).forEach(k => {
             if (k !== 'galatat') {
               if (ejecutivosMap[k]) {
-                ejecutivosMap[k].meta = parsed[k].meta !== undefined ? parsed[k].meta : ejecutivosMap[k].meta;
                 ejecutivosMap[k].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[k].llamadas;
               } else {
                 ejecutivosMap[k] = parsed[k];
@@ -356,7 +369,7 @@
                 usuario,
                 nombre: nombre || usuario,
                 supervisor,
-                meta: 5,
+                metaCalculada: 0,
                 avance: 0,
                 llamadas: 0
               };
@@ -398,14 +411,75 @@
       return null;
     }
 
+    // CÁLCULO DE META ACUMULADA SEGÚN EL RANGO DE FECHAS SELECCIONADO
+    function calcularMetaAcumuladaParaRango(fInicio, fFin, metaDiaria) {
+      if (!fInicio || !fFin || fInicio > fFin) return metaDiaria;
+
+      let metaTotal = 0;
+      let curr = new Date(fInicio.getTime());
+
+      while (curr <= fFin) {
+        const dayOfWeek = curr.getDay(); // 0 = Domingo (Descanso)
+        const mm = String(curr.getMonth() + 1).padStart(2, '0');
+        const dd = String(curr.getDate()).padStart(2, '0');
+        const fechaKey = `${mm}-${dd}`;
+
+        if (dayOfWeek === 0) {
+          // Día de descanso semanal
+          metaTotal += 0;
+        } else if (feriadosChile.includes(fechaKey)) {
+          // Feriado Chileno (Cuota 0.5)
+          metaTotal += (metaDiaria * 0.5);
+        } else {
+          // Día Hábil Normal
+          metaTotal += metaDiaria;
+        }
+
+        curr.setDate(curr.getDate() + 1);
+      }
+
+      return metaTotal;
+    }
+
     function recalcularAvances() {
       Object.keys(ejecutivosMap).forEach(k => ejecutivosMap[k].avance = 0);
 
+      const metaDiaria = parseFloat(document.getElementById('metaDiariaBase').value) || 5;
       const fDesdeVal = document.getElementById('filterFechaDesde').value;
       const fHastaVal = document.getElementById('filterFechaHasta').value;
       const mesVal = document.getElementById('selectMes').value;
       const semanaVal = document.getElementById('selectSemana').value;
 
+      // Determinar rango efectivo de fechas para calcular la meta acumulada
+      let añoBase = 2026;
+      let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : 9; // Octubre por defecto
+      let fInicioRango = new Date(añoBase, mesIndex, 1);
+      let fFinRango = new Date(añoBase, mesIndex, 19); // 19 de Octubre por defecto
+
+      if (fDesdeVal) {
+        const dSplit = fDesdeVal.split('-');
+        fInicioRango = new Date(parseInt(dSplit[0]), parseInt(dSplit[1]) - 1, parseInt(dSplit[2]));
+      }
+
+      if (fHastaVal) {
+        const hSplit = fHastaVal.split('-');
+        fFinRango = new Date(parseInt(hSplit[0]), parseInt(hSplit[1]) - 1, parseInt(hSplit[2]));
+      } else if (semanaVal !== "todos") {
+        if (semanaVal === "sem1") { fInicioRango.setDate(1); fFinRango.setDate(4); }
+        if (semanaVal === "sem2") { fInicioRango.setDate(5); fFinRango.setDate(11); }
+        if (semanaVal === "sem3") { fInicioRango.setDate(12); fFinRango.setDate(18); }
+        if (semanaVal === "sem4") { fInicioRango.setDate(19); fFinRango.setDate(25); }
+        if (semanaVal === "sem5") { fInicioRango.setDate(26); fFinRango.setDate(31); }
+      }
+
+      // Calcular meta total acumulada del periodo
+      const metaPeriodo = calcularMetaAcumuladaParaRango(fInicioRango, fFinRango, metaDiaria);
+
+      Object.keys(ejecutivosMap).forEach(k => {
+        ejecutivosMap[k].metaCalculada = metaPeriodo;
+      });
+
+      // Recalcular avances
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
       const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
 
@@ -418,7 +492,6 @@
           let pasaFiltro = true;
           const regFecha = parseFechaExcel(reg.fechaStr);
 
-          // Filtro Rango de Fechas
           if (fDesde || fHasta) {
             if (regFecha) {
               if (fDesde && regFecha < fDesde) pasaFiltro = false;
@@ -426,13 +499,11 @@
             }
           }
 
-          // Filtro por Mes
           if (pasaFiltro && mesVal !== "todos" && regFecha) {
             const mesReg = regFecha.getMonth() + 1;
             if (mesReg !== parseInt(mesVal)) pasaFiltro = false;
           }
 
-          // Filtro por Semana de acuerdo a regla indicada
           if (pasaFiltro && semanaVal !== "todos" && regFecha) {
             const dia = regFecha.getDate();
             if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
@@ -476,11 +547,12 @@
       arrEjecutivos.sort((a, b) => b.avance - a.avance);
 
       arrEjecutivos.forEach((item) => {
-        sumMeta += parseInt(item.meta) || 0;
+        const metaInd = item.metaCalculada || 5;
+        sumMeta += metaInd;
         sumAvance += parseInt(item.avance) || 0;
         sumLlamadas += parseInt(item.llamadas) || 0;
 
-        const pctCump = item.meta > 0 ? (item.avance / item.meta) * 100 : 0;
+        const pctCump = metaInd > 0 ? (item.avance / metaInd) * 100 : 0;
         const pctFormateado = Math.min(pctCump, 100).toFixed(1);
         const efecNum = item.llamadas > 0 ? (item.avance / item.llamadas) * 100 : 0;
         const efectividad = item.llamadas > 0 ? efecNum.toFixed(1) : '0.0';
@@ -489,10 +561,10 @@
         let dotColor = "bg-rose-400";
         let barColorCump = "bg-rose-400";
         
-        if (item.avance >= 4 || pctCump >= 80) {
+        if (pctCump >= 100) {
           dotColor = "bg-emerald-400";
           barColorCump = "bg-emerald-400";
-        } else if (item.avance >= 1 || pctCump >= 40) {
+        } else if (pctCump >= 50) {
           dotColor = "bg-amber-400";
           barColorCump = "bg-amber-400";
         }
@@ -527,9 +599,9 @@
             </div>
           </td>
 
-          <!-- META ACO -->
-          <td class="p-4 border-r border-slate-100 text-center">
-            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
+          <!-- META ACO (ACUMULADA SEGÚN FECHAS) -->
+          <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900">
+            ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
           </td>
 
           <!-- AVANCE -->
@@ -567,21 +639,13 @@
 
       // ACTUALIZAR TARJETAS KPI SUPERIORES
       document.getElementById('kpiTotalAsesores').innerText = arrEjecutivos.length;
-      document.getElementById('kpiMetaTotal').innerText = sumMeta;
+      document.getElementById('kpiMetaTotal').innerText = sumMeta % 1 === 0 ? sumMeta : sumMeta.toFixed(1);
       document.getElementById('kpiLlamadasTotal').innerText = sumLlamadas;
 
       const efecGlobal = sumLlamadas > 0 ? ((sumAvance / sumLlamadas) * 100).toFixed(1) : 0.0;
       document.getElementById('kpiEfectividadGlobal').innerText = `${efecGlobal}%`;
 
       lucide.createIcons();
-    }
-
-    function actualizarMeta(usuario, val) {
-      if (ejecutivosMap[usuario]) {
-        ejecutivosMap[usuario].meta = parseInt(val) || 0;
-        guardarEnStorage();
-        renderizarTabla();
-      }
     }
 
     function actualizarLlamadas(usuario, val) {
@@ -594,11 +658,12 @@
 
     function limpiarFiltros() {
       document.getElementById('selectSupervisor').value = "Eguilas Morales Gustavo ernesto";
-      document.getElementById('selectMes').value = "todos";
+      document.getElementById('selectMes').value = "10";
       document.getElementById('selectSemana').value = "todos";
       document.getElementById('filterFechaDesde').value = "";
       document.getElementById('filterFechaHasta').value = "";
       document.getElementById('searchInput').value = "";
+      document.getElementById('metaDiariaBase').value = "5";
       aplicarFiltrosGlobales();
     }
 
@@ -610,9 +675,9 @@
         "ASESOR": item.nombre,
         "USUARIO": item.usuario,
         "SUPERVISOR": item.supervisor,
-        "META ACO": item.meta,
+        "META ACO": item.metaCalculada,
         "AVANCE": item.avance,
-        "% CUMP": item.meta > 0 ? ((item.avance / item.meta) * 100).toFixed(1) + '%' : '0%',
+        "% CUMP": item.metaCalculada > 0 ? ((item.avance / item.metaCalculada) * 100).toFixed(1) + '%' : '0%',
         "LLAMADAS": item.llamadas,
         "EFECTIVIDAD": item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) + '%' : '0%'
       }));
