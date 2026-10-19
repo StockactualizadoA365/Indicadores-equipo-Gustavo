@@ -99,9 +99,9 @@
           <label class="text-xs font-bold text-slate-700 block">Cumplimiento:</label>
           <select id="filterEstado" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-xs rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
             <option value="todos">Todos los estados</option>
-            <option value="100">Completado (100%+)</option>
-            <option value="50">En Progreso (50%-99%)</option>
-            <option value="0">Bajo (&lt;50%)</option>
+            <option value="4">4 a más ventas (Verde)</option>
+            <option value="1-3">1 a 3 ventas (Amarillo)</option>
+            <option value="0">0 ventas (Alerta)</option>
           </select>
         </div>
 
@@ -195,6 +195,7 @@
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-800 text-white font-bold uppercase tracking-wider">
               <tr>
+                <th class="p-3.5 border-r border-slate-700 text-center w-12">Estado</th>
                 <th class="p-3.5 border-r border-slate-700">USUARIO WEB</th>
                 <th class="p-3.5 border-r border-slate-700">Nombre y Apellidos</th>
                 <th class="p-3.5 border-r border-slate-700">Supervisor</th>
@@ -223,7 +224,6 @@
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
     let miChart = null;
 
-    // Sin Gonzalo Alata (galatat)
     let ejecutivosBase = [
       { usuario: "gguerreroe", nombre: "Guerrero Eyzaguirre Gypsi", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
       { usuario: "msolero", nombre: "Soler Oberto Maritriny Patricia", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
@@ -317,7 +317,6 @@
             if (!row) continue;
 
             const usuario = String(row[colUser] || '').trim().toLowerCase();
-            // Ignorar explícitamente a galatat si viene en el Excel
             if (usuario === 'galatat') continue;
 
             const nombre = colNom !== -1 ? String(row[colNom] || '').trim() : '';
@@ -422,25 +421,22 @@
       const estado = document.getElementById('filterEstado').value;
 
       let sumMeta = 0, sumAvance = 0, sumLlamadas = 0;
-      
-      // Filtrar y ordenar de MAYOR A MENOR en base a ventas (avance)
+
       let arrEjecutivos = Object.values(ejecutivosMap).filter(item => {
         if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) return false;
-        // Ignorar galatat por seguridad
         if (item.usuario.toLowerCase() === 'galatat') return false;
 
         const matchQuery = item.usuario.toLowerCase().includes(query) || item.nombre.toLowerCase().includes(query);
-        const pctCump = item.meta > 0 ? (item.avance / item.meta) * 100 : 0;
 
         let matchEstado = true;
-        if (estado === '100') matchEstado = pctCump >= 100;
-        else if (estado === '50') matchEstado = pctCump >= 50 && pctCump < 100;
-        else if (estado === '0') matchEstado = pctCump < 50;
+        if (estado === '4') matchEstado = item.avance >= 4;
+        else if (estado === '1-3') matchEstado = item.avance >= 1 && item.avance <= 3;
+        else if (estado === '0') matchEstado = item.avance === 0;
 
         return matchQuery && matchEstado;
       });
 
-      // ORDENAMIENTO DE MAYOR A MENOR VENTA
+      // ORDEN DE MAYOR A MENOR EN BASE A VENTAS
       arrEjecutivos.sort((a, b) => b.avance - a.avance);
 
       arrEjecutivos.forEach((item) => {
@@ -452,13 +448,20 @@
         const pctFormateado = pctCump.toFixed(1);
         const efectividad = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) : '-';
 
-        let badgeColor = "bg-slate-100 text-slate-700 border-slate-200";
-        if (pctCump >= 100) badgeColor = "bg-emerald-50 text-emerald-800 border-emerald-200 font-bold";
-        else if (pctCump >= 50) badgeColor = "bg-amber-50 text-amber-800 border-amber-200";
+        // ICONOS Y SEMÁFORO SEGÚN CANTIDAD DE VENTAS
+        let iconoHtml = '';
+        if (item.avance === 0) {
+          iconoHtml = `<span class="inline-flex items-center justify-center p-1 bg-amber-100 text-amber-700 rounded-full" title="0 ventas - Alerta"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i></span>`;
+        } else if (item.avance >= 1 && item.avance <= 3) {
+          iconoHtml = `<span class="inline-block w-3 h-3 bg-amber-400 rounded-full shadow-sm" title="1 a 3 ventas"></span>`;
+        } else {
+          iconoHtml = `<span class="inline-block w-3 h-3 bg-emerald-500 rounded-full shadow-sm" title="4 a más ventas"></span>`;
+        }
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition-colors";
         tr.innerHTML = `
+          <td class="p-3.5 border-r border-slate-100 text-center">${iconoHtml}</td>
           <td class="p-3.5 border-r border-slate-100 font-mono text-slate-900 font-bold">${item.usuario}</td>
           <td class="p-3.5 border-r border-slate-100 text-slate-800 font-medium">${item.nombre}</td>
           <td class="p-3.5 border-r border-slate-100 text-slate-500 text-[11px]">${item.supervisor}</td>
@@ -468,10 +471,8 @@
           <td class="p-3.5 border-r border-slate-100 text-center bg-slate-50 font-black text-slate-900 text-sm">
             ${item.avance}
           </td>
-          <td class="p-3.5 border-r border-slate-100 text-center">
-            <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold border ${badgeColor}">
-              ${pctFormateado}%
-            </span>
+          <td class="p-3.5 border-r border-slate-100 text-center font-bold">
+            ${pctFormateado}%
           </td>
           <td class="p-3.5 border-r border-slate-100 text-center">
             <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-medium text-slate-800 focus:outline-none focus:border-slate-500">
