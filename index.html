@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Ventas & Rendimiento Diario - Entel</title>
+  <title>PANEL DE DESEMPEÑO - EQUIPO DE VENTAS</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,229 +17,186 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
+<body class="bg-[#f3f5f8] min-h-screen text-slate-800 font-sans pb-12">
 
-  <!-- HEADER / BARRA SUPERIOR -->
-  <header class="bg-[#0b132b] text-white border-b border-slate-700 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-      
-      <div class="flex items-center space-x-3">
-        <div class="bg-slate-800 text-slate-200 p-2 rounded-xl border border-slate-700">
-          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold text-base md:text-lg tracking-tight text-white">Dashboard de Ventas & Rendimiento Diario</h1>
-            <span class="text-[10px] bg-slate-800 text-slate-300 font-bold px-2 py-0.5 rounded-md uppercase border border-slate-700">Entel Tienda</span>
-          </div>
-        </div>
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
+
+    <!-- SECCIÓN SUPERIOR: TÍTULO Y BOTONES DE ACCIÓN -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase">
+          PANEL DE DESEMPEÑO - EQUIPO DE VENTAS
+        </h1>
       </div>
 
-      <!-- BOTONES DE ACCIÓN -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <label class="bg-[#002EFF] hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shadow-sm">
-          <i data-lucide="upload" class="w-4 h-4"></i>
-          <span>Importar Excel Webform</span>
+      <div class="flex items-center gap-3 flex-wrap">
+        <!-- BOTÓN IMPORTAR EXCEL -->
+        <label class="bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-300 shadow-sm cursor-pointer transition-all flex items-center gap-2">
+          <i data-lucide="upload" class="w-4 h-4 text-slate-600"></i>
+          <span>Cargar Excel</span>
           <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="hidden" onchange="procesarExcel(event)">
         </label>
 
-        <button onclick="cargarDatosEjemplo()" class="bg-slate-800 hover:bg-slate-900 text-slate-200 font-bold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
-          <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-400"></i>
-          <span>Restablecer</span>
+        <!-- BOTÓN TOGGLE FILTROS -->
+        <button onclick="togglePanelFiltros()" class="bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-300 shadow-sm transition-all flex items-center gap-2">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-slate-600"></i>
+          <span>Filtros</span>
         </button>
 
-        <button onclick="exportarExcel()" class="bg-slate-800 hover:bg-slate-900 text-slate-200 font-bold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700">
-          <i data-lucide="download" class="w-4 h-4 text-slate-300"></i>
+        <!-- BOTÓN EXPORTAR -->
+        <button onclick="exportarExcel()" class="bg-[#0f172a] hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
           <span>Exportar</span>
         </button>
       </div>
-
     </div>
-  </header>
 
-  <!-- ESTRUCTURA CON SIDEBAR A LA IZQUIERDA -->
-  <div class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- PANEL DESPLEGABLE DE FILTROS -->
+    <div id="panelFiltros" class="hidden bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <span class="font-bold text-xs uppercase tracking-wider text-slate-700">Opciones de Filtrado Avanzado</span>
+        <button onclick="limpiarFiltros()" class="text-xs text-blue-600 hover:underline font-bold">Limpiar todo</button>
+      </div>
 
-    <!-- COLUMNA IZQUIERDA: PANEL DE FILTROS -->
-    <aside class="lg:col-span-1 space-y-4">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 sticky top-20">
-        
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div class="flex items-center gap-2 font-bold text-slate-900 text-xs uppercase tracking-wider">
-            <i data-lucide="filter" class="w-4 h-4 text-slate-600"></i>
-            <span>Filtros y Fechas</span>
-          </div>
-          <button onclick="limpiarFiltros()" class="text-[11px] text-slate-500 hover:text-slate-900 font-bold">Limpiar</button>
-        </div>
-
-        <!-- FILTRO 1: SUPERVISOR -->
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-slate-700 block">Supervisor:</label>
-          <select id="selectSupervisor" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 font-semibold text-xs rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+        <div>
+          <label class="font-bold text-slate-600 block mb-1">Supervisor:</label>
+          <select id="selectSupervisor" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
             <option value="todos">Todos los Supervisores</option>
           </select>
         </div>
 
-        <!-- FILTRO 2: FECHA DESDE -->
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-slate-700 block">Fecha Desde:</label>
-          <input type="date" id="filterFechaDesde" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
+        <div>
+          <label class="font-bold text-slate-600 block mb-1">Fecha Desde:</label>
+          <input type="date" id="filterFechaDesde" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
         </div>
 
-        <!-- FILTRO 3: FECHA HASTA -->
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-slate-700 block">Fecha Hasta:</label>
-          <input type="date" id="filterFechaHasta" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
+        <div>
+          <label class="font-bold text-slate-600 block mb-1">Fecha Hasta:</label>
+          <input type="date" id="filterFechaHasta" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
         </div>
 
-        <!-- FILTRO 4: ESTADO DE CUMPLIMIENTO -->
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-slate-700 block">Cumplimiento:</label>
-          <select id="filterEstado" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-xs rounded-xl p-2.5 focus:outline-none focus:border-slate-500">
-            <option value="todos">Todos los estados</option>
-            <option value="4">4 a más ventas (Verde)</option>
-            <option value="1-3">1 a 3 ventas (Amarillo)</option>
-            <option value="0">0 ventas (Alerta)</option>
-          </select>
+        <div>
+          <label class="font-bold text-slate-600 block mb-1">Buscar Asesor:</label>
+          <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre o @usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
         </div>
-
-        <!-- FILTRO 5: BÚSQUEDA POR TEXTO -->
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-slate-700 block">Buscar Asesor:</label>
-          <div class="relative">
-            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
-            <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Usuario o nombre..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-500 font-medium">
-          </div>
-        </div>
-
-        <button onclick="toggleGrafica()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-slate-300 mt-2">
-          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-          <span id="btnGraficaText">Ocultar Gráfica</span>
-        </button>
-
       </div>
-    </aside>
+    </div>
 
-    <!-- COLUMNA DERECHA: KPIS, GRÁFICO Y TABLA -->
-    <main class="lg:col-span-3 space-y-6">
+    <!-- TARJETAS DE INDICADORES GLOBALES (KPIs EXACTOS A LA IMAGEN) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      
+      <!-- KPI 1: TOTAL DE ASESORES -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-xs font-semibold text-slate-500 block mb-1">Total de Asesores</span>
+          <div id="kpiTotalAsesores" class="text-2xl font-black text-slate-900">0</div>
+        </div>
+        <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl">
+          <i data-lucide="users" class="w-5 h-5"></i>
+        </div>
+      </div>
 
-      <!-- TARJETAS DE INDICADORES GLOBALES (KPIs) -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-        
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Meta Total</span>
-            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="target" class="w-4 h-4"></i></div>
-          </div>
+      <!-- KPI 2: TOTAL DE META ACOGIDA -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-xs font-semibold text-slate-500 block mb-1">Total de Meta Acogida</span>
           <div id="kpiMetaTotal" class="text-2xl font-black text-slate-900">0</div>
-          <span class="text-[10px] text-slate-400 font-medium">Acumulada</span>
         </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ventas Válidas</span>
-            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="shopping-bag" class="w-4 h-4"></i></div>
-          </div>
-          <div id="kpiVentasTotal" class="text-2xl font-black text-slate-900">0</div>
-          <span class="text-[10px] text-slate-400 font-medium">Líneas / Portas</span>
+        <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl">
+          <i data-lucide="target" class="w-5 h-5"></i>
         </div>
+      </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">% Cump</span>
-            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="award" class="w-4 h-4"></i></div>
-          </div>
-          <div id="kpiCumplimientoGlobal" class="text-2xl font-black text-slate-900">0.0%</div>
-          <span class="text-[10px] text-slate-400 font-medium">Promedio</span>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Llamadas</span>
-            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="phone-call" class="w-4 h-4"></i></div>
-          </div>
+      <!-- KPI 3: LLAMADAS REALIZADAS TOTAL -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-xs font-semibold text-slate-500 block mb-1">Llamadas Realizadas Total</span>
           <div id="kpiLlamadasTotal" class="text-2xl font-black text-slate-900">0</div>
-          <span class="text-[10px] text-slate-400 font-medium">Gestión del día</span>
         </div>
+        <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl">
+          <i data-lucide="phone" class="w-5 h-5"></i>
+        </div>
+      </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm col-span-2 md:col-span-1">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Efectividad</span>
-            <div class="p-1.5 bg-slate-100 text-slate-700 rounded-lg"><i data-lucide="percent" class="w-4 h-4"></i></div>
-          </div>
+      <!-- KPI 4: EFECTIVIDAD TOTAL -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-xs font-semibold text-slate-500 block mb-1">Efectividad Total</span>
           <div id="kpiEfectividadGlobal" class="text-2xl font-black text-slate-900">0.0%</div>
-          <span class="text-[10px] text-slate-400 font-medium">Ventas / Llamadas</span>
         </div>
-
-      </div>
-
-      <!-- GRÁFICO COMPARATIVO -->
-      <div id="secGrafica" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-2">
-            <i data-lucide="trending-up" class="w-4 h-4 text-slate-600"></i>
-            Comparativa de Avance vs Meta (Ordenado de Mayor a Menor)
-          </h3>
-          <span class="text-[11px] text-slate-400 italic">Actualización automática</span>
-        </div>
-        <div class="h-64 w-full">
-          <canvas id="chartVentas"></canvas>
+        <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl">
+          <i data-lucide="trending-up" class="w-5 h-5"></i>
         </div>
       </div>
 
-      <!-- TABLA PRINCIPAL DE DATOS -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-800 text-white font-bold uppercase tracking-wider">
-              <tr>
-                <th class="p-3.5 border-r border-slate-700 text-center w-12">Estado</th>
-                <th class="p-3.5 border-r border-slate-700">USUARIO WEB</th>
-                <th class="p-3.5 border-r border-slate-700">Nombre y Apellidos</th>
-                <th class="p-3.5 border-r border-slate-700">Supervisor</th>
-                <th class="p-3.5 border-r border-slate-700 text-center">Meta Aco</th>
-                <th class="p-3.5 border-r border-slate-700 text-center bg-slate-900 text-white">Avance</th>
-                <th class="p-3.5 border-r border-slate-700 text-center">% Cump</th>
-                <th class="p-3.5 border-r border-slate-700 text-center">Llamadas</th>
-                <th class="p-3.5 text-center">Efectividad</th>
-              </tr>
-            </thead>
-            <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-700">
-              <!-- Filas dinámicas ordenadas -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+    </div>
 
-    </main>
+    <!-- TABLA PRINCIPAL ESTILO IMAGEN REFERENCIAL -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-[#1e293b] text-white font-bold tracking-wider uppercase">
+            <tr>
+              <th class="p-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
+              <th class="p-4 border-r border-slate-700/60">
+                <div class="flex items-center justify-between">
+                  <span>SUPERVISOR</span>
+                  <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+              </th>
+              <th class="p-4 border-r border-slate-700/60 text-center w-28">META ACO</th>
+              <th class="p-4 border-r border-slate-700/60 text-center w-28">AVANCE</th>
+              <th class="p-4 border-r border-slate-700/60 text-center w-36">% CUMP</th>
+              <th class="p-4 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
+              <th class="p-4 text-center w-32">EFECTIVIDAD</th>
+            </tr>
+          </thead>
+          <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-800">
+            <!-- Filas dinámicas -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
   </div>
 
   <script>
-    let registrosExcelBrutos = [];
+    let operacionesAcumuladas = {};
     let ejecutivosMap = {};
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
-    let miChart = null;
 
+    // ASESORES BASE DE GUSTAVO
     let ejecutivosBase = [
-      { usuario: "gguerreroe", nombre: "Guerrero Eyzaguirre Gypsi", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
-      { usuario: "msolero", nombre: "Soler Oberto Maritriny Patricia", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
-      { usuario: "illanquim", nombre: "Llanqui masias Isabel Veronica", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
-      { usuario: "cnoriegaf", nombre: "Noriega Fonseca Carla carolina", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
-      { usuario: "glopeza", nombre: "Lopez Abanto Guillermo antonio", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
-      { usuario: "rtorresh", nombre: "Torres Heredia Roberto baruc", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 }
+      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 10 },
+      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 8 },
+      { usuario: "glopeza", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 5 },
+      { usuario: "rtorresh", nombre: "Roberto Torres", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 },
+      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", meta: 5, llamadas: 0 }
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
-      inicializarChart();
-      inicializarDatosBase();
+      cargarDesdeStorage();
     });
 
-    function inicializarDatosBase() {
+    function cargarDesdeStorage() {
+      const savedOps = localStorage.getItem('entel_operaciones_acumuladas');
+      const savedEjec = localStorage.getItem('entel_ejecutivos_map');
+
+      if (savedOps) {
+        try { operacionesAcumuladas = JSON.parse(savedOps); } catch(e) { operacionesAcumuladas = {}; }
+      }
+      
       ejecutivosMap = {};
       supervisoresDisponibles.clear();
 
@@ -255,8 +212,30 @@
         supervisoresDisponibles.add(e.supervisor);
       });
 
+      if (savedEjec) {
+        try {
+          const parsed = JSON.parse(savedEjec);
+          Object.keys(parsed).forEach(k => {
+            if (k !== 'galatat') {
+              if (ejecutivosMap[k]) {
+                ejecutivosMap[k].meta = parsed[k].meta !== undefined ? parsed[k].meta : ejecutivosMap[k].meta;
+                ejecutivosMap[k].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[k].llamadas;
+              } else {
+                ejecutivosMap[k] = parsed[k];
+              }
+              if (parsed[k].supervisor) supervisoresDisponibles.add(parsed[k].supervisor);
+            }
+          });
+        } catch(e) {}
+      }
+
       actualizarSelectorSupervisores();
-      renderizarTabla();
+      recalcularAvances();
+    }
+
+    function guardarEnStorage() {
+      localStorage.setItem('entel_operaciones_acumuladas', JSON.stringify(operacionesAcumuladas));
+      localStorage.setItem('entel_ejecutivos_map', JSON.stringify(ejecutivosMap));
     }
 
     function actualizarSelectorSupervisores() {
@@ -288,7 +267,7 @@
             return;
           }
 
-          let colUser = -1, colNom = -1, colSup = -1, colTipoOp = -1, colFecha = -1, headerRow = -1;
+          let colUser = -1, colNom = -1, colSup = -1, colTipoOp = -1, colFecha = -1, colNroOp = -1, headerRow = -1;
 
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
             const row = rawRows[r];
@@ -300,63 +279,65 @@
               if (val === 'SUPERVISOR') colSup = c;
               if (val === 'TIPO OPERACION') colTipoOp = c;
               if (val.includes('FECHA REGISTRO') || val === 'FECHA') colFecha = c;
+              if (val.includes('NRO.OPERACION') || val.includes('NRO OPERACION') || val === 'OPERACION') colNroOp = c;
             }
             if (colUser !== -1) break;
           }
 
           if (colUser === -1 || colTipoOp === -1) {
-            alert("No se encontraron las columnas necesarias en el Excel.");
+            alert("No se encontraron las columnas requeridas en el Excel.");
             return;
           }
 
-          registrosExcelBrutos = [];
-          supervisoresDisponibles.clear();
+          let nuevos = 0;
 
           for (let r = headerRow + 1; r < rawRows.length; r++) {
             const row = rawRows[r];
             if (!row) continue;
 
             const usuario = String(row[colUser] || '').trim().toLowerCase();
-            if (usuario === 'galatat') continue;
+            if (usuario === 'galatat' || !usuario || usuario === 'undefined' || usuario === '0') continue;
 
             const nombre = colNom !== -1 ? String(row[colNom] || '').trim() : '';
             const supervisor = colSup !== -1 ? String(row[colSup] || '').trim() : 'Sin Supervisor';
             const tipoOperacion = String(row[colTipoOp] || '').toUpperCase().trim();
             const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
+            const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
 
-            if (usuario && usuario !== 'undefined' && usuario !== '0') {
-              supervisoresDisponibles.add(supervisor);
-              registrosExcelBrutos.push({ usuario, nombre, supervisor, tipoOperacion, fechaStr });
+            if (!operacionesAcumuladas[nroOp]) {
+              operacionesAcumuladas[nroOp] = { nroOp, usuario, nombre, supervisor, tipoOperacion, fechaStr };
+              nuevos++;
             }
-          }
 
-          registrosExcelBrutos.forEach(reg => {
-            if (!ejecutivosMap[reg.usuario]) {
-              ejecutivosMap[reg.usuario] = {
-                usuario: reg.usuario,
-                nombre: reg.nombre || reg.usuario,
-                supervisor: reg.supervisor,
+            if (!ejecutivosMap[usuario]) {
+              ejecutivosMap[usuario] = {
+                usuario,
+                nombre: nombre || usuario,
+                supervisor,
                 meta: 5,
                 avance: 0,
                 llamadas: 0
               };
             } else {
-              if (reg.nombre && (!ejecutivosMap[reg.usuario].nombre || ejecutivosMap[reg.usuario].nombre === reg.usuario)) {
-                ejecutivosMap[reg.usuario].nombre = reg.nombre;
+              if (nombre && (!ejecutivosMap[usuario].nombre || ejecutivosMap[usuario].nombre === usuario)) {
+                ejecutivosMap[usuario].nombre = nombre;
               }
-              if (reg.supervisor) {
-                ejecutivosMap[reg.usuario].supervisor = reg.supervisor;
-              }
+              if (supervisor) ejecutivosMap[usuario].supervisor = supervisor;
             }
-          });
+
+            if (supervisor) supervisoresDisponibles.add(supervisor);
+          }
 
           actualizarSelectorSupervisores();
           recalcularAvances();
+          guardarEnStorage();
           document.getElementById('inputExcel').value = '';
+
+          alert(`¡Éxito! Se añadieron ${nuevos} operaciones válidas al acumulado.`);
 
         } catch (err) {
           console.error(err);
-          alert("Error al procesar el archivo Excel.");
+          alert("Error al leer el archivo Excel.");
         }
       };
       reader.readAsArrayBuffer(file);
@@ -384,7 +365,7 @@
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
       const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
 
-      registrosExcelBrutos.forEach(reg => {
+      Object.values(operacionesAcumuladas).forEach(reg => {
         const tipo = reg.tipoOperacion;
         const esValido = tipo.includes('NUEVA') || tipo.includes('2DA') || tipo.includes('PORTA');
         const esExcluido = tipo.includes('RENOVACION') || tipo.includes('FIBRA') || tipo.includes('MIGRACION');
@@ -410,7 +391,7 @@
 
     function aplicarFiltrosGlobales() {
       supervisorSeleccionado = document.getElementById('selectSupervisor').value;
-      renderizarTabla();
+      recalcularAvances();
     }
 
     function renderizarTabla() {
@@ -418,7 +399,6 @@
       tbody.innerHTML = '';
 
       const query = document.getElementById('searchInput').value.toLowerCase();
-      const estado = document.getElementById('filterEstado').value;
 
       let sumMeta = 0, sumAvance = 0, sumLlamadas = 0;
 
@@ -427,16 +407,10 @@
         if (item.usuario.toLowerCase() === 'galatat') return false;
 
         const matchQuery = item.usuario.toLowerCase().includes(query) || item.nombre.toLowerCase().includes(query);
-
-        let matchEstado = true;
-        if (estado === '4') matchEstado = item.avance >= 4;
-        else if (estado === '1-3') matchEstado = item.avance >= 1 && item.avance <= 3;
-        else if (estado === '0') matchEstado = item.avance === 0;
-
-        return matchQuery && matchEstado;
+        return matchQuery;
       });
 
-      // ORDEN DE MAYOR A MENOR EN BASE A VENTAS
+      // ORDENAR DE MAYOR A MENOR SEGÚN VENTAS
       arrEjecutivos.sort((a, b) => b.avance - a.avance);
 
       arrEjecutivos.forEach((item) => {
@@ -445,62 +419,91 @@
         sumLlamadas += parseInt(item.llamadas) || 0;
 
         const pctCump = item.meta > 0 ? (item.avance / item.meta) * 100 : 0;
-        const pctFormateado = pctCump.toFixed(1);
-        const efectividad = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) : '-';
+        const pctFormateado = Math.min(pctCump, 100).toFixed(1);
+        const efectividad = item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) : '0.0';
 
-        // ICONOS Y SEMÁFORO SEGÚN CANTIDAD DE VENTAS
-        let iconoHtml = '';
-        if (item.avance === 0) {
-          iconoHtml = `<span class="inline-flex items-center justify-center p-1 bg-amber-100 text-amber-700 rounded-full" title="0 ventas - Alerta"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i></span>`;
-        } else if (item.avance >= 1 && item.avance <= 3) {
-          iconoHtml = `<span class="inline-block w-3 h-3 bg-amber-400 rounded-full shadow-sm" title="1 a 3 ventas"></span>`;
-        } else {
-          iconoHtml = `<span class="inline-block w-3 h-3 bg-emerald-500 rounded-full shadow-sm" title="4 a más ventas"></span>`;
+        // COLOR Y BARRA DE PROGRESO COMO LA IMAGEN
+        let dotColor = "bg-rose-400";
+        let barColor = "bg-rose-400";
+        
+        if (item.avance >= 4 || pctCump >= 80) {
+          dotColor = "bg-emerald-400";
+          barColor = "bg-emerald-400";
+        } else if (item.avance >= 1 || pctCump >= 40) {
+          dotColor = "bg-amber-400";
+          barColor = "bg-amber-400";
         }
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition-colors";
         tr.innerHTML = `
-          <td class="p-3.5 border-r border-slate-100 text-center">${iconoHtml}</td>
-          <td class="p-3.5 border-r border-slate-100 font-mono text-slate-900 font-bold">${item.usuario}</td>
-          <td class="p-3.5 border-r border-slate-100 text-slate-800 font-medium">${item.nombre}</td>
-          <td class="p-3.5 border-r border-slate-100 text-slate-500 text-[11px]">${item.supervisor}</td>
-          <td class="p-3.5 border-r border-slate-100 text-center font-bold">
-            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-bold text-slate-800 focus:outline-none focus:border-slate-500">
+          <!-- ASESOR -->
+          <td class="p-4 pl-6 border-r border-slate-100">
+            <div class="flex items-center gap-3">
+              <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+              <div>
+                <div class="font-bold text-slate-900 text-xs">${item.nombre}</div>
+                <div class="text-[11px] text-slate-400 font-mono">@${item.usuario}</div>
+              </div>
+            </div>
           </td>
-          <td class="p-3.5 border-r border-slate-100 text-center bg-slate-50 font-black text-slate-900 text-sm">
+
+          <!-- SUPERVISOR -->
+          <td class="p-4 border-r border-slate-100">
+            <div class="flex items-center gap-3">
+              <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+              <span class="text-xs text-slate-700">${item.supervisor}</span>
+            </div>
+          </td>
+
+          <!-- META ACO -->
+          <td class="p-4 border-r border-slate-100 text-center">
+            <input type="number" min="0" value="${item.meta}" onchange="actualizarMeta('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
+          </td>
+
+          <!-- AVANCE -->
+          <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900 text-sm">
             ${item.avance}
           </td>
-          <td class="p-3.5 border-r border-slate-100 text-center font-bold">
-            ${pctFormateado}%
+
+          <!-- % CUMP CON BARRA DE PROGRESO -->
+          <td class="p-4 border-r border-slate-100 text-center">
+            <div class="space-y-1.5 w-24 mx-auto">
+              <span class="font-bold text-slate-800 block text-xs">${pctFormateado}%</span>
+              <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div class="${barColor} h-1.5 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
+              </div>
+            </div>
           </td>
-          <td class="p-3.5 border-r border-slate-100 text-center">
-            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-slate-50 border border-slate-300 rounded-lg text-center p-1 font-medium text-slate-800 focus:outline-none focus:border-slate-500">
+
+          <!-- LLAMADAS -->
+          <td class="p-4 border-r border-slate-100 text-center">
+            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
           </td>
-          <td class="p-3.5 text-center font-bold text-slate-700">
-            ${efectividad}${efectividad !== '-' ? '%' : ''}
+
+          <!-- EFECTIVIDAD -->
+          <td class="p-4 text-center font-bold text-slate-800">
+            ${efectividad}%
           </td>
         `;
         tbody.appendChild(tr);
       });
 
+      // ACTUALIZAR TARJETAS KPI SUPERIORES
+      document.getElementById('kpiTotalAsesores').innerText = arrEjecutivos.length;
       document.getElementById('kpiMetaTotal').innerText = sumMeta;
-      document.getElementById('kpiVentasTotal').innerText = sumAvance;
       document.getElementById('kpiLlamadasTotal').innerText = sumLlamadas;
 
-      const cumpGlobal = sumMeta > 0 ? ((sumAvance / sumMeta) * 100).toFixed(1) : 0;
-      document.getElementById('kpiCumplimientoGlobal').innerText = `${cumpGlobal}%`;
-
-      const efecGlobal = sumLlamadas > 0 ? ((sumAvance / sumLlamadas) * 100).toFixed(1) : 0;
+      const efecGlobal = sumLlamadas > 0 ? ((sumAvance / sumLlamadas) * 100).toFixed(1) : 0.0;
       document.getElementById('kpiEfectividadGlobal').innerText = `${efecGlobal}%`;
 
       lucide.createIcons();
-      actualizarChart(arrEjecutivos);
     }
 
     function actualizarMeta(usuario, val) {
       if (ejecutivosMap[usuario]) {
         ejecutivosMap[usuario].meta = parseInt(val) || 0;
+        guardarEnStorage();
         renderizarTabla();
       }
     }
@@ -508,60 +511,22 @@
     function actualizarLlamadas(usuario, val) {
       if (ejecutivosMap[usuario]) {
         ejecutivosMap[usuario].llamadas = parseInt(val) || 0;
+        guardarEnStorage();
         renderizarTabla();
       }
     }
 
-    function inicializarChart() {
-      const ctx = document.getElementById('chartVentas').getContext('2d');
-      miChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: [],
-          datasets: [
-            { label: 'Meta Aco', data: [], backgroundColor: 'rgba(203, 213, 225, 0.7)', borderColor: 'rgba(148, 163, 184, 1)', borderWidth: 1, borderRadius: 6 },
-            { label: 'Ventas Válidas', data: [], backgroundColor: '#334155', borderColor: '#1e293b', borderWidth: 1, borderRadius: 6 }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: '#334155', font: { size: 11, weight: 'bold' } } } },
-          scales: {
-            x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(226, 232, 240, 1)' }, beginAtZero: true }
-          }
-        }
-      });
-    }
-
-    function actualizarChart(arrFiltrados) {
-      if (!miChart) return;
-      miChart.data.labels = arrFiltrados.map(e => e.usuario);
-      miChart.data.datasets[0].data = arrFiltrados.map(e => e.meta);
-      miChart.data.datasets[1].data = arrFiltrados.map(e => e.avance);
-      miChart.update();
+    function togglePanelFiltros() {
+      const panel = document.getElementById('panelFiltros');
+      panel.classList.toggle('hidden');
     }
 
     function limpiarFiltros() {
       document.getElementById('selectSupervisor').value = "Eguilas Morales Gustavo ernesto";
       document.getElementById('filterFechaDesde').value = "";
       document.getElementById('filterFechaHasta').value = "";
-      document.getElementById('filterEstado').value = "todos";
       document.getElementById('searchInput').value = "";
       aplicarFiltrosGlobales();
-    }
-
-    function toggleGrafica() {
-      const sec = document.getElementById('secGrafica');
-      const btnText = document.getElementById('btnGraficaText');
-      if (sec.classList.contains('hidden')) {
-        sec.classList.remove('hidden');
-        btnText.innerText = "Ocultar Gráfica";
-      } else {
-        sec.classList.add('hidden');
-        btnText.innerText = "Mostrar Gráfica";
-      }
     }
 
     function exportarExcel() {
@@ -569,24 +534,20 @@
       filtrados.sort((a, b) => b.avance - a.avance);
 
       const dataExport = filtrados.map(item => ({
-        "USUARIO WEB": item.usuario,
-        "Nombre y Apellidos": item.nombre,
-        "Supervisor": item.supervisor,
-        "Meta Aco": item.meta,
-        "Avance Válido": item.avance,
-        "% Cump": item.meta > 0 ? ((item.avance / item.meta) * 100).toFixed(1) + '%' : '0%',
-        "Llamadas": item.llamadas,
-        "Efectividad": item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) + '%' : '-'
+        "ASESOR": item.nombre,
+        "USUARIO": item.usuario,
+        "SUPERVISOR": item.supervisor,
+        "META ACO": item.meta,
+        "AVANCE": item.avance,
+        "% CUMP": item.meta > 0 ? ((item.avance / item.meta) * 100).toFixed(1) + '%' : '0%',
+        "LLAMADAS": item.llamadas,
+        "EFECTIVIDAD": item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) + '%' : '0%'
       }));
 
       const ws = XLSX.utils.json_to_sheet(dataExport);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Reporte_Filtrado");
-      XLSX.writeFile(wb, `Reporte_Supervisor_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-
-    function cargarDatosEjemplo() {
-      inicializarDatosBase();
+      XLSX.utils.book_append_sheet(wb, ws, "Panel_Desempeno");
+      XLSX.writeFile(wb, `Panel_Desempeno_Ventas_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
   </script>
 </body>
