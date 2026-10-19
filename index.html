@@ -43,48 +43,10 @@
           <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="hidden" onchange="procesarExcel(event)">
         </label>
 
-        <!-- BOTÓN TOGGLE FILTROS -->
-        <button onclick="togglePanelFiltros()" class="bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-300 shadow-sm transition-all flex items-center gap-2">
-          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-slate-600"></i>
-          <span>Filtros</span>
-        </button>
-
         <!-- BOTÓN EXPORTAR -->
         <button onclick="exportarExcel()" class="bg-[#0f172a] hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
           <span>Exportar</span>
         </button>
-      </div>
-    </div>
-
-    <!-- PANEL DESPLEGABLE DE FILTROS -->
-    <div id="panelFiltros" class="hidden bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <span class="font-bold text-xs uppercase tracking-wider text-slate-700">Opciones de Filtrado Avanzado</span>
-        <button onclick="limpiarFiltros()" class="text-xs text-blue-600 hover:underline font-bold">Limpiar todo</button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-        <div>
-          <label class="font-bold text-slate-600 block mb-1">Supervisor:</label>
-          <select id="selectSupervisor" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
-            <option value="todos">Todos los Supervisores</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="font-bold text-slate-600 block mb-1">Fecha Desde:</label>
-          <input type="date" id="filterFechaDesde" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
-        </div>
-
-        <div>
-          <label class="font-bold text-slate-600 block mb-1">Fecha Hasta:</label>
-          <input type="date" id="filterFechaHasta" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
-        </div>
-
-        <div>
-          <label class="font-bold text-slate-600 block mb-1">Buscar Asesor:</label>
-          <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre o @usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500">
-        </div>
       </div>
     </div>
 
@@ -137,31 +99,114 @@
 
     </div>
 
-    <!-- TABLA PRINCIPAL ESTILO IMAGEN REFERENCIAL -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
-          <thead class="bg-[#1e293b] text-white font-bold tracking-wider uppercase">
-            <tr>
-              <th class="p-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
-              <th class="p-4 border-r border-slate-700/60">
-                <div class="flex items-center justify-between">
-                  <span>SUPERVISOR</span>
-                  <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400"></i>
-                </div>
-              </th>
-              <th class="p-4 border-r border-slate-700/60 text-center w-28">META ACO</th>
-              <th class="p-4 border-r border-slate-700/60 text-center w-28">AVANCE</th>
-              <th class="p-4 border-r border-slate-700/60 text-center w-36">% CUMP</th>
-              <th class="p-4 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
-              <th class="p-4 text-center w-36">EFECTIVIDAD</th>
-            </tr>
-          </thead>
-          <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-800">
-            <!-- Filas dinámicas -->
-          </tbody>
-        </table>
-      </div>
+    <!-- ESTRUCTURA PRINCIPAL: COLUMNA DE FILTROS Y TABLA DE DATOS -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+
+      <!-- COLUMNA IZQUIERDA: PANEL DE FILTROS CON ESTILO DE LA TABLA -->
+      <aside class="lg:col-span-1 space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden sticky top-6">
+          
+          <!-- ENCABEZADO PANEL DE FILTROS (MISMAS LÍNEAS QUE LA TABLA) -->
+          <div class="bg-[#1e293b] text-white p-4 font-bold tracking-wider uppercase text-xs flex items-center justify-between border-b border-slate-700/60">
+            <div class="flex items-center gap-2">
+              <i data-lucide="filter" class="w-4 h-4 text-slate-300"></i>
+              <span>FILTROS</span>
+            </div>
+            <button onclick="limpiarFiltros()" class="text-[11px] text-slate-300 hover:text-white font-semibold underline">Limpiar</button>
+          </div>
+
+          <div class="p-5 space-y-4 text-xs font-medium text-slate-700">
+
+            <!-- FILTRO POR SUPERVISOR -->
+            <div>
+              <label class="font-bold text-slate-800 block mb-1">Supervisor:</label>
+              <select id="selectSupervisor" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
+                <option value="todos">Todos los Supervisores</option>
+              </select>
+            </div>
+
+            <!-- FILTRO POR MES -->
+            <div>
+              <label class="font-bold text-slate-800 block mb-1">Mes:</label>
+              <select id="selectMes" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
+                <option value="todos">Todos los Meses</option>
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+              </select>
+            </div>
+
+            <!-- FILTRO POR SEMANA (SEGÚN REGLA EXACTA) -->
+            <div>
+              <label class="font-bold text-slate-800 block mb-1">Semana del Mes:</label>
+              <select id="selectSemana" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
+                <option value="todos">Todas las Semanas</option>
+                <option value="sem1">Semana 1 (Día 1 al 4)</option>
+                <option value="sem2">Semana 2 (Día 5 al 11)</option>
+                <option value="sem3">Semana 3 (Día 12 al 18)</option>
+                <option value="sem4">Semana 4 (Día 19 al 25)</option>
+                <option value="sem5">Semana 5 (Día 26 al 31)</option>
+              </select>
+            </div>
+
+            <!-- FILTROS POR FECHA EXACTA -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-bold text-slate-800 block mb-1">Desde:</label>
+                <input type="date" id="filterFechaDesde" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-[11px] font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500 shadow-sm">
+              </div>
+              <div>
+                <label class="font-bold text-slate-800 block mb-1">Hasta:</label>
+                <input type="date" id="filterFechaHasta" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-[11px] font-semibold rounded-xl p-2 focus:outline-none focus:border-slate-500 shadow-sm">
+              </div>
+            </div>
+
+            <!-- BÚSQUEDA POR ASESOR -->
+            <div>
+              <label class="font-bold text-slate-800 block mb-1">Buscar Asesor:</label>
+              <div class="relative">
+                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
+                <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre o @usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl pl-8 pr-2.5 py-2 focus:outline-none focus:border-slate-500 shadow-sm">
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </aside>
+
+      <!-- COLUMNA DERECHA: TABLA PRINCIPAL DE DATOS -->
+      <main class="lg:col-span-3">
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead class="bg-[#1e293b] text-white font-bold tracking-wider uppercase">
+                <tr>
+                  <th class="p-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
+                  <th class="p-4 border-r border-slate-700/60">SUPERVISOR</th>
+                  <th class="p-4 border-r border-slate-700/60 text-center w-28">META ACO</th>
+                  <th class="p-4 border-r border-slate-700/60 text-center w-28">AVANCE</th>
+                  <th class="p-4 border-r border-slate-700/60 text-center w-36">% CUMP</th>
+                  <th class="p-4 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
+                  <th class="p-4 text-center w-36">EFECTIVIDAD</th>
+                </tr>
+              </thead>
+              <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-800">
+                <!-- Filas dinámicas -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
     </div>
 
   </div>
@@ -358,6 +403,8 @@
 
       const fDesdeVal = document.getElementById('filterFechaDesde').value;
       const fHastaVal = document.getElementById('filterFechaHasta').value;
+      const mesVal = document.getElementById('selectMes').value;
+      const semanaVal = document.getElementById('selectSemana').value;
 
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
       const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
@@ -368,16 +415,34 @@
         const esExcluido = tipo.includes('RENOVACION') || tipo.includes('FIBRA') || tipo.includes('MIGRACION');
 
         if (esValido && !esExcluido) {
-          let pasaFecha = true;
+          let pasaFiltro = true;
+          const regFecha = parseFechaExcel(reg.fechaStr);
+
+          // Filtro Rango de Fechas
           if (fDesde || fHasta) {
-            const regFecha = parseFechaExcel(reg.fechaStr);
             if (regFecha) {
-              if (fDesde && regFecha < fDesde) pasaFecha = false;
-              if (fHasta && regFecha > fHasta) pasaFecha = false;
+              if (fDesde && regFecha < fDesde) pasaFiltro = false;
+              if (fHasta && regFecha > fHasta) pasaFiltro = false;
             }
           }
 
-          if (pasaFecha && ejecutivosMap[reg.usuario]) {
+          // Filtro por Mes
+          if (pasaFiltro && mesVal !== "todos" && regFecha) {
+            const mesReg = regFecha.getMonth() + 1;
+            if (mesReg !== parseInt(mesVal)) pasaFiltro = false;
+          }
+
+          // Filtro por Semana de acuerdo a regla indicada
+          if (pasaFiltro && semanaVal !== "todos" && regFecha) {
+            const dia = regFecha.getDate();
+            if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
+            if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
+            if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
+            if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
+            if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+          }
+
+          if (pasaFiltro && ejecutivosMap[reg.usuario]) {
             ejecutivosMap[reg.usuario].avance++;
           }
         }
@@ -527,13 +592,10 @@
       }
     }
 
-    function togglePanelFiltros() {
-      const panel = document.getElementById('panelFiltros');
-      panel.classList.toggle('hidden');
-    }
-
     function limpiarFiltros() {
       document.getElementById('selectSupervisor').value = "Eguilas Morales Gustavo ernesto";
+      document.getElementById('selectMes').value = "todos";
+      document.getElementById('selectSemana').value = "todos";
       document.getElementById('filterFechaDesde').value = "";
       document.getElementById('filterFechaHasta').value = "";
       document.getElementById('searchInput').value = "";
