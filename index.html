@@ -246,6 +246,7 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
+    // NÓMINA OFICIAL DE USUARIOS ACTIVOS (INCLUYE A ROBERTO BARUC TORRES - rtorresc)
     const usuariosActivosSet = new Set([
       "illanquim",
       "cnoriegaf",
@@ -253,7 +254,8 @@
       "gguerreroe",
       "sdionicioj",
       "glopeza",
-      "msolero"
+      "msolero",
+      "rtorresc"
     ]);
 
     const feriadosChile = [
@@ -269,7 +271,8 @@
       { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10 },
       { usuario: "sdionicioj", nombre: "Dionicio Julca Stephano", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "glopeza", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5 },
-      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
+      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
+      { usuario: "rtorresc", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -325,6 +328,7 @@
             if (k !== 'galatat') {
               const esActivo = usuariosActivosSet.has(k);
               if (ejecutivosMap[k]) {
+                ejecutivosMap[k].activo = esActivo;
                 ejecutivosMap[k].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[k].llamadas;
               } else {
                 ejecutivosMap[k] = { ...parsed[k], activo: esActivo, horasVentas: Array(24).fill(0) };
