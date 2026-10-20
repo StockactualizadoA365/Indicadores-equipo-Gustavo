@@ -248,6 +248,7 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
+    // NÓMINA GARANTIZADA DE USUARIOS ACTIVOS
     const usuariosActivosSet = new Set([
       "illanquim",
       "cnoriegaf",
@@ -270,7 +271,7 @@
       { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8 },
       { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10 },
-      { usuario: "sdionicioj", nombre: "Dionicio Julca Stephano", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
+      { usuario: "sdionicioj", nombre: "Dionicio Julca Stephano", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 7 },
       { usuario: "glopeza", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5 },
       { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "rtorresc", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
@@ -283,7 +284,7 @@
       if (userClean.includes('rtorres') || nomClean.includes('baruc') || nomClean.includes('roberto baruc')) {
         return 'rtorresc';
       }
-      if (userClean.includes('sdionicio') || nomClean.includes('stephano') || nomClean.includes('dionicio julca')) {
+      if (userClean.includes('sdionicio') || userClean.includes('stephano') || nomClean.includes('stephano') || nomClean.includes('dionicio')) {
         return 'sdionicioj';
       }
       return userClean;
@@ -321,6 +322,7 @@
       ejecutivosMap = {};
       supervisoresDisponibles.clear();
 
+      // INICIALIZACIÓN BASE GARANTIZADA
       ejecutivosBase.forEach(e => {
         const uNorm = normalizarUsuario(e.usuario, e.nombre);
         ejecutivosMap[uNorm] = {
@@ -347,12 +349,28 @@
                 ejecutivosMap[uNorm].activo = esActivo;
                 ejecutivosMap[uNorm].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[uNorm].llamadas;
               } else {
-                ejecutivosMap[uNorm] = { ...parsed[k], usuario: uNorm, activo: esActivo, horasVentas: Array(24).fill(0) };
+                ejecutivosMap[uNorm] = { 
+                  ...parsed[k], 
+                  usuario: uNorm, 
+                  nombre: uNorm === 'sdionicioj' ? "Dionicio Julca Stephano" : (uNorm === 'rtorresc' ? "Roberto Baruc Torres" : parsed[k].nombre),
+                  activo: esActivo, 
+                  horasVentas: Array(24).fill(0) 
+                };
               }
               if (parsed[k].supervisor) supervisoresDisponibles.add(parsed[k].supervisor);
             }
           });
         } catch(e) {}
+      }
+
+      // ASEGURAR SIEMPRE A STEPHANO Y ROBERTO COMO ACTIVOS
+      if (ejecutivosMap['sdionicioj']) {
+        ejecutivosMap['sdionicioj'].activo = true;
+        ejecutivosMap['sdionicioj'].nombre = "Dionicio Julca Stephano";
+      }
+      if (ejecutivosMap['rtorresc']) {
+        ejecutivosMap['rtorresc'].activo = true;
+        ejecutivosMap['rtorresc'].nombre = "Roberto Baruc Torres";
       }
 
       actualizarSelectorSupervisores();
@@ -517,7 +535,7 @@
       let curr = new Date(fInicio.getTime());
 
       while (curr <= fFin) {
-        const dayOfWeek = curr.getDay(); // 0 = Domingo
+        const dayOfWeek = curr.getDay();
         const mm = String(curr.getMonth() + 1).padStart(2, '0');
         const dd = String(curr.getDate()).padStart(2, '0');
         const fechaKey = `${mm}-${dd}`;
@@ -691,7 +709,6 @@
         const efecNum = item.llamadas > 0 ? (item.avance / item.llamadas) * 100 : 0;
         const efectividad = item.llamadas > 0 ? efecNum.toFixed(1) : '0.0';
 
-        // COLORES Y DIPLOMA DE CUMPLIMIENTO
         let dotColor = "bg-rose-500";
         let barColorCump = "bg-rose-500";
         let rowBgClass = "";
@@ -776,7 +793,7 @@
               </span>
             </td>
 
-            <!-- % CUMP CON BARRAS REFORZADAS -->
+            <!-- % CUMP -->
             <td class="py-2 px-3 border-r border-slate-100 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${pctFormateado}%</span>
