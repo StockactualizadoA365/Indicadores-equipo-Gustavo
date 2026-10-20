@@ -22,7 +22,7 @@
     }
   </style>
 </head>
-<body class="bg-[#f3f5f8] min-h-screen text-slate-800 font-sans pb-12">
+<body class="bg-[#f1f5f9] min-h-screen text-slate-800 font-sans pb-12">
 
   <!-- CONTENEDOR PRINCIPAL -->
   <div class="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
@@ -30,8 +30,8 @@
     <!-- SECCIÓN SUPERIOR: TÍTULO Y BOTONES DE ACCIÓN -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase">
-          PANEL DE DESEMPEÑO - EQUIPO DE VENTAS
+        <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
+          <span>PANEL DE DESEMPEÑO - EQUIPO DE VENTAS</span>
         </h1>
       </div>
 
@@ -45,6 +45,7 @@
 
         <!-- BOTÓN EXPORTAR -->
         <button onclick="exportarExcel()" class="bg-[#0f172a] hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4 text-slate-300"></i>
           <span>Exportar</span>
         </button>
       </div>
@@ -106,13 +107,13 @@
       <aside class="lg:col-span-1 space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden sticky top-6">
           
-          <!-- ENCABEZADO PANEL DE FILTROS -->
-          <div class="bg-[#1e293b] text-white p-4 font-bold tracking-wider uppercase text-xs flex items-center justify-between border-b border-slate-700/60">
+          <!-- ENCABEZADO PANEL DE FILTROS (AZUL MARINO) -->
+          <div class="bg-[#0f172a] text-white p-4 font-bold tracking-wider uppercase text-xs flex items-center justify-between border-b border-slate-800">
             <div class="flex items-center gap-2">
-              <i data-lucide="filter" class="w-4 h-4 text-slate-300"></i>
-              <span>FILTROS</span>
+              <i data-lucide="filter" class="w-4 h-4 text-blue-400"></i>
+              <span>FILTROS DE CONTROL</span>
             </div>
-            <button onclick="limpiarFiltros()" class="text-[11px] text-slate-300 hover:text-white font-semibold underline">Limpiar</button>
+            <button onclick="limpiarFiltros()" class="text-[11px] text-blue-300 hover:text-white font-semibold underline">Limpiar</button>
           </div>
 
           <div class="p-5 space-y-4 text-xs font-medium text-slate-700">
@@ -200,32 +201,33 @@
         </div>
       </aside>
 
-      <!-- COLUMNA DERECHA: TABLA PRINCIPAL DE DATOS CON INTERLINEADO COMPACTO -->
+      <!-- COLUMNA DERECHA: TABLA PRINCIPAL CON AZUL MARINO Y COLORES DINÁMICOS -->
       <main class="lg:col-span-3 space-y-3">
         
-        <!-- BARRA SUPERIOR DE LA TABLA CON BOTÓN PIZARRA -->
+        <!-- BARRA SUPERIOR DE LA TABLA -->
         <div class="flex justify-between items-center bg-white p-3 px-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase">
-            <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
+            <i data-lucide="layout-grid" class="w-4 h-4 text-blue-900"></i>
             <span id="tituloVistaTabla">Vista Resumen General</span>
           </div>
 
-          <!-- BOTÓN PARA DESPLEGAR/RETRAER LA PIZARRA HORARIA -->
-          <button onclick="toggleVistaPizarra()" id="btnVistaPizarra" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-4 py-2 rounded-xl transition-all flex items-center gap-2 border border-slate-300 shadow-sm">
-            <i data-lucide="columns" class="w-4 h-4 text-slate-600"></i>
+          <!-- BOTÓN PIZARRA -->
+          <button onclick="toggleVistaPizarra()" id="btnVistaPizarra" class="bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold text-xs px-4 py-2 rounded-xl transition-all flex items-center gap-2 border border-blue-200 shadow-sm">
+            <i data-lucide="columns" class="w-4 h-4 text-blue-700"></i>
             <span id="btnPizarraText">Pizarra (10 AM - 9 PM)</span>
           </button>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-md overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
-              <thead class="bg-[#1e293b] text-white font-bold tracking-wider uppercase">
+              <!-- ENCABEZADO AZUL MARINO -->
+              <thead class="bg-[#0f172a] text-white font-bold tracking-wider uppercase border-b border-slate-800">
                 <tr id="tablaEncabezado">
                   <!-- Encabezados dinámicos -->
                 </tr>
               </thead>
-              <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-800">
+              <tbody id="tablaCuerpo" class="divide-y divide-slate-200/70 font-medium text-slate-800">
                 <!-- Filas dinámicas -->
               </tbody>
             </table>
@@ -274,7 +276,6 @@
       { usuario: "rtorresc", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
     ];
 
-    // MAPEO Y NORMALIZACIÓN DE USUARIOS PARA AGRUPAR VARIANTES DE NOMBRE O CÓDIGO
     function normalizarUsuario(u, nombreCompleto = "") {
       const userClean = (u || '').toLowerCase().trim();
       const nomClean = (nombreCompleto || '').toLowerCase().trim();
@@ -632,31 +633,31 @@
 
       if (mostrarPizarra) {
         theadTr.innerHTML = `
-          <th class="py-2.5 px-4 pl-6 border-r border-slate-700/60 w-1/4">ASESOR</th>
-          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center">META</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">10AM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">11AM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">12PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">1PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">2PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">3PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">4PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">5PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">6PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">7PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">8PM</th>
-          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">9PM</th>
-          <th class="py-2.5 px-3 text-center font-bold">TOTAL</th>
+          <th class="py-3 px-4 pl-6 border-r border-slate-800/80 w-1/4 text-blue-100">ASESOR</th>
+          <th class="py-3 px-3 border-r border-slate-800/80 text-center text-blue-100">META</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">10AM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">11AM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">12PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">1PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">2PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">3PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">4PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">5PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">6PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">7PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">8PM</th>
+          <th class="py-3 px-2 border-r border-slate-800/80 text-center text-blue-100">9PM</th>
+          <th class="py-3 px-3 text-center font-bold text-amber-300">TOTAL</th>
         `;
       } else {
         theadTr.innerHTML = `
-          <th class="py-2.5 px-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
-          <th class="py-2.5 px-4 border-r border-slate-700/60">SUPERVISOR</th>
-          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-28">META ACO</th>
-          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-28">AVANCE</th>
-          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-36">% CUMP</th>
-          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
-          <th class="py-2.5 px-3 text-center w-36">EFECTIVIDAD</th>
+          <th class="py-3 px-4 pl-6 border-r border-slate-800/80 w-1/3 text-blue-100">ASESOR</th>
+          <th class="py-3 px-4 border-r border-slate-800/80 text-blue-100">SUPERVISOR</th>
+          <th class="py-3 px-3 border-r border-slate-800/80 text-center w-28 text-blue-100">META ACO</th>
+          <th class="py-3 px-3 border-r border-slate-800/80 text-center w-28 text-blue-100">AVANCE</th>
+          <th class="py-3 px-3 border-r border-slate-800/80 text-center w-36 text-blue-100">% CUMP</th>
+          <th class="py-3 px-3 border-r border-slate-800/80 text-center w-28 text-blue-100">LLAMADAS</th>
+          <th class="py-3 px-3 text-center w-36 text-blue-100">EFECTIVIDAD</th>
         `;
       }
 
@@ -690,91 +691,115 @@
         const efecNum = item.llamadas > 0 ? (item.avance / item.llamadas) * 100 : 0;
         const efectividad = item.llamadas > 0 ? efecNum.toFixed(1) : '0.0';
 
-        let dotColor = "bg-rose-400";
-        let barColorCump = "bg-rose-400";
-        
-        if (pctCump >= 100) {
-          dotColor = "bg-emerald-400";
-          barColorCump = "bg-emerald-400";
+        // COLORES Y DIPLOMA DE CUMPLIMIENTO
+        let dotColor = "bg-rose-500";
+        let barColorCump = "bg-rose-500";
+        let rowBgClass = "";
+        let badgeAvanceBg = "bg-rose-100 text-rose-800 border-rose-200";
+
+        if (pctCump >= 85) {
+          dotColor = "bg-emerald-500";
+          barColorCump = "bg-emerald-500";
+          rowBgClass = "bg-emerald-50/50 hover:bg-emerald-100/60";
+          badgeAvanceBg = "bg-emerald-100 text-emerald-800 border-emerald-300";
         } else if (pctCump >= 50) {
-          dotColor = "bg-amber-400";
-          barColorCump = "bg-amber-400";
+          dotColor = "bg-amber-500";
+          barColorCump = "bg-amber-500";
+          rowBgClass = "hover:bg-amber-50/40";
+          badgeAvanceBg = "bg-amber-100 text-amber-800 border-amber-300";
+        } else if (item.avance === 0) {
+          rowBgClass = "bg-rose-50/40 hover:bg-rose-100/50";
         }
 
-        let barColorEfec = "bg-rose-400";
+        let barColorEfec = "bg-rose-500";
         if (efecNum >= 40) {
-          barColorEfec = "bg-emerald-400";
+          barColorEfec = "bg-emerald-500";
         } else if (efecNum >= 20) {
-          barColorEfec = "bg-amber-400";
+          barColorEfec = "bg-amber-500";
         }
 
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.className = `${rowBgClass} transition-colors border-b border-slate-100`;
 
         if (mostrarPizarra) {
           let colsHoras = '';
           horasRango.forEach(h => {
             const v = item.horasVentas[h] || 0;
-            const bgClass = v > 0 ? "font-bold text-slate-900 bg-emerald-50" : "text-slate-300";
-            colsHoras += `<td class="py-1.5 px-2 border-r border-slate-100 text-center ${bgClass}">${v}</td>`;
+            const bgClass = v > 0 ? "font-bold text-emerald-900 bg-emerald-100/80 shadow-inner" : "text-slate-300";
+            colsHoras += `<td class="py-2 px-2 border-r border-slate-100 text-center ${bgClass}">${v}</td>`;
           });
 
           tr.innerHTML = `
-            <td class="py-1.5 px-4 pl-6 border-r border-slate-100">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
+            <td class="py-2 px-4 pl-6 border-r border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
                   <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
                   <div class="text-[10px] text-slate-400 font-mono leading-tight">@${item.usuario}</div>
                 </div>
               </div>
             </td>
-            <td class="py-1.5 px-3 border-r border-slate-100 text-center font-bold text-slate-900">${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}</td>
+            <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-700">${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}</td>
             ${colsHoras}
-            <td class="py-1.5 px-3 text-center font-black text-slate-900 text-xs bg-slate-50">${item.avance}</td>
+            <td class="py-2 px-3 text-center font-black text-slate-900 text-xs bg-slate-100/70">${item.avance}</td>
           `;
         } else {
           tr.innerHTML = `
-            <td class="py-1.5 px-4 pl-6 border-r border-slate-100">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
+            <!-- ASESOR -->
+            <td class="py-2 px-4 pl-6 border-r border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
                   <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
                   <div class="text-[10px] text-slate-400 font-mono leading-tight">@${item.usuario}</div>
                 </div>
               </div>
             </td>
-            <td class="py-1.5 px-4 border-r border-slate-100">
+
+            <!-- SUPERVISOR -->
+            <td class="py-2 px-4 border-r border-slate-100">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
-                <span class="text-xs text-slate-700">${item.supervisor}</span>
+                <span class="w-2 h-2 rounded-full bg-slate-300 shrink-0"></span>
+                <span class="text-xs text-slate-600 font-medium">${item.supervisor}</span>
               </div>
             </td>
-            <td class="py-1.5 px-3 border-r border-slate-100 text-center font-bold text-slate-900">
+
+            <!-- META ACO -->
+            <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-700">
               ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
             </td>
-            <td class="py-1.5 px-3 border-r border-slate-100 text-center font-bold text-slate-900 text-xs">
-              ${item.avance}
+
+            <!-- AVANCE BADGE RESALTADO -->
+            <td class="py-2 px-3 border-r border-slate-100 text-center">
+              <span class="inline-block px-3 py-1 font-black text-xs rounded-lg border shadow-xs ${badgeAvanceBg}">
+                ${item.avance}
+              </span>
             </td>
-            <td class="py-1.5 px-3 border-r border-slate-100 text-center">
+
+            <!-- % CUMP CON BARRAS REFORZADAS -->
+            <td class="py-2 px-3 border-r border-slate-100 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${pctFormateado}%</span>
-                <div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden p-0.5 border border-slate-300/40">
                   <div class="${barColorCump} h-1 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
                 </div>
               </div>
             </td>
-            <td class="py-1.5 px-3 border-r border-slate-100 text-center">
-              <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-14 bg-white border border-slate-300 rounded-lg text-center py-1 px-1.5 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm text-xs">
+
+            <!-- LLAMADAS -->
+            <td class="py-2 px-3 border-r border-slate-100 text-center">
+              <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-14 bg-white border border-slate-300 rounded-lg text-center py-1 px-1.5 font-bold text-slate-800 focus:outline-none focus:border-blue-500 shadow-xs text-xs">
             </td>
-            <td class="py-1.5 px-3 text-center">
+
+            <!-- EFECTIVIDAD -->
+            <td class="py-2 px-3 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${efectividad}%</span>
-                <div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden p-0.5 border border-slate-300/40">
                   <div class="${barColorEfec} h-1 rounded-full" style="width: ${Math.min(efecNum, 100)}%"></div>
                 </div>
               </div>
-            </div>
+            </td>
           `;
         }
 
