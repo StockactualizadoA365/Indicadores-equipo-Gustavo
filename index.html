@@ -86,7 +86,7 @@
         </div>
       </div>
 
-      <!-- KPI 4: CUMPLIMIENTO DE META TOTAL (DINÁMICO CON SOMBREADO) -->
+      <!-- KPI 4: CUMPLIMIENTO DE META TOTAL CON SOMBREADO -->
       <div id="kpiCumplimientoCard" class="p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between transition-colors bg-white">
         <div>
           <span id="kpiCumplimientoLabel" class="text-xs font-semibold text-slate-500 block mb-1">Cumplimiento de Meta</span>
@@ -200,20 +200,29 @@
         </div>
       </aside>
 
-      <!-- COLUMNA DERECHA: TABLA PRINCIPAL DE DATOS -->
-      <main class="lg:col-span-3">
+      <!-- COLUMNA DERECHA: TABLA PRINCIPAL DE DATOS CON BOTÓN PIZARRA -->
+      <main class="lg:col-span-3 space-y-3">
+        
+        <!-- BARRA SUPERIOR DE LA TABLA CON BOTÓN PIZARRA -->
+        <div class="flex justify-between items-center bg-white p-3 px-4 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase">
+            <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
+            <span id="tituloVistaTabla">Vista Resumen General</span>
+          </div>
+
+          <!-- BOTÓN PARA DESPLEGAR/RETRAER LA PIZARRA HORARIA -->
+          <button onclick="toggleVistaPizarra()" id="btnVistaPizarra" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-4 py-2 rounded-xl transition-all flex items-center gap-2 border border-slate-300 shadow-sm">
+            <i data-lucide="columns" class="w-4 h-4 text-slate-600"></i>
+            <span id="btnPizarraText">Pizarra (10 AM - 9 PM)</span>
+          </button>
+        </div>
+
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
               <thead class="bg-[#1e293b] text-white font-bold tracking-wider uppercase">
-                <tr>
-                  <th class="p-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
-                  <th class="p-4 border-r border-slate-700/60">SUPERVISOR</th>
-                  <th class="p-4 border-r border-slate-700/60 text-center w-28">META ACO</th>
-                  <th class="p-4 border-r border-slate-700/60 text-center w-28">AVANCE</th>
-                  <th class="p-4 border-r border-slate-700/60 text-center w-36">% CUMP</th>
-                  <th class="p-4 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
-                  <th class="p-4 text-center w-36">EFECTIVIDAD</th>
+                <tr id="tablaEncabezado">
+                  <!-- Encabezados dinámicos -->
                 </tr>
               </thead>
               <tbody id="tablaCuerpo" class="divide-y divide-slate-100 font-medium text-slate-800">
@@ -233,6 +242,9 @@
     let ejecutivosMap = {};
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
+    let mostrarPizarra = false;
+
+    const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
     const usuariosActivosSet = new Set([
       "illanquim",
@@ -265,6 +277,22 @@
       cargarDesdeStorage();
     });
 
+    function toggleVistaPizarra() {
+      mostrarPizarra = !mostrarPizarra;
+      const btnText = document.getElementById('btnPizarraText');
+      const tituloVista = document.getElementById('tituloVistaTabla');
+
+      if (mostrarPizarra) {
+        btnText.innerText = "Vista Resumen";
+        tituloVista.innerText = "Pizarra Horaria (10 AM - 9 PM)";
+      } else {
+        btnText.innerText = "Pizarra (10 AM - 9 PM)";
+        tituloVista.innerText = "Vista Resumen General";
+      }
+
+      renderizarTabla();
+    }
+
     function cargarDesdeStorage() {
       const savedOps = localStorage.getItem('entel_operaciones_acumuladas');
       const savedEjec = localStorage.getItem('entel_ejecutivos_map');
@@ -284,6 +312,7 @@
           activo: true,
           metaCalculada: 0,
           avance: 0,
+          horasVentas: Array(24).fill(0),
           llamadas: e.llamadas
         };
         supervisoresDisponibles.add(e.supervisor);
@@ -298,7 +327,7 @@
               if (ejecutivosMap[k]) {
                 ejecutivosMap[k].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[k].llamadas;
               } else {
-                ejecutivosMap[k] = { ...parsed[k], activo: esActivo };
+                ejecutivosMap[k] = { ...parsed[k], activo: esActivo, horasVentas: Array(24).fill(0) };
               }
               if (parsed[k].supervisor) supervisoresDisponibles.add(parsed[k].supervisor);
             }
@@ -344,7 +373,7 @@
             return;
           }
 
-          let colUser = -1, colNom = -1, colSup = -1, colTipoOp = -1, colFecha = -1, colNroOp = -1, headerRow = -1;
+          let colUser = -1, colNom = -1, colSup = -1, colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, headerRow = -1;
 
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
             const row = rawRows[r];
@@ -356,6 +385,7 @@
               if (val === 'SUPERVISOR') colSup = c;
               if (val === 'TIPO OPERACION') colTipoOp = c;
               if (val.includes('FECHA REGISTRO') || val === 'FECHA') colFecha = c;
+              if (val.includes('HORA')) colHora = c;
               if (val.includes('NRO.OPERACION') || val.includes('NRO OPERACION') || val === 'OPERACION') colNroOp = c;
             }
             if (colUser !== -1) break;
@@ -379,10 +409,11 @@
             const supervisor = colSup !== -1 ? String(row[colSup] || '').trim() : 'Sin Supervisor';
             const tipoOperacion = String(row[colTipoOp] || '').toUpperCase().trim();
             const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
+            const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
             const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
 
             if (!operacionesAcumuladas[nroOp]) {
-              operacionesAcumuladas[nroOp] = { nroOp, usuario, nombre, supervisor, tipoOperacion, fechaStr };
+              operacionesAcumuladas[nroOp] = { nroOp, usuario, nombre, supervisor, tipoOperacion, fechaStr, horaStr };
               nuevos++;
             }
 
@@ -396,6 +427,7 @@
                 activo: esActivo,
                 metaCalculada: 0,
                 avance: 0,
+                horasVentas: Array(24).fill(0),
                 llamadas: 0
               };
             } else {
@@ -439,6 +471,21 @@
       return null;
     }
 
+    function extraerHoraInt(reg) {
+      if (reg.horaStr) {
+        const h = parseInt(reg.horaStr.split(':')[0]);
+        if (!isNaN(h)) return h;
+      }
+      if (reg.fechaStr && reg.fechaStr.includes(' ')) {
+        const horaPart = reg.fechaStr.split(' ')[1];
+        if (horaPart) {
+          const h = parseInt(horaPart.split(':')[0]);
+          if (!isNaN(h)) return h;
+        }
+      }
+      return 10;
+    }
+
     function calcularMetaAcumuladaParaRango(fInicio, fFin, metaDiaria) {
       if (!fInicio || !fFin || fInicio > fFin) return metaDiaria;
 
@@ -466,7 +513,10 @@
     }
 
     function recalcularAvances() {
-      Object.keys(ejecutivosMap).forEach(k => ejecutivosMap[k].avance = 0);
+      Object.keys(ejecutivosMap).forEach(k => {
+        ejecutivosMap[k].avance = 0;
+        ejecutivosMap[k].horasVentas = Array(24).fill(0);
+      });
 
       const metaDiaria = parseFloat(document.getElementById('metaDiariaBase').value) || 5;
       const fDesdeVal = document.getElementById('filterFechaDesde').value;
@@ -536,6 +586,8 @@
 
           if (pasaFiltro && ejecutivosMap[reg.usuario]) {
             ejecutivosMap[reg.usuario].avance++;
+            const h = extraerHoraInt(reg);
+            if (h >= 0 && h < 24) ejecutivosMap[reg.usuario].horasVentas[h]++;
           }
         }
       });
@@ -549,8 +601,39 @@
     }
 
     function renderizarTabla() {
+      const theadTr = document.getElementById('tablaEncabezado');
       const tbody = document.getElementById('tablaCuerpo');
       tbody.innerHTML = '';
+
+      if (mostrarPizarra) {
+        theadTr.innerHTML = `
+          <th class="p-4 pl-6 border-r border-slate-700/60 w-1/4">ASESOR</th>
+          <th class="p-4 border-r border-slate-700/60 text-center">META</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">10AM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">11AM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">12PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">1PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">2PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">3PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">4PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">5PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">6PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">7PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">8PM</th>
+          <th class="p-3 border-r border-slate-700/60 text-center">9PM</th>
+          <th class="p-4 text-center font-bold">TOTAL</th>
+        `;
+      } else {
+        theadTr.innerHTML = `
+          <th class="p-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
+          <th class="p-4 border-r border-slate-700/60">SUPERVISOR</th>
+          <th class="p-4 border-r border-slate-700/60 text-center w-28">META ACO</th>
+          <th class="p-4 border-r border-slate-700/60 text-center w-28">AVANCE</th>
+          <th class="p-4 border-r border-slate-700/60 text-center w-36">% CUMP</th>
+          <th class="p-4 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
+          <th class="p-4 text-center w-36">EFECTIVIDAD</th>
+        `;
+      }
 
       const query = document.getElementById('searchInput').value.toLowerCase();
       const estadoAgente = document.getElementById('selectEstadoAgente').value;
@@ -569,7 +652,6 @@
         return matchQuery;
       });
 
-      // ORDENAR DE MAYOR A MENOR SEGÚN VENTAS
       arrEjecutivos.sort((a, b) => b.avance - a.avance);
 
       arrEjecutivos.forEach((item) => {
@@ -603,70 +685,81 @@
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition-colors";
-        tr.innerHTML = `
-          <!-- ASESOR -->
-          <td class="p-4 pl-6 border-r border-slate-100">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
-              <div>
-                <div class="font-bold text-slate-900 text-xs">${item.nombre}</div>
-                <div class="text-[11px] text-slate-400 font-mono">@${item.usuario}</div>
+
+        if (mostrarPizarra) {
+          let colsHoras = '';
+          horasRango.forEach(h => {
+            const v = item.horasVentas[h] || 0;
+            const bgClass = v > 0 ? "font-bold text-slate-900 bg-emerald-50" : "text-slate-300";
+            colsHoras += `<td class="p-3 border-r border-slate-100 text-center ${bgClass}">${v}</td>`;
+          });
+
+          tr.innerHTML = `
+            <td class="p-4 pl-6 border-r border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+                <div>
+                  <div class="font-bold text-slate-900 text-xs">${item.nombre}</div>
+                  <div class="text-[11px] text-slate-400 font-mono">@${item.usuario}</div>
+                </div>
               </div>
-            </div>
-          </td>
-
-          <!-- SUPERVISOR -->
-          <td class="p-4 border-r border-slate-100">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
-              <span class="text-xs text-slate-700">${item.supervisor}</span>
-            </div>
-          </td>
-
-          <!-- META ACO -->
-          <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900">
-            ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
-          </td>
-
-          <!-- AVANCE -->
-          <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900 text-sm">
-            ${item.avance}
-          </td>
-
-          <!-- % CUMP -->
-          <td class="p-4 border-r border-slate-100 text-center">
-            <div class="space-y-1.5 w-24 mx-auto">
-              <span class="font-bold text-slate-800 block text-xs">${pctFormateado}%</span>
-              <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div class="${barColorCump} h-1.5 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
+            </td>
+            <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900">${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}</td>
+            ${colsHoras}
+            <td class="p-4 text-center font-black text-slate-900 text-sm bg-slate-50">${item.avance}</td>
+          `;
+        } else {
+          tr.innerHTML = `
+            <td class="p-4 pl-6 border-r border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+                <div>
+                  <div class="font-bold text-slate-900 text-xs">${item.nombre}</div>
+                  <div class="text-[11px] text-slate-400 font-mono">@${item.usuario}</div>
+                </div>
               </div>
-            </div>
-          </td>
-
-          <!-- LLAMADAS -->
-          <td class="p-4 border-r border-slate-100 text-center">
-            <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
-          </td>
-
-          <!-- EFECTIVIDAD -->
-          <td class="p-4 text-center">
-            <div class="space-y-1.5 w-24 mx-auto">
-              <span class="font-bold text-slate-800 block text-xs">${efectividad}%</span>
-              <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div class="${barColorEfec} h-1.5 rounded-full" style="width: ${Math.min(efecNum, 100)}%"></div>
+            </td>
+            <td class="p-4 border-r border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+                <span class="text-xs text-slate-700">${item.supervisor}</span>
               </div>
-            </div>
-          </td>
-        `;
+            </td>
+            <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900">
+              ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
+            </td>
+            <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900 text-sm">
+              ${item.avance}
+            </td>
+            <td class="p-4 border-r border-slate-100 text-center">
+              <div class="space-y-1.5 w-24 mx-auto">
+                <span class="font-bold text-slate-800 block text-xs">${pctFormateado}%</span>
+                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div class="${barColorCump} h-1.5 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
+                </div>
+              </div>
+            </td>
+            <td class="p-4 border-r border-slate-100 text-center">
+              <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
+            </td>
+            <td class="p-4 text-center">
+              <div class="space-y-1.5 w-24 mx-auto">
+                <span class="font-bold text-slate-800 block text-xs">${efectividad}%</span>
+                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div class="${barColorEfec} h-1.5 rounded-full" style="width: ${Math.min(efecNum, 100)}%"></div>
+                </div>
+              </div>
+            </td>
+          `;
+        }
+
         tbody.appendChild(tr);
       });
 
-      // ACTUALIZAR TARJETAS KPI SUPERIORES
       document.getElementById('kpiTotalAsesores').innerText = arrEjecutivos.length;
       document.getElementById('kpiMetaTotal').innerText = sumMeta % 1 === 0 ? sumMeta : sumMeta.toFixed(1);
       document.getElementById('kpiVentasTotal').innerText = sumAvance;
 
-      // KPI 4: CUMPLIMIENTO DE META GLOBAL Y SOMBREADO SEGÚN RANGOS
       const pctCumplimientoGlobal = sumMeta > 0 ? (sumAvance / sumMeta) * 100 : 0.0;
       const kpiCard = document.getElementById('kpiCumplimientoCard');
       const kpiGlobalVal = document.getElementById('kpiCumplimientoGlobal');
@@ -675,21 +768,17 @@
 
       kpiGlobalVal.innerText = `${pctCumplimientoGlobal.toFixed(1)}%`;
 
-      // REGLAS DE SOMBREADO
       if (pctCumplimientoGlobal < 70) {
-        // ROJO
         kpiCard.className = "p-5 rounded-2xl border border-rose-600 shadow-sm flex items-center justify-between transition-colors bg-rose-500 text-white";
         kpiGlobalVal.className = "text-2xl font-black text-white";
         kpiLabel.className = "text-xs font-semibold text-rose-100 block mb-1";
         kpiIconBg.className = "p-3 bg-rose-600/60 text-white rounded-2xl";
       } else if (pctCumplimientoGlobal >= 70 && pctCumplimientoGlobal < 85) {
-        // AMARILLO
         kpiCard.className = "p-5 rounded-2xl border border-amber-500 shadow-sm flex items-center justify-between transition-colors bg-amber-400 text-slate-900";
         kpiGlobalVal.className = "text-2xl font-black text-slate-900";
         kpiLabel.className = "text-xs font-semibold text-slate-800 block mb-1";
         kpiIconBg.className = "p-3 bg-amber-500/50 text-slate-900 rounded-2xl";
       } else {
-        // VERDE (85% o más)
         kpiCard.className = "p-5 rounded-2xl border border-emerald-600 shadow-sm flex items-center justify-between transition-colors bg-emerald-500 text-white";
         kpiGlobalVal.className = "text-2xl font-black text-white";
         kpiLabel.className = "text-xs font-semibold text-emerald-100 block mb-1";
