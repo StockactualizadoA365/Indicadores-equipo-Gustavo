@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EQUIPO DE VENTAS - WEB PRIVADO PM </title>
+  <title>WEB PRIVADO PM - EQUIPO DE VENTAS</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -200,7 +200,7 @@
         </div>
       </aside>
 
-      <!-- COLUMNA DERECHA: TABLA PRINCIPAL DE DATOS CON BOTÓN PIZARRA -->
+      <!-- COLUMNA DERECHA: TABLA PRINCIPAL DE DATOS CON INTERLINEADO COMPACTO -->
       <main class="lg:col-span-3 space-y-3">
         
         <!-- BARRA SUPERIOR DE LA TABLA CON BOTÓN PIZARRA -->
@@ -246,7 +246,6 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA OFICIAL DE USUARIOS ACTIVOS (INCLUYE A ROBERTO BARUC TORRES - rtorresc)
     const usuariosActivosSet = new Set([
       "illanquim",
       "cnoriegaf",
@@ -611,31 +610,31 @@
 
       if (mostrarPizarra) {
         theadTr.innerHTML = `
-          <th class="p-4 pl-6 border-r border-slate-700/60 w-1/4">ASESOR</th>
-          <th class="p-4 border-r border-slate-700/60 text-center">META</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">10AM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">11AM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">12PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">1PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">2PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">3PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">4PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">5PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">6PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">7PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">8PM</th>
-          <th class="p-3 border-r border-slate-700/60 text-center">9PM</th>
-          <th class="p-4 text-center font-bold">TOTAL</th>
+          <th class="py-2.5 px-4 pl-6 border-r border-slate-700/60 w-1/4">ASESOR</th>
+          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center">META</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">10AM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">11AM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">12PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">1PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">2PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">3PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">4PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">5PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">6PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">7PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">8PM</th>
+          <th class="py-2.5 px-2 border-r border-slate-700/60 text-center">9PM</th>
+          <th class="py-2.5 px-3 text-center font-bold">TOTAL</th>
         `;
       } else {
         theadTr.innerHTML = `
-          <th class="p-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
-          <th class="p-4 border-r border-slate-700/60">SUPERVISOR</th>
-          <th class="p-4 border-r border-slate-700/60 text-center w-28">META ACO</th>
-          <th class="p-4 border-r border-slate-700/60 text-center w-28">AVANCE</th>
-          <th class="p-4 border-r border-slate-700/60 text-center w-36">% CUMP</th>
-          <th class="p-4 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
-          <th class="p-4 text-center w-36">EFECTIVIDAD</th>
+          <th class="py-2.5 px-4 pl-6 border-r border-slate-700/60 w-1/3">ASESOR</th>
+          <th class="py-2.5 px-4 border-r border-slate-700/60">SUPERVISOR</th>
+          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-28">META ACO</th>
+          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-28">AVANCE</th>
+          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-36">% CUMP</th>
+          <th class="py-2.5 px-3 border-r border-slate-700/60 text-center w-28">LLAMADAS</th>
+          <th class="py-2.5 px-3 text-center w-36">EFECTIVIDAD</th>
         `;
       }
 
@@ -695,62 +694,62 @@
           horasRango.forEach(h => {
             const v = item.horasVentas[h] || 0;
             const bgClass = v > 0 ? "font-bold text-slate-900 bg-emerald-50" : "text-slate-300";
-            colsHoras += `<td class="p-3 border-r border-slate-100 text-center ${bgClass}">${v}</td>`;
+            colsHoras += `<td class="py-1.5 px-2 border-r border-slate-100 text-center ${bgClass}">${v}</td>`;
           });
 
           tr.innerHTML = `
-            <td class="p-4 pl-6 border-r border-slate-100">
-              <div class="flex items-center gap-3">
-                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+            <td class="py-1.5 px-4 pl-6 border-r border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
                 <div>
-                  <div class="font-bold text-slate-900 text-xs">${item.nombre}</div>
-                  <div class="text-[11px] text-slate-400 font-mono">@${item.usuario}</div>
+                  <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">@${item.usuario}</div>
                 </div>
               </div>
             </td>
-            <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900">${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}</td>
+            <td class="py-1.5 px-3 border-r border-slate-100 text-center font-bold text-slate-900">${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}</td>
             ${colsHoras}
-            <td class="p-4 text-center font-black text-slate-900 text-sm bg-slate-50">${item.avance}</td>
+            <td class="py-1.5 px-3 text-center font-black text-slate-900 text-xs bg-slate-50">${item.avance}</td>
           `;
         } else {
           tr.innerHTML = `
-            <td class="p-4 pl-6 border-r border-slate-100">
-              <div class="flex items-center gap-3">
-                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+            <td class="py-1.5 px-4 pl-6 border-r border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
                 <div>
-                  <div class="font-bold text-slate-900 text-xs">${item.nombre}</div>
-                  <div class="text-[11px] text-slate-400 font-mono">@${item.usuario}</div>
+                  <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">@${item.usuario}</div>
                 </div>
               </div>
             </td>
-            <td class="p-4 border-r border-slate-100">
-              <div class="flex items-center gap-3">
-                <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+            <td class="py-1.5 px-4 border-r border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
                 <span class="text-xs text-slate-700">${item.supervisor}</span>
               </div>
             </td>
-            <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900">
+            <td class="py-1.5 px-3 border-r border-slate-100 text-center font-bold text-slate-900">
               ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
             </td>
-            <td class="p-4 border-r border-slate-100 text-center font-bold text-slate-900 text-sm">
+            <td class="py-1.5 px-3 border-r border-slate-100 text-center font-bold text-slate-900 text-xs">
               ${item.avance}
             </td>
-            <td class="p-4 border-r border-slate-100 text-center">
-              <div class="space-y-1.5 w-24 mx-auto">
-                <span class="font-bold text-slate-800 block text-xs">${pctFormateado}%</span>
-                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                  <div class="${barColorCump} h-1.5 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
+            <td class="py-1.5 px-3 border-r border-slate-100 text-center">
+              <div class="space-y-1 w-20 mx-auto">
+                <span class="font-bold text-slate-800 block text-[11px] leading-none">${pctFormateado}%</span>
+                <div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                  <div class="${barColorCump} h-1 rounded-full" style="width: ${Math.min(pctCump, 100)}%"></div>
                 </div>
               </div>
             </td>
-            <td class="p-4 border-r border-slate-100 text-center">
-              <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-16 bg-white border border-slate-300 rounded-xl text-center py-1.5 px-2 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm">
+            <td class="py-1.5 px-3 border-r border-slate-100 text-center">
+              <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-14 bg-white border border-slate-300 rounded-lg text-center py-1 px-1.5 font-semibold text-slate-800 focus:outline-none focus:border-slate-500 shadow-sm text-xs">
             </td>
-            <td class="p-4 text-center">
-              <div class="space-y-1.5 w-24 mx-auto">
-                <span class="font-bold text-slate-800 block text-xs">${efectividad}%</span>
-                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                  <div class="${barColorEfec} h-1.5 rounded-full" style="width: ${Math.min(efecNum, 100)}%"></div>
+            <td class="py-1.5 px-3 text-center">
+              <div class="space-y-1 w-20 mx-auto">
+                <span class="font-bold text-slate-800 block text-[11px] leading-none">${efectividad}%</span>
+                <div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                  <div class="${barColorEfec} h-1 rounded-full" style="width: ${Math.min(efecNum, 100)}%"></div>
                 </div>
               </div>
             </td>
