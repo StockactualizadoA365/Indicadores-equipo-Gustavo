@@ -248,25 +248,8 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA GARANTIZADA DE USUARIOS ACTIVOS
-    const usuariosActivosSet = new Set([
-      "illanquim",
-      "cnoriegaf",
-      "fcampost",
-      "gguerreroe",
-      "sdionicioj",
-      "glopeza",
-      "msolero",
-      "rtorresc"
-    ]);
-
-    const feriadosChile = [
-      "01-01", "04-03", "04-04", "05-01", "05-21", "06-07", "06-20", 
-      "06-29", "07-16", "08-15", "09-18", "09-19", "10-12", "10-31", 
-      "11-01", "12-08", "12-25"
-    ];
-
-    let ejecutivosBase = [
+    // NÓMINA INMUTABLE DE ASESORES BASE
+    const ejecutivosBase = [
       { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 3 },
       { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8 },
       { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
@@ -277,18 +260,31 @@
       { usuario: "rtorresc", nombre: "Roberto Baruc Torres", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
     ];
 
-    function normalizarUsuario(u, nombreCompleto = "", dniStr = "") {
-      const userClean = (u || '').toLowerCase().trim();
-      const nomClean = (nombreCompleto || '').toLowerCase().trim();
-      const dniClean = (dniStr || '').toString().trim();
+    const usuariosActivosSet = new Set(ejecutivosBase.map(e => e.usuario));
 
-      if (dniClean === "73590536" || userClean.includes('sdionicio') || userClean.includes('stephano') || nomClean.includes('stephano') || nomClean.includes('jauregui')) {
-        return 'sdionicioj';
+    const feriadosChile = [
+      "01-01", "04-03", "04-04", "05-01", "05-21", "06-07", "06-20", 
+      "06-29", "07-16", "08-15", "09-18", "09-19", "10-12", "10-31", 
+      "11-01", "12-08", "12-25"
+    ];
+
+    function normalizarUsuario(rowStr, userRaw = "", nomRaw = "", dniRaw = "") {
+      const fullStr = (rowStr + " " + userRaw + " " + nomRaw + " " + dniRaw).toLowerCase();
+
+      if (fullStr.includes("73590536") || fullStr.includes("sdionicio") || fullStr.includes("stephano")) {
+        return "sdionicioj";
       }
-      if (userClean.includes('rtorres') || nomClean.includes('baruc') || nomClean.includes('roberto baruc')) {
-        return 'rtorresc';
+      if (fullStr.includes("rtorresc") || fullStr.includes("baruc") || fullStr.includes("roberto baruc")) {
+        return "rtorresc";
       }
-      return userClean;
+      if (fullStr.includes("illanquim") || fullStr.includes("llanqui")) return "illanquim";
+      if (fullStr.includes("cnoriegaf") || fullStr.includes("noriega")) return "cnoriegaf";
+      if (fullStr.includes("fcampost") || fullStr.includes("campos tapia")) return "fcampost";
+      if (fullStr.includes("gguerreroe") || fullStr.includes("guerrero")) return "gguerreroe";
+      if (fullStr.includes("glopeza") || fullStr.includes("guillermo antonio")) return "glopeza";
+      if (fullStr.includes("msolero") || fullStr.includes("soler oberto")) return "msolero";
+
+      return (userRaw || "").toLowerCase().trim();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -324,9 +320,8 @@
       supervisoresDisponibles.clear();
 
       ejecutivosBase.forEach(e => {
-        const uNorm = normalizarUsuario(e.usuario, e.nombre, e.dni);
-        ejecutivosMap[uNorm] = {
-          usuario: uNorm,
+        ejecutivosMap[e.usuario] = {
+          usuario: e.usuario,
           nombre: e.nombre,
           dni: e.dni,
           supervisor: e.supervisor,
@@ -343,18 +338,16 @@
         try {
           const parsed = JSON.parse(savedEjec);
           Object.keys(parsed).forEach(k => {
-            const uNorm = normalizarUsuario(k, parsed[k].nombre, parsed[k].dni);
-            if (uNorm !== 'galatat') {
-              const esActivo = usuariosActivosSet.has(uNorm);
+            const uNorm = normalizarUsuario(JSON.stringify(parsed[k]), k, parsed[k].nombre, parsed[k].dni);
+            if (uNorm !== 'galatat' && uNorm) {
               if (ejecutivosMap[uNorm]) {
-                ejecutivosMap[uNorm].activo = esActivo;
-                ejecutivosMap[uNorm].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[uNorm].llamadas;
+                ejecutivosMap[uNorm].activo = true;
+                if (parsed[k].llamadas !== undefined) ejecutivosMap[uNorm].llamadas = parsed[k].llamadas;
               } else {
                 ejecutivosMap[uNorm] = { 
                   ...parsed[k], 
                   usuario: uNorm, 
-                  nombre: uNorm === 'sdionicioj' ? "Dionicio Jauregui Stephano Sebastian" : (uNorm === 'rtorresc' ? "Roberto Baruc Torres" : parsed[k].nombre),
-                  activo: esActivo, 
+                  activo: true, 
                   horasVentas: Array(24).fill(0) 
                 };
               }
@@ -364,16 +357,13 @@
         } catch(e) {}
       }
 
-      // GARANTIZAR PERFILES ACTIVOS
-      if (ejecutivosMap['sdionicioj']) {
-        ejecutivosMap['sdionicioj'].activo = true;
-        ejecutivosMap['sdionicioj'].nombre = "Dionicio Jauregui Stephano Sebastian";
-        ejecutivosMap['sdionicioj'].dni = "73590536";
-      }
-      if (ejecutivosMap['rtorresc']) {
-        ejecutivosMap['rtorresc'].activo = true;
-        ejecutivosMap['rtorresc'].nombre = "Roberto Baruc Torres";
-      }
+      // FIJAR PERFIL OFICIAL DE STEPHANO Y ROBERTO
+      ejecutivosMap['sdionicioj'].nombre = "Dionicio Jauregui Stephano Sebastian";
+      ejecutivosMap['sdionicioj'].dni = "73590536";
+      ejecutivosMap['sdionicioj'].activo = true;
+
+      ejecutivosMap['rtorresc'].nombre = "Roberto Baruc Torres";
+      ejecutivosMap['rtorresc'].activo = true;
 
       actualizarSelectorSupervisores();
       recalcularAvances();
@@ -413,28 +403,19 @@
             return;
           }
 
-          let colUser = -1, colNom = -1, colDni = -1, colSup = -1, colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, headerRow = -1;
+          let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, headerRow = -1;
 
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
             const row = rawRows[r];
             if (!row) continue;
             for (let c = 0; c < row.length; c++) {
               const val = String(row[c] || '').toUpperCase().trim();
-              if (val.includes('CODIGO USUARIO') || val === 'USUARIO WEB') colUser = c, headerRow = r;
-              if (val.includes('NOMBRE USUARIO') || val === 'NOMBRE Y APELLIDOS') colNom = c;
-              if (val.includes('DOC USUARIO REG') || val.includes('DOC.USUARIO') || val === 'DNI USUARIO') colDni = c;
-              if (val === 'SUPERVISOR') colSup = c;
-              if (val === 'TIPO OPERACION') colTipoOp = c;
+              if (val === 'TIPO OPERACION') colTipoOp = c, headerRow = r;
               if (val.includes('FECHA REGISTRO') || val === 'FECHA') colFecha = c;
               if (val.includes('HORA')) colHora = c;
               if (val.includes('NRO.OPERACION') || val.includes('NRO OPERACION') || val === 'OPERACION') colNroOp = c;
             }
-            if (colUser !== -1 || colDni !== -1) break;
-          }
-
-          if ((colUser === -1 && colDni === -1) || colTipoOp === -1) {
-            alert("No se encontraron las columnas de Usuario/DNI o Tipo de Operación en el Excel.");
-            return;
+            if (colTipoOp !== -1) break;
           }
 
           let nuevos = 0;
@@ -443,53 +424,35 @@
             const row = rawRows[r];
             if (!row) continue;
 
-            const userRaw = colUser !== -1 ? String(row[colUser] || '').trim().toLowerCase() : '';
-            const nombreRaw = colNom !== -1 ? String(row[colNom] || '').trim() : '';
-            const dniRaw = colDni !== -1 ? String(row[colDni] || '').trim() : '';
-
-            const usuario = normalizarUsuario(userRaw, nombreRaw, dniRaw);
+            const rowText = row.join(' ');
+            const usuario = normalizarUsuario(rowText);
 
             if (usuario === 'galatat' || !usuario || usuario === 'undefined' || usuario === '0') continue;
 
-            const supervisor = colSup !== -1 ? String(row[colSup] || '').trim() : 'Sin Supervisor';
-            const tipoOperacion = String(row[colTipoOp] || '').toUpperCase().trim();
+            const supervisor = "Eguilas Morales Gustavo ernesto";
+            const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim() : '';
             const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
             const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
             const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
 
             if (!operacionesAcumuladas[nroOp]) {
-              operacionesAcumuladas[nroOp] = { nroOp, usuario, nombre: nombreRaw, dni: dniRaw, supervisor, tipoOperacion, fechaStr, horaStr };
+              operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr };
               nuevos++;
             }
-
-            const esActivo = usuariosActivosSet.has(usuario);
 
             if (!ejecutivosMap[usuario]) {
               ejecutivosMap[usuario] = {
                 usuario,
-                nombre: (usuario === 'sdionicioj') ? "Dionicio Jauregui Stephano Sebastian" : ((usuario === 'rtorresc') ? "Roberto Baruc Torres" : (nombreRaw || usuario)),
-                dni: dniRaw,
+                nombre: (usuario === 'sdionicioj') ? "Dionicio Jauregui Stephano Sebastian" : ((usuario === 'rtorresc') ? "Roberto Baruc Torres" : usuario),
+                dni: usuario === 'sdionicioj' ? "73590536" : "",
                 supervisor,
-                activo: esActivo,
+                activo: true,
                 metaCalculada: 0,
                 avance: 0,
                 horasVentas: Array(24).fill(0),
                 llamadas: 0
               };
-            } else {
-              ejecutivosMap[usuario].activo = esActivo;
-              if (usuario === 'sdionicioj') {
-                ejecutivosMap[usuario].nombre = "Dionicio Jauregui Stephano Sebastian";
-                ejecutivosMap[usuario].dni = "73590536";
-              } else if (usuario === 'rtorresc') {
-                ejecutivosMap[usuario].nombre = "Roberto Baruc Torres";
-              } else if (nombreRaw && (!ejecutivosMap[usuario].nombre || ejecutivosMap[usuario].nombre === usuario)) {
-                ejecutivosMap[usuario].nombre = nombreRaw;
-              }
-              if (supervisor) ejecutivosMap[usuario].supervisor = supervisor;
             }
-
-            if (supervisor) supervisoresDisponibles.add(supervisor);
           }
 
           actualizarSelectorSupervisores();
@@ -497,7 +460,7 @@
           guardarEnStorage();
           document.getElementById('inputExcel').value = '';
 
-          alert(`¡Éxito! Se añadieron ${nuevos} operaciones válidas al acumulado.`);
+          alert(`¡Éxito! Se procesaron ${nuevos} operaciones válidas en el reporte.`);
 
         } catch (err) {
           console.error(err);
@@ -633,7 +596,7 @@
             if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
           }
 
-          const uNorm = normalizarUsuario(reg.usuario, reg.nombre, reg.dni);
+          const uNorm = normalizarUsuario(JSON.stringify(reg), reg.usuario);
 
           if (pasaFiltro && ejecutivosMap[uNorm]) {
             ejecutivosMap[uNorm].avance++;
@@ -889,9 +852,6 @@
       const filtrados = Object.values(ejecutivosMap).filter(e => {
         if (supervisorSeleccionado !== "todos" && e.supervisor !== supervisorSeleccionado) return false;
         if (e.usuario.toLowerCase() === 'galatat') return false;
-        const esActivo = e.activo || usuariosActivosSet.has(e.usuario.toLowerCase());
-        if (estadoAgente === "activos" && !esActivo) return false;
-        if (estadoAgente === "inactivos" && esActivo) return false;
         return true;
       });
 
@@ -902,7 +862,7 @@
         "USUARIO": item.usuario,
         "DNI": item.dni,
         "SUPERVISOR": item.supervisor,
-        "ESTADO": (item.activo || usuariosActivosSet.has(item.usuario.toLowerCase())) ? "Activo" : "Inactivo",
+        "ESTADO": "Activo",
         "META ACO": item.metaCalculada,
         "AVANCE": item.avance,
         "% CUMP": item.metaCalculada > 0 ? ((item.avance / item.metaCalculada) * 100).toFixed(1) + '%' : '0%',
