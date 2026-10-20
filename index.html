@@ -64,7 +64,7 @@
         </div>
       </div>
 
-      <!-- KPI 2: TOTAL DE META ACOGIDA -->
+      <!-- KPI 2: TOTAL DE META ACOGIDA (SUMA TOTAL DE METAS DE LOS ASESORES VISIBLES) -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <span class="text-xs font-semibold text-slate-500 block mb-1">Total de Meta Acogida</span>
@@ -75,14 +75,14 @@
         </div>
       </div>
 
-      <!-- KPI 3: LLAMADAS REALIZADAS TOTAL -->
+      <!-- KPI 3: TOTAL VENTAS REALIZADAS -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
-          <span class="text-xs font-semibold text-slate-500 block mb-1">Llamadas Realizadas Total</span>
-          <div id="kpiLlamadasTotal" class="text-2xl font-black text-slate-900">0</div>
+          <span class="text-xs font-semibold text-slate-500 block mb-1">Total Ventas Realizadas</span>
+          <div id="kpiVentasTotal" class="text-2xl font-black text-slate-900">0</div>
         </div>
         <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl">
-          <i data-lucide="phone" class="w-5 h-5"></i>
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
         </div>
       </div>
 
@@ -117,7 +117,7 @@
 
           <div class="p-5 space-y-4 text-xs font-medium text-slate-700">
 
-            <!-- FILTRO POR ESTADO DEL AGENTE (ACTIVO / INACTIVO) -->
+            <!-- FILTRO POR ESTADO DEL AGENTE -->
             <div>
               <label class="font-bold text-slate-800 block mb-1">Estado del Agente:</label>
               <select id="selectEstadoAgente" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -234,7 +234,6 @@
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
 
-    // NOMINA OFICIAL DE USUARIOS ACTIVOS
     const usuariosActivosSet = new Set([
       "illanquim",
       "cnoriegaf",
@@ -245,7 +244,6 @@
       "msolero"
     ]);
 
-    // FERIADOS OFICIALES CHILE (MM-DD)
     const feriadosChile = [
       "01-01", "04-03", "04-04", "05-01", "05-21", "06-07", "06-20", 
       "06-29", "07-16", "08-15", "09-18", "09-19", "10-12", "10-31", 
@@ -257,7 +255,7 @@
       { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8 },
       { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10 },
-      { usuario: "sdionicioj", nombre: "Dionicio Julca Stephany", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
+      { usuario: "sdionicioj", nombre: "Dionicio Julca Stephano", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "glopeza", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5 },
       { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
     ];
@@ -393,7 +391,7 @@
             if (!ejecutivosMap[usuario]) {
               ejecutivosMap[usuario] = {
                 usuario,
-                nombre: nombre || usuario,
+                nombre: (usuario === 'sdionicioj') ? "Dionicio Julca Stephano" : (nombre || usuario),
                 supervisor,
                 activo: esActivo,
                 metaCalculada: 0,
@@ -402,7 +400,9 @@
               };
             } else {
               ejecutivosMap[usuario].activo = esActivo;
-              if (nombre && (!ejecutivosMap[usuario].nombre || ejecutivosMap[usuario].nombre === usuario)) {
+              if (usuario === 'sdionicioj') {
+                ejecutivosMap[usuario].nombre = "Dionicio Julca Stephano";
+              } else if (nombre && (!ejecutivosMap[usuario].nombre || ejecutivosMap[usuario].nombre === usuario)) {
                 ejecutivosMap[usuario].nombre = nombre;
               }
               if (supervisor) ejecutivosMap[usuario].supervisor = supervisor;
@@ -446,7 +446,7 @@
       let curr = new Date(fInicio.getTime());
 
       while (curr <= fFin) {
-        const dayOfWeek = curr.getDay(); // 0 = Domingo (Descanso)
+        const dayOfWeek = curr.getDay(); // 0 = Domingo
         const mm = String(curr.getMonth() + 1).padStart(2, '0');
         const dd = String(curr.getDate()).padStart(2, '0');
         const fechaKey = `${mm}-${dd}`;
@@ -561,7 +561,6 @@
         if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) return false;
         if (item.usuario.toLowerCase() === 'galatat') return false;
 
-        // FILTRO POR ESTADO DEL AGENTE (ACTIVOS / INACTIVOS)
         const esActivo = item.activo || usuariosActivosSet.has(item.usuario.toLowerCase());
         if (estadoAgente === "activos" && !esActivo) return false;
         if (estadoAgente === "inactivos" && esActivo) return false;
@@ -662,10 +661,10 @@
         tbody.appendChild(tr);
       });
 
-      // ACTUALIZAR TARJETAS KPI SUPERIORES
+      // ACTUALIZAR TARJETAS KPI SUPERIORES (SUMA TOTAL DE METAS DE LOS ASESORES VISIBLES Y TOTAL VENTAS)
       document.getElementById('kpiTotalAsesores').innerText = arrEjecutivos.length;
       document.getElementById('kpiMetaTotal').innerText = sumMeta % 1 === 0 ? sumMeta : sumMeta.toFixed(1);
-      document.getElementById('kpiLlamadasTotal').innerText = sumLlamadas;
+      document.getElementById('kpiVentasTotal').innerText = sumAvance;
 
       const efecGlobal = sumLlamadas > 0 ? ((sumAvance / sumLlamadas) * 100).toFixed(1) : 0.0;
       document.getElementById('kpiEfectividadGlobal').innerText = `${efecGlobal}%`;
