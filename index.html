@@ -64,7 +64,7 @@
         </div>
       </div>
 
-      <!-- KPI 2: TOTAL DE META ACOGIDA (SUMA TOTAL DE METAS DE LOS ASESORES VISIBLES) -->
+      <!-- KPI 2: TOTAL DE META ACOGIDA -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <span class="text-xs font-semibold text-slate-500 block mb-1">Total de Meta Acogida</span>
@@ -86,13 +86,13 @@
         </div>
       </div>
 
-      <!-- KPI 4: EFECTIVIDAD TOTAL -->
-      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+      <!-- KPI 4: CUMPLIMIENTO DE META TOTAL (DINÁMICO CON SOMBREADO) -->
+      <div id="kpiCumplimientoCard" class="p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between transition-colors bg-white">
         <div>
-          <span class="text-xs font-semibold text-slate-500 block mb-1">Efectividad Total</span>
-          <div id="kpiEfectividadGlobal" class="text-2xl font-black text-slate-900">0.0%</div>
+          <span id="kpiCumplimientoLabel" class="text-xs font-semibold text-slate-500 block mb-1">Cumplimiento de Meta</span>
+          <div id="kpiCumplimientoGlobal" class="text-2xl font-black text-slate-900">0.0%</div>
         </div>
-        <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl">
+        <div id="kpiCumplimientoIconBg" class="p-3 bg-slate-100 text-slate-500 rounded-2xl">
           <i data-lucide="trending-up" class="w-5 h-5"></i>
         </div>
       </div>
@@ -661,13 +661,40 @@
         tbody.appendChild(tr);
       });
 
-      // ACTUALIZAR TARJETAS KPI SUPERIORES (SUMA TOTAL DE METAS DE LOS ASESORES VISIBLES Y TOTAL VENTAS)
+      // ACTUALIZAR TARJETAS KPI SUPERIORES
       document.getElementById('kpiTotalAsesores').innerText = arrEjecutivos.length;
       document.getElementById('kpiMetaTotal').innerText = sumMeta % 1 === 0 ? sumMeta : sumMeta.toFixed(1);
       document.getElementById('kpiVentasTotal').innerText = sumAvance;
 
-      const efecGlobal = sumLlamadas > 0 ? ((sumAvance / sumLlamadas) * 100).toFixed(1) : 0.0;
-      document.getElementById('kpiEfectividadGlobal').innerText = `${efecGlobal}%`;
+      // KPI 4: CUMPLIMIENTO DE META GLOBAL Y SOMBREADO SEGÚN RANGOS
+      const pctCumplimientoGlobal = sumMeta > 0 ? (sumAvance / sumMeta) * 100 : 0.0;
+      const kpiCard = document.getElementById('kpiCumplimientoCard');
+      const kpiGlobalVal = document.getElementById('kpiCumplimientoGlobal');
+      const kpiLabel = document.getElementById('kpiCumplimientoLabel');
+      const kpiIconBg = document.getElementById('kpiCumplimientoIconBg');
+
+      kpiGlobalVal.innerText = `${pctCumplimientoGlobal.toFixed(1)}%`;
+
+      // REGLAS DE SOMBREADO
+      if (pctCumplimientoGlobal < 70) {
+        // ROJO
+        kpiCard.className = "p-5 rounded-2xl border border-rose-600 shadow-sm flex items-center justify-between transition-colors bg-rose-500 text-white";
+        kpiGlobalVal.className = "text-2xl font-black text-white";
+        kpiLabel.className = "text-xs font-semibold text-rose-100 block mb-1";
+        kpiIconBg.className = "p-3 bg-rose-600/60 text-white rounded-2xl";
+      } else if (pctCumplimientoGlobal >= 70 && pctCumplimientoGlobal < 85) {
+        // AMARILLO
+        kpiCard.className = "p-5 rounded-2xl border border-amber-500 shadow-sm flex items-center justify-between transition-colors bg-amber-400 text-slate-900";
+        kpiGlobalVal.className = "text-2xl font-black text-slate-900";
+        kpiLabel.className = "text-xs font-semibold text-slate-800 block mb-1";
+        kpiIconBg.className = "p-3 bg-amber-500/50 text-slate-900 rounded-2xl";
+      } else {
+        // VERDE (85% o más)
+        kpiCard.className = "p-5 rounded-2xl border border-emerald-600 shadow-sm flex items-center justify-between transition-colors bg-emerald-500 text-white";
+        kpiGlobalVal.className = "text-2xl font-black text-white";
+        kpiLabel.className = "text-xs font-semibold text-emerald-100 block mb-1";
+        kpiIconBg.className = "p-3 bg-emerald-600/60 text-white rounded-2xl";
+      }
 
       lucide.createIcons();
     }
