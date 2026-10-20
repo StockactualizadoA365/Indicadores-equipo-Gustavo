@@ -246,7 +246,6 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA OFICIAL DE USUARIOS ACTIVOS (INCLUYE A STEPHANO DIONICIO Y ROBERTO BARUC)
     const usuariosActivosSet = new Set([
       "illanquim",
       "cnoriegaf",
@@ -274,6 +273,20 @@
       { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
       { usuario: "rtorresc", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
     ];
+
+    // MAPEO Y NORMALIZACIÓN DE USUARIOS PARA AGRUPAR VARIANTES DE NOMBRE O CÓDIGO
+    function normalizarUsuario(u, nombreCompleto = "") {
+      const userClean = (u || '').toLowerCase().trim();
+      const nomClean = (nombreCompleto || '').toLowerCase().trim();
+
+      if (userClean.includes('rtorres') || nomClean.includes('baruc') || nomClean.includes('roberto baruc')) {
+        return 'rtorresc';
+      }
+      if (userClean.includes('sdionicio') || nomClean.includes('stephano') || nomClean.includes('dionicio julca')) {
+        return 'sdionicioj';
+      }
+      return userClean;
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
@@ -308,8 +321,9 @@
       supervisoresDisponibles.clear();
 
       ejecutivosBase.forEach(e => {
-        ejecutivosMap[e.usuario.toLowerCase()] = {
-          usuario: e.usuario,
+        const uNorm = normalizarUsuario(e.usuario, e.nombre);
+        ejecutivosMap[uNorm] = {
+          usuario: uNorm,
           nombre: e.nombre,
           supervisor: e.supervisor,
           activo: true,
@@ -325,13 +339,14 @@
         try {
           const parsed = JSON.parse(savedEjec);
           Object.keys(parsed).forEach(k => {
-            if (k !== 'galatat') {
-              const esActivo = usuariosActivosSet.has(k);
-              if (ejecutivosMap[k]) {
-                ejecutivosMap[k].activo = esActivo;
-                ejecutivosMap[k].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[k].llamadas;
+            const uNorm = normalizarUsuario(k, parsed[k].nombre);
+            if (uNorm !== 'galatat') {
+              const esActivo = usuariosActivosSet.has(uNorm);
+              if (ejecutivosMap[uNorm]) {
+                ejecutivosMap[uNorm].activo = esActivo;
+                ejecutivosMap[uNorm].llamadas = parsed[k].llamadas !== undefined ? parsed[k].llamadas : ejecutivosMap[uNorm].llamadas;
               } else {
-                ejecutivosMap[k] = { ...parsed[k], activo: esActivo, horasVentas: Array(24).fill(0) };
+                ejecutivosMap[uNorm] = { ...parsed[k], usuario: uNorm, activo: esActivo, horasVentas: Array(24).fill(0) };
               }
               if (parsed[k].supervisor) supervisoresDisponibles.add(parsed[k].supervisor);
             }
@@ -406,10 +421,12 @@
             const row = rawRows[r];
             if (!row) continue;
 
-            const usuario = String(row[colUser] || '').trim().toLowerCase();
+            const userRaw = String(row[colUser] || '').trim().toLowerCase();
+            const nombreRaw = colNom !== -1 ? String(row[colNom] || '').trim() : '';
+            const usuario = normalizarUsuario(userRaw, nombreRaw);
+
             if (usuario === 'galatat' || !usuario || usuario === 'undefined' || usuario === '0') continue;
 
-            const nombre = colNom !== -1 ? String(row[colNom] || '').trim() : '';
             const supervisor = colSup !== -1 ? String(row[colSup] || '').trim() : 'Sin Supervisor';
             const tipoOperacion = String(row[colTipoOp] || '').toUpperCase().trim();
             const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
@@ -417,7 +434,7 @@
             const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
 
             if (!operacionesAcumuladas[nroOp]) {
-              operacionesAcumuladas[nroOp] = { nroOp, usuario, nombre, supervisor, tipoOperacion, fechaStr, horaStr };
+              operacionesAcumuladas[nroOp] = { nroOp, usuario, nombre: nombreRaw, supervisor, tipoOperacion, fechaStr, horaStr };
               nuevos++;
             }
 
@@ -426,7 +443,7 @@
             if (!ejecutivosMap[usuario]) {
               ejecutivosMap[usuario] = {
                 usuario,
-                nombre: (usuario === 'sdionicioj') ? "Dionicio Julca Stephano" : (nombre || usuario),
+                nombre: (usuario === 'sdionicioj') ? "Dionicio Julca Stephano" : ((usuario === 'rtorresc') ? "Roberto Baruc Torres" : (nombreRaw || usuario)),
                 supervisor,
                 activo: esActivo,
                 metaCalculada: 0,
@@ -438,8 +455,10 @@
               ejecutivosMap[usuario].activo = esActivo;
               if (usuario === 'sdionicioj') {
                 ejecutivosMap[usuario].nombre = "Dionicio Julca Stephano";
-              } else if (nombre && (!ejecutivosMap[usuario].nombre || ejecutivosMap[usuario].nombre === usuario)) {
-                ejecutivosMap[usuario].nombre = nombre;
+              } else if (usuario === 'rtorresc') {
+                ejecutivosMap[usuario].nombre = "Roberto Baruc Torres";
+              } else if (nombreRaw && (!ejecutivosMap[usuario].nombre || ejecutivosMap[usuario].nombre === usuario)) {
+                ejecutivosMap[usuario].nombre = nombreRaw;
               }
               if (supervisor) ejecutivosMap[usuario].supervisor = supervisor;
             }
@@ -588,10 +607,12 @@
             if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
           }
 
-          if (pasaFiltro && ejecutivosMap[reg.usuario]) {
-            ejecutivosMap[reg.usuario].avance++;
+          const uNorm = normalizarUsuario(reg.usuario, reg.nombre);
+
+          if (pasaFiltro && ejecutivosMap[uNorm]) {
+            ejecutivosMap[uNorm].avance++;
             const h = extraerHoraInt(reg);
-            if (h >= 0 && h < 24) ejecutivosMap[reg.usuario].horasVentas[h]++;
+            if (h >= 0 && h < 24) ejecutivosMap[uNorm].horasVentas[h]++;
           }
         }
       });
@@ -753,7 +774,7 @@
                   <div class="${barColorEfec} h-1 rounded-full" style="width: ${Math.min(efecNum, 100)}%"></div>
                 </div>
               </div>
-            </td>
+            </div>
           `;
         }
 
@@ -834,7 +855,7 @@
         "AVANCE": item.avance,
         "% CUMP": item.metaCalculada > 0 ? ((item.avance / item.metaCalculada) * 100).toFixed(1) + '%' : '0%',
         "LLAMADAS": item.llamadas,
-        "EFECTIVIDAD": item.llamadas > 0 ? ((item.avance / item.llamadas) * 100).toFixed(1) + '%' : '0%'
+        "EFECTIVIDAD": item.llamadas > 0 ? ((item.avance / item.metaCalculada) * 100).toFixed(1) + '%' : '0%'
       }));
 
       const ws = XLSX.utils.json_to_sheet(dataExport);
