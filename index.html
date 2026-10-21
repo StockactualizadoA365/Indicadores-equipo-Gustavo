@@ -38,10 +38,10 @@
       </div>
 
       <div class="flex items-center gap-3 flex-wrap">
-        <!-- BOTÓN IMPORTAR EXCEL -->
+        <!-- BOTÓN IMPORTAR EXCEL (VENTAS O LLAMADAS) -->
         <label class="bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-300 shadow-sm cursor-pointer transition-all flex items-center gap-2">
           <i data-lucide="upload" class="w-4 h-4 text-slate-600"></i>
-          <span>Cargar Excel</span>
+          <span>Cargar Excel (Ventas / Llamadas)</span>
           <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="hidden" onchange="procesarExcel(event)">
         </label>
 
@@ -95,7 +95,7 @@
         </div>
       </div>
 
-      <!-- KPI 4: CUMPLIMIENTO DE META TOTAL CON SOMBREADO -->
+      <!-- KPI 4: CUMPLIMIENTO DE META TOTAL -->
       <div id="kpiCumplimientoCard" class="p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between transition-colors bg-white">
         <div>
           <span id="kpiCumplimientoLabel" class="text-xs font-semibold text-slate-500 block mb-1">Cumplimiento de Meta</span>
@@ -249,6 +249,7 @@
 
   <script>
     let operacionesAcumuladas = {};
+    let llamadasDiariasAcumuladas = []; // Registro de llamadas por día
     let ejecutivosMap = {};
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
@@ -258,17 +259,17 @@
 
     // NÓMINA OFICIAL DE ACTIVOS (8 ASESORES)
     const ejecutivosBaseActivos = [
-      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 3, activo: true },
-      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8, activo: true },
+      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10, activo: true },
-      { usuario: "sdionicioj", nombre: "Dionicio Jauregui Stephano Sebastian", dni: "73590536", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 7, activo: true },
-      { usuario: "glopeza", nombre: "Guillermo Antonio López", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5, activo: true },
+      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "sdionicioj", nombre: "Dionicio Jauregui Stephano Sebastian", dni: "73590536", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "glopeza", nombre: "Guillermo Antonio López", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "rtorresc", nombre: "Roberto Baruc Torres", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
+      { usuario: "rtorresc", nombre: "Roberto Baruc Torres", dni: "72312477", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
     ];
 
-    // REGISTRO DE INACTIVOS CONOCIDOS
+    // INACTIVOS EXPLICITOS
     const ejecutivosInactivosSet = new Set([
       "brigitte", "mtania", "tania", "maria tania", "bcontreras", "mbalza"
     ]);
@@ -283,11 +284,12 @@
 
     function normalizarUsuario(rowStr, userRaw = "", nomRaw = "", dniRaw = "") {
       const fullStr = (rowStr + " " + userRaw + " " + nomRaw + " " + dniRaw).toLowerCase();
+      const dniClean = String(dniRaw || "").trim();
 
-      if (fullStr.includes("73590536") || fullStr.includes("sdionicio") || fullStr.includes("stephano")) {
+      if (dniClean === "73590536" || fullStr.includes("73590536") || fullStr.includes("sdionicio") || fullStr.includes("stephano")) {
         return "sdionicioj";
       }
-      if (fullStr.includes("rtorresc") || fullStr.includes("baruc") || fullStr.includes("roberto baruc")) {
+      if (dniClean === "72312477" || fullStr.includes("72312477") || fullStr.includes("rtorresc") || fullStr.includes("baruc") || fullStr.includes("roberto baruc")) {
         return "rtorresc";
       }
       if (fullStr.includes("brigitte")) return "brigitte";
@@ -326,16 +328,19 @@
 
     function cargarDesdeStorage() {
       const savedOps = localStorage.getItem('entel_operaciones_acumuladas');
+      const savedLlamadas = localStorage.getItem('entel_llamadas_diarias_acumuladas');
       const savedEjec = localStorage.getItem('entel_ejecutivos_map');
 
       if (savedOps) {
         try { operacionesAcumuladas = JSON.parse(savedOps); } catch(e) { operacionesAcumuladas = {}; }
       }
+      if (savedLlamadas) {
+        try { llamadasDiariasAcumuladas = JSON.parse(savedLlamadas); } catch(e) { llamadasDiariasAcumuladas = []; }
+      }
       
       ejecutivosMap = {};
       supervisoresDisponibles.clear();
 
-      // Cargar lista activa oficial
       ejecutivosBaseActivos.forEach(e => {
         ejecutivosMap[e.usuario] = {
           usuario: e.usuario,
@@ -346,12 +351,11 @@
           metaCalculada: 0,
           avance: 0,
           horasVentas: Array(24).fill(0),
-          llamadas: e.llamadas
+          llamadas: 0
         };
         supervisoresDisponibles.add(e.supervisor);
       });
 
-      // Registrar inactivos explicitos
       ejecutivosMap['brigitte'] = { usuario: 'brigitte', nombre: 'Brigitte Contreras', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
       ejecutivosMap['mtania'] = { usuario: 'mtania', nombre: 'Maria Tania Balza', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
 
@@ -364,7 +368,6 @@
               const esActivo = usuariosActivosSet.has(uNorm) && !ejecutivosInactivosSet.has(uNorm);
               if (ejecutivosMap[uNorm]) {
                 ejecutivosMap[uNorm].activo = esActivo;
-                if (parsed[k].llamadas !== undefined) ejecutivosMap[uNorm].llamadas = parsed[k].llamadas;
               } else {
                 ejecutivosMap[uNorm] = { 
                   ...parsed[k], 
@@ -379,12 +382,12 @@
         } catch(e) {}
       }
 
-      // FORZAR REGLA DE ESTADOS
       ejecutivosMap['sdionicioj'].nombre = "Dionicio Jauregui Stephano Sebastian";
       ejecutivosMap['sdionicioj'].dni = "73590536";
       ejecutivosMap['sdionicioj'].activo = true;
 
       ejecutivosMap['rtorresc'].nombre = "Roberto Baruc Torres";
+      ejecutivosMap['rtorresc'].dni = "72312477";
       ejecutivosMap['rtorresc'].activo = true;
 
       ejecutivosMap['brigitte'].activo = false;
@@ -396,6 +399,7 @@
 
     function guardarEnStorage() {
       localStorage.setItem('entel_operaciones_acumuladas', JSON.stringify(operacionesAcumuladas));
+      localStorage.setItem('entel_llamadas_diarias_acumuladas', JSON.stringify(llamadasDiariasAcumuladas));
       localStorage.setItem('entel_ejecutivos_map', JSON.stringify(ejecutivosMap));
     }
 
@@ -428,7 +432,7 @@
             return;
           }
 
-          let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, headerRow = -1;
+          let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, colLlamadas = -1, colDniLlamadas = -1, colUserLlamadas = -1, colNomLlamadas = -1, headerRow = -1;
 
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
             const row = rawRows[r];
@@ -436,58 +440,72 @@
             for (let c = 0; c < row.length; c++) {
               const val = String(row[c] || '').toUpperCase().trim();
               if (val === 'TIPO OPERACION') colTipoOp = c, headerRow = r;
+              if (val === 'CONTESTADAS' || val.includes('LLAMADAS') || val.includes('MARCACIONES') || val.includes('GESTIONES')) colLlamadas = c, headerRow = r;
+              if (val === 'DNI') colDniLlamadas = c;
+              if (val === 'USER' || val === 'USUARIO') colUserLlamadas = c;
+              if (val === 'AGENTE' || val === 'NOMBRE') colNomLlamadas = c;
               if (val.includes('FECHA REGISTRO') || val === 'FECHA') colFecha = c;
               if (val.includes('HORA')) colHora = c;
-              if (val.includes('NRO.OPERACION') || val.includes('NRO OPERACION') || val === 'OPERACION') colNroOp = c;
+              if (val.includes('NRO.OPERACION') || val.includes('OPERACION')) colNroOp = c;
             }
-            if (colTipoOp !== -1) break;
+            if (colTipoOp !== -1 || colLlamadas !== -1) break;
           }
 
           let nuevos = 0;
 
-          for (let r = headerRow + 1; r < rawRows.length; r++) {
-            const row = rawRows[r];
-            if (!row) continue;
+          // REPORTE DE LLAMADAS (BUSCA POR DNI Y COLUMNA CONTESTADAS A)
+          if (colLlamadas !== -1 || colDniLlamadas !== -1) {
+            for (let r = headerRow + 1; r < rawRows.length; r++) {
+              const row = rawRows[r];
+              if (!row) continue;
 
-            const rowText = row.join(' ');
-            const usuario = normalizarUsuario(rowText);
+              const dniVal = colDniLlamadas !== -1 ? String(row[colDniLlamadas] || '').trim() : '';
+              const userVal = colUserLlamadas !== -1 ? String(row[colUserLlamadas] || '').trim() : '';
+              const nomVal = colNomLlamadas !== -1 ? String(row[colNomLlamadas] || '').trim() : '';
+              const rowText = row.join(' ');
+              
+              const usuario = normalizarUsuario(rowText, userVal, nomVal, dniVal);
+              if (!usuario || usuario === 'galatat') continue;
 
-            if (usuario === 'galatat' || !usuario || usuario === 'undefined' || usuario === '0') continue;
+              const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
+              const cantLlamadas = parseInt(row[colLlamadas !== -1 ? colLlamadas : 0]) || 0;
 
-            const supervisor = "Eguilas Morales Gustavo ernesto";
-            const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim() : '';
-            const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
-            const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
-            const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
-
-            if (!operacionesAcumuladas[nroOp]) {
-              operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr };
-              nuevos++;
+              if (cantLlamadas > 0) {
+                llamadasDiariasAcumuladas.push({ usuario, fechaStr, llamadas: cantLlamadas });
+                nuevos++;
+              }
             }
+            alert(`¡Éxito! Se consolidaron ${nuevos} registros de llamadas desde el archivo.`);
+          } 
+          // REPORTE WEBFORM DE VENTAS
+          else {
+            for (let r = headerRow + 1; r < rawRows.length; r++) {
+              const row = rawRows[r];
+              if (!row) continue;
 
-            const esActivo = usuariosActivosSet.has(usuario) && !ejecutivosInactivosSet.has(usuario);
+              const rowText = row.join(' ');
+              const usuario = normalizarUsuario(rowText);
 
-            if (!ejecutivosMap[usuario]) {
-              ejecutivosMap[usuario] = {
-                usuario,
-                nombre: (usuario === 'sdionicioj') ? "Dionicio Jauregui Stephano Sebastian" : ((usuario === 'rtorresc') ? "Roberto Baruc Torres" : usuario),
-                dni: usuario === 'sdionicioj' ? "73590536" : "",
-                supervisor,
-                activo: esActivo,
-                metaCalculada: 0,
-                avance: 0,
-                horasVentas: Array(24).fill(0),
-                llamadas: 0
-              };
+              if (usuario === 'galatat' || !usuario || usuario === 'undefined' || usuario === '0') continue;
+
+              const supervisor = "Eguilas Morales Gustavo ernesto";
+              const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim() : '';
+              const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
+              const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
+              const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
+
+              if (!operacionesAcumuladas[nroOp]) {
+                operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr };
+                nuevos++;
+              }
             }
+            alert(`¡Éxito! Se procesaron ${nuevos} operaciones válidas en el reporte de ventas.`);
           }
 
           actualizarSelectorSupervisores();
           recalcularAvances();
           guardarEnStorage();
           document.getElementById('inputExcel').value = '';
-
-          alert(`¡Éxito! Se procesaron ${nuevos} operaciones válidas en el reporte.`);
 
         } catch (err) {
           console.error(err);
@@ -555,6 +573,7 @@
       Object.keys(ejecutivosMap).forEach(k => {
         ejecutivosMap[k].avance = 0;
         ejecutivosMap[k].horasVentas = Array(24).fill(0);
+        ejecutivosMap[k].llamadas = 0; // Se recalculará desde el historial de llamadas
       });
 
       const metaDiaria = parseFloat(document.getElementById('metaDiariaBase').value) || 5;
@@ -593,6 +612,38 @@
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
       const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
 
+      // CONSOLIDAR LLAMADAS DESDE EL HISTORIAL
+      llamadasDiariasAcumuladas.forEach(itemLlamada => {
+        let pasaFiltro = true;
+        const regFecha = parseFechaExcel(itemLlamada.fechaStr);
+
+        if (fDesde || fHasta) {
+          if (regFecha) {
+            if (fDesde && regFecha < fDesde) pasaFiltro = false;
+            if (fHasta && regFecha > fHasta) pasaFiltro = false;
+          }
+        }
+
+        if (pasaFiltro && mesVal !== "todos" && regFecha) {
+          if (regFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
+        }
+
+        if (pasaFiltro && semanaVal !== "todos" && regFecha) {
+          const dia = regFecha.getDate();
+          if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
+          if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
+          if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
+          if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
+          if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+        }
+
+        const uNorm = itemLlamada.usuario;
+        if (pasaFiltro && ejecutivosMap[uNorm]) {
+          ejecutivosMap[uNorm].llamadas += itemLlamada.llamadas;
+        }
+      });
+
+      // CONSOLIDAR VENTAS
       Object.values(operacionesAcumuladas).forEach(reg => {
         const tipo = reg.tipoOperacion;
         const esValido = tipo.includes('NUEVA') || tipo.includes('2DA') || tipo.includes('PORTA');
@@ -802,9 +853,9 @@
               </div>
             </td>
 
-            <!-- LLAMADAS -->
-            <td class="py-2 px-3 border-r border-slate-100 text-center">
-              <input type="number" min="0" value="${item.llamadas}" onchange="actualizarLlamadas('${item.usuario}', this.value)" class="w-14 bg-white border border-slate-300 rounded-lg text-center py-1 px-1.5 font-bold text-slate-800 focus:outline-none focus:border-blue-500 shadow-xs text-xs">
+            <!-- LLAMADAS (FIJAS / CONSOLIDADAS DEL REPORTE) -->
+            <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-900 bg-slate-50">
+              ${item.llamadas}
             </td>
 
             <!-- EFECTIVIDAD (META VERDE SI >= 13.5%) -->
@@ -852,14 +903,6 @@
       }
 
       lucide.createIcons();
-    }
-
-    function actualizarLlamadas(usuario, val) {
-      if (ejecutivosMap[usuario]) {
-        ejecutivosMap[usuario].llamadas = parseInt(val) || 0;
-        guardarEnStorage();
-        renderizarTabla();
-      }
     }
 
     function limpiarFiltros() {
