@@ -11,6 +11,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- SheetJS para lectura/escritura de Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas para captura de imagen -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -43,7 +45,13 @@
           <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="hidden" onchange="procesarExcel(event)">
         </label>
 
-        <!-- BOTÓN EXPORTAR -->
+        <!-- BOTÓN COPIAR COMO IMAGEN -->
+        <button onclick="copiarTablaComoImagen()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
+          <i data-lucide="camera" class="w-4 h-4 text-emerald-200"></i>
+          <span id="btnCopiarText">Copiar Imagen</span>
+        </button>
+
+        <!-- BOTÓN EXPORTAR EXCEL -->
         <button onclick="exportarExcel()" class="bg-[#0f172a] hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4 text-slate-300"></i>
           <span>Exportar</span>
@@ -218,9 +226,9 @@
           </button>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-md overflow-hidden">
+        <div id="contenedorTablaCaptura" class="bg-white rounded-2xl border border-slate-200/80 shadow-md overflow-hidden p-1">
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
+            <table id="tablaPrincipal" class="w-full text-left text-xs border-collapse">
               <!-- ENCABEZADO AZUL MARINO -->
               <thead class="bg-[#0f172a] text-white font-bold tracking-wider uppercase border-b border-slate-800">
                 <tr id="tablaEncabezado">
@@ -248,19 +256,24 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA INMUTABLE DE ASESORES BASE
-    const ejecutivosBase = [
-      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 3 },
-      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8 },
-      { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
-      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10 },
-      { usuario: "sdionicioj", nombre: "Dionicio Jauregui Stephano Sebastian", dni: "73590536", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 7 },
-      { usuario: "glopeza", nombre: "Guillermo Antonio López", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5 },
-      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 },
-      { usuario: "rtorresc", nombre: "Roberto Baruc Torres", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0 }
+    // NÓMINA OFICIAL DE ACTIVOS (8 ASESORES)
+    const ejecutivosBaseActivos = [
+      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 3, activo: true },
+      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 8, activo: true },
+      { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 10, activo: true },
+      { usuario: "sdionicioj", nombre: "Dionicio Jauregui Stephano Sebastian", dni: "73590536", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 7, activo: true },
+      { usuario: "glopeza", nombre: "Guillermo Antonio López", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 5, activo: true },
+      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "rtorresc", nombre: "Roberto Baruc Torres", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
     ];
 
-    const usuariosActivosSet = new Set(ejecutivosBase.map(e => e.usuario));
+    // REGISTRO DE INACTIVOS CONOCIDOS
+    const ejecutivosInactivosSet = new Set([
+      "brigitte", "mtania", "tania", "maria tania", "bcontreras", "mbalza"
+    ]);
+
+    const usuariosActivosSet = new Set(ejecutivosBaseActivos.map(e => e.usuario));
 
     const feriadosChile = [
       "01-01", "04-03", "04-04", "05-01", "05-21", "06-07", "06-20", 
@@ -277,6 +290,9 @@
       if (fullStr.includes("rtorresc") || fullStr.includes("baruc") || fullStr.includes("roberto baruc")) {
         return "rtorresc";
       }
+      if (fullStr.includes("brigitte")) return "brigitte";
+      if (fullStr.includes("tania")) return "mtania";
+
       if (fullStr.includes("illanquim") || fullStr.includes("llanqui")) return "illanquim";
       if (fullStr.includes("cnoriegaf") || fullStr.includes("noriega")) return "cnoriegaf";
       if (fullStr.includes("fcampost") || fullStr.includes("campos tapia")) return "fcampost";
@@ -319,7 +335,8 @@
       ejecutivosMap = {};
       supervisoresDisponibles.clear();
 
-      ejecutivosBase.forEach(e => {
+      // Cargar lista activa oficial
+      ejecutivosBaseActivos.forEach(e => {
         ejecutivosMap[e.usuario] = {
           usuario: e.usuario,
           nombre: e.nombre,
@@ -334,20 +351,25 @@
         supervisoresDisponibles.add(e.supervisor);
       });
 
+      // Registrar inactivos explicitos
+      ejecutivosMap['brigitte'] = { usuario: 'brigitte', nombre: 'Brigitte Contreras', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
+      ejecutivosMap['mtania'] = { usuario: 'mtania', nombre: 'Maria Tania Balza', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
+
       if (savedEjec) {
         try {
           const parsed = JSON.parse(savedEjec);
           Object.keys(parsed).forEach(k => {
             const uNorm = normalizarUsuario(JSON.stringify(parsed[k]), k, parsed[k].nombre, parsed[k].dni);
             if (uNorm !== 'galatat' && uNorm) {
+              const esActivo = usuariosActivosSet.has(uNorm) && !ejecutivosInactivosSet.has(uNorm);
               if (ejecutivosMap[uNorm]) {
-                ejecutivosMap[uNorm].activo = true;
+                ejecutivosMap[uNorm].activo = esActivo;
                 if (parsed[k].llamadas !== undefined) ejecutivosMap[uNorm].llamadas = parsed[k].llamadas;
               } else {
                 ejecutivosMap[uNorm] = { 
                   ...parsed[k], 
                   usuario: uNorm, 
-                  activo: true, 
+                  activo: esActivo, 
                   horasVentas: Array(24).fill(0) 
                 };
               }
@@ -357,13 +379,16 @@
         } catch(e) {}
       }
 
-      // FIJAR PERFIL OFICIAL DE STEPHANO Y ROBERTO
+      // FORZAR REGLA DE ESTADOS
       ejecutivosMap['sdionicioj'].nombre = "Dionicio Jauregui Stephano Sebastian";
       ejecutivosMap['sdionicioj'].dni = "73590536";
       ejecutivosMap['sdionicioj'].activo = true;
 
       ejecutivosMap['rtorresc'].nombre = "Roberto Baruc Torres";
       ejecutivosMap['rtorresc'].activo = true;
+
+      ejecutivosMap['brigitte'].activo = false;
+      ejecutivosMap['mtania'].activo = false;
 
       actualizarSelectorSupervisores();
       recalcularAvances();
@@ -440,13 +465,15 @@
               nuevos++;
             }
 
+            const esActivo = usuariosActivosSet.has(usuario) && !ejecutivosInactivosSet.has(usuario);
+
             if (!ejecutivosMap[usuario]) {
               ejecutivosMap[usuario] = {
                 usuario,
                 nombre: (usuario === 'sdionicioj') ? "Dionicio Jauregui Stephano Sebastian" : ((usuario === 'rtorresc') ? "Roberto Baruc Torres" : usuario),
                 dni: usuario === 'sdionicioj' ? "73590536" : "",
                 supervisor,
-                activo: true,
+                activo: esActivo,
                 metaCalculada: 0,
                 avance: 0,
                 horasVentas: Array(24).fill(0),
@@ -658,7 +685,7 @@
         if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) return false;
         if (item.usuario.toLowerCase() === 'galatat') return false;
 
-        const esActivo = item.activo || usuariosActivosSet.has(item.usuario.toLowerCase());
+        const esActivo = usuariosActivosSet.has(item.usuario.toLowerCase()) && !ejecutivosInactivosSet.has(item.usuario.toLowerCase()) && item.activo !== false;
         if (estadoAgente === "activos" && !esActivo) return false;
         if (estadoAgente === "inactivos" && esActivo) return false;
 
@@ -847,11 +874,52 @@
       aplicarFiltrosGlobales();
     }
 
+    // COPIAR TABLA COMO IMAGEN AL PORTAPAPELES
+    function copiarTablaComoImagen() {
+      const btnText = document.getElementById('btnCopiarText');
+      btnText.innerText = "Capturando...";
+
+      const elemento = document.getElementById('contenedorTablaCaptura');
+
+      html2canvas(elemento, { scale: 2, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => {
+        canvas.toBlob(blob => {
+          if (navigator.clipboard && navigator.clipboard.write) {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]).then(() => {
+              btnText.innerText = "¡Copiado!";
+              setTimeout(() => { btnText.innerText = "Copiar Imagen"; }, 2500);
+            }).catch(err => {
+              descargarImagenFallback(canvas);
+            });
+          } else {
+            descargarImagenFallback(canvas);
+          }
+        });
+      }).catch(err => {
+        console.error(err);
+        btnText.innerText = "Copiar Imagen";
+        alert("Ocurrió un error al generar la imagen.");
+      });
+    }
+
+    function descargarImagenFallback(canvas) {
+      const link = document.createElement('a');
+      link.download = `Reporte_Tabla_Ventas_${new Date().toISOString().slice(0,10)}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      document.getElementById('btnCopiarText').innerText = "¡Descargado!";
+      setTimeout(() => { document.getElementById('btnCopiarText').innerText = "Copiar Imagen"; }, 2500);
+    }
+
     function exportarExcel() {
       const estadoAgente = document.getElementById('selectEstadoAgente').value;
       const filtrados = Object.values(ejecutivosMap).filter(e => {
         if (supervisorSeleccionado !== "todos" && e.supervisor !== supervisorSeleccionado) return false;
         if (e.usuario.toLowerCase() === 'galatat') return false;
+        
+        const esActivo = usuariosActivosSet.has(e.usuario.toLowerCase()) && !ejecutivosInactivosSet.has(e.usuario.toLowerCase()) && e.activo !== false;
+        if (estadoAgente === "activos" && !esActivo) return false;
+        if (estadoAgente === "inactivos" && esActivo) return false;
         return true;
       });
 
@@ -862,7 +930,7 @@
         "USUARIO": item.usuario,
         "DNI": item.dni,
         "SUPERVISOR": item.supervisor,
-        "ESTADO": "Activo",
+        "ESTADO": item.activo ? "Activo" : "Inactivo",
         "META ACO": item.metaCalculada,
         "AVANCE": item.avance,
         "% CUMP": item.metaCalculada > 0 ? ((item.avance / item.metaCalculada) * 100).toFixed(1) + '%' : '0%',
