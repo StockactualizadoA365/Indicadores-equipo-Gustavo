@@ -249,7 +249,7 @@
 
   <script>
     let operacionesAcumuladas = {};
-    let llamadasDiariasAcumuladas = []; // Registro de llamadas por día
+    let llamadasDiariasAcumuladas = []; // Historial diario de llamadas
     let ejecutivosMap = {};
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
@@ -303,6 +303,37 @@
       if (fullStr.includes("msolero") || fullStr.includes("soler oberto")) return "msolero";
 
       return (userRaw || "").toLowerCase().trim();
+    }
+
+    // PARSER DE FECHA ROBUSTO Y EXCLUSIVO
+    function parseFechaExcel(fVal) {
+      if (!fVal) return null;
+
+      if (fVal instanceof Date) {
+        return new Date(fVal.getFullYear(), fVal.getMonth(), fVal.getDate());
+      }
+
+      const fStr = String(fVal).trim();
+      if (!fStr) return null;
+
+      // Si viene como string ISO YYYY-MM-DD o YYYY/MM/DD
+      if (fStr.match(/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/)) {
+        const p = fStr.split(' ')[0].split(/[\/\-]/);
+        return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+      }
+
+      // Si viene como DD/MM/YYYY o DD-MM-YYYY
+      if (fStr.match(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/)) {
+        const p = fStr.split(' ')[0].split(/[\/\-]/);
+        return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+      }
+
+      const parsed = new Date(fStr);
+      if (!isNaN(parsed.getTime())) {
+        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+      }
+
+      return null;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -423,7 +454,7 @@
       reader.onload = function(e) {
         try {
           const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
           const worksheet = workbook.Sheets[workbook.SheetNames[0]];
           const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
 
@@ -453,7 +484,7 @@
 
           let nuevos = 0;
 
-          // REPORTE DE LLAMADAS (BUSCA POR DNI Y COLUMNA CONTESTADAS A)
+          // ARCHIVO DE LLAMADAS DIARIAS
           if (colLlamadas !== -1 || colDniLlamadas !== -1) {
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
@@ -467,17 +498,17 @@
               const usuario = normalizarUsuario(rowText, userVal, nomVal, dniVal);
               if (!usuario || usuario === 'galatat') continue;
 
-              const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
+              const fechaRaw = colFecha !== -1 ? row[colFecha] : '';
               const cantLlamadas = parseInt(row[colLlamadas !== -1 ? colLlamadas : 0]) || 0;
 
               if (cantLlamadas > 0) {
-                llamadasDiariasAcumuladas.push({ usuario, fechaStr, llamadas: cantLlamadas });
+                llamadasDiariasAcumuladas.push({ usuario, fechaStr: fechaRaw, llamadas: cantLlamadas });
                 nuevos++;
               }
             }
-            alert(`¡Éxito! Se consolidaron ${nuevos} registros de llamadas desde el archivo.`);
+            alert(`¡Éxito! Se consolidaron ${nuevos} registros diarios de llamadas.`);
           } 
-          // REPORTE WEBFORM DE VENTAS
+          // ARCHIVO WEBFORM DE VENTAS
           else {
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
@@ -499,7 +530,7 @@
                 nuevos++;
               }
             }
-            alert(`¡Éxito! Se procesaron ${nuevos} operaciones válidas en el reporte de ventas.`);
+            alert(`¡Éxito! Se procesaron ${nuevos} operaciones de ventas.`);
           }
 
           actualizarSelectorSupervisores();
@@ -515,26 +546,13 @@
       reader.readAsArrayBuffer(file);
     }
 
-    function parseFechaExcel(fStr) {
-      if (!fStr) return null;
-      const partes = fStr.split(' ')[0].split(/[\/\-]/);
-      if (partes.length === 3) {
-        if (partes[2].length === 4) {
-          return new Date(partes[2], partes[1] - 1, partes[0]);
-        } else if (partes[0].length === 4) {
-          return new Date(partes[0], partes[1] - 1, partes[2]);
-        }
-      }
-      return null;
-    }
-
     function extraerHoraInt(reg) {
       if (reg.horaStr) {
         const h = parseInt(reg.horaStr.split(':')[0]);
         if (!isNaN(h)) return h;
       }
-      if (reg.fechaStr && reg.fechaStr.includes(' ')) {
-        const horaPart = reg.fechaStr.split(' ')[1];
+      if (reg.fechaStr && String(reg.fechaStr).includes(' ')) {
+        const horaPart = String(reg.fechaStr).split(' ')[1];
         if (horaPart) {
           const h = parseInt(horaPart.split(':')[0]);
           if (!isNaN(h)) return h;
@@ -573,7 +591,7 @@
       Object.keys(ejecutivosMap).forEach(k => {
         ejecutivosMap[k].avance = 0;
         ejecutivosMap[k].horasVentas = Array(24).fill(0);
-        ejecutivosMap[k].llamadas = 0; // Se recalculará desde el historial de llamadas
+        ejecutivosMap[k].llamadas = 0;
       });
 
       const metaDiaria = parseFloat(document.getElementById('metaDiariaBase').value) || 5;
@@ -612,29 +630,27 @@
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
       const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
 
-      // CONSOLIDAR LLAMADAS DESDE EL HISTORIAL
+      // FILTRADO ESTRICTO DE LLAMADAS DIARIAS
       llamadasDiariasAcumuladas.forEach(itemLlamada => {
         let pasaFiltro = true;
         const regFecha = parseFechaExcel(itemLlamada.fechaStr);
 
-        if (fDesde || fHasta) {
-          if (regFecha) {
-            if (fDesde && regFecha < fDesde) pasaFiltro = false;
-            if (fHasta && regFecha > fHasta) pasaFiltro = false;
+        if (regFecha) {
+          if (fDesde && regFecha.getTime() < fDesde.getTime()) pasaFiltro = false;
+          if (fHasta && regFecha.getTime() > fHasta.getTime()) pasaFiltro = false;
+
+          if (pasaFiltro && mesVal !== "todos") {
+            if (regFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
           }
-        }
 
-        if (pasaFiltro && mesVal !== "todos" && regFecha) {
-          if (regFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
-        }
-
-        if (pasaFiltro && semanaVal !== "todos" && regFecha) {
-          const dia = regFecha.getDate();
-          if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
-          if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
-          if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
-          if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
-          if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+          if (pasaFiltro && semanaVal !== "todos") {
+            const dia = regFecha.getDate();
+            if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
+            if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
+            if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
+            if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
+            if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+          }
         }
 
         const uNorm = itemLlamada.usuario;
@@ -643,7 +659,7 @@
         }
       });
 
-      // CONSOLIDAR VENTAS
+      // FILTRADO DE VENTAS
       Object.values(operacionesAcumuladas).forEach(reg => {
         const tipo = reg.tipoOperacion;
         const esValido = tipo.includes('NUEVA') || tipo.includes('2DA') || tipo.includes('PORTA');
@@ -653,25 +669,22 @@
           let pasaFiltro = true;
           const regFecha = parseFechaExcel(reg.fechaStr);
 
-          if (fDesde || fHasta) {
-            if (regFecha) {
-              if (fDesde && regFecha < fDesde) pasaFiltro = false;
-              if (fHasta && regFecha > fHasta) pasaFiltro = false;
+          if (regFecha) {
+            if (fDesde && regFecha.getTime() < fDesde.getTime()) pasaFiltro = false;
+            if (fHasta && regFecha.getTime() > fHasta.getTime()) pasaFiltro = false;
+
+            if (pasaFiltro && mesVal !== "todos") {
+              if (regFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
             }
-          }
 
-          if (pasaFiltro && mesVal !== "todos" && regFecha) {
-            const mesReg = regFecha.getMonth() + 1;
-            if (mesReg !== parseInt(mesVal)) pasaFiltro = false;
-          }
-
-          if (pasaFiltro && semanaVal !== "todos" && regFecha) {
-            const dia = regFecha.getDate();
-            if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
-            if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
-            if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
-            if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
-            if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+            if (pasaFiltro && semanaVal !== "todos") {
+              const dia = regFecha.getDate();
+              if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
+              if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
+              if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
+              if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
+              if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+            }
           }
 
           const uNorm = normalizarUsuario(JSON.stringify(reg), reg.usuario);
@@ -777,7 +790,7 @@
           rowBgClass = "bg-rose-50/40 hover:bg-rose-100/50";
         }
 
-        // REGLAS EFECTIVIDAD META >= 13.5% (VERDE / BUENA)
+        // REGLAS EFECTIVIDAD META >= 13.5%
         let barColorEfec = "bg-rose-500";
         if (efecNum >= 13.5) {
           barColorEfec = "bg-emerald-500";
@@ -853,12 +866,12 @@
               </div>
             </td>
 
-            <!-- LLAMADAS (FIJAS / CONSOLIDADAS DEL REPORTE) -->
+            <!-- LLAMADAS (FILTRADAS SEGÚN RANGO DE FECHAS SELECCIONADO) -->
             <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-900 bg-slate-50">
               ${item.llamadas}
             </td>
 
-            <!-- EFECTIVIDAD (META VERDE SI >= 13.5%) -->
+            <!-- EFECTIVIDAD REAL SELECCIONADA -->
             <td class="py-2 px-3 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${efectividad}%</span>
