@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PANEL DE DESEMPEÑO - EQUIPO DE VENTAS</title>
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- SheetJS para lectura/escritura de Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- html2canvas para captura de imagen -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
@@ -56,9 +52,8 @@
       </div>
     </div>
 
-    <!-- TARJETAS DE INDICADORES GLOBALES (KPIs) -->
+    <!-- TARJETAS DE INDICADORES GLOBALES -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <span class="text-xs font-semibold text-slate-500 block mb-1">Total de Asesores</span>
@@ -98,16 +93,12 @@
           <i data-lucide="trending-up" class="w-5 h-5"></i>
         </div>
       </div>
-
     </div>
 
-    <!-- ESTRUCTURA PRINCIPAL: COLUMNA DE FILTROS Y TABLA DE DATOS -->
+    <!-- TABLA Y FILTROS -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-
-      <!-- COLUMNA IZQUIERDA: PANEL DE FILTROS -->
       <aside class="lg:col-span-1 space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden sticky top-6">
-          
           <div class="bg-[#0f172a] text-white p-4 font-bold tracking-wider uppercase text-xs flex items-center justify-between border-b border-slate-800">
             <div class="flex items-center gap-2">
               <i data-lucide="filter" class="w-4 h-4 text-blue-400"></i>
@@ -117,7 +108,6 @@
           </div>
 
           <div class="p-5 space-y-4 text-xs font-medium text-slate-700">
-
             <div>
               <label class="font-bold text-slate-800 block mb-1">Estado del Agente:</label>
               <select id="selectEstadoAgente" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -180,23 +170,19 @@
               <label class="font-bold text-slate-800 block mb-1">Buscar Asesor:</label>
               <div class="relative">
                 <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
-                <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre, DNI o @usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl pl-8 pr-2.5 py-2 focus:outline-none focus:border-slate-500 shadow-sm">
+                <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre, DNI o usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl pl-8 pr-2.5 py-2 focus:outline-none focus:border-slate-500 shadow-sm">
               </div>
             </div>
 
             <div class="pt-2 border-t border-slate-100">
               <label class="font-bold text-slate-800 block mb-1">Meta Diaria Base:</label>
               <input type="number" id="metaDiariaBase" value="5" min="1" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-bold text-center rounded-xl p-2 focus:outline-none focus:border-slate-500 shadow-sm">
-              <span class="text-[10px] text-slate-400 block mt-1">Acumula automáticamente descensos y feriados (50%).</span>
             </div>
-
           </div>
         </div>
       </aside>
 
-      <!-- COLUMNA DERECHA: TABLA PRINCIPAL CON AZUL MARINO Y COLORES DINÁMICOS -->
       <main class="lg:col-span-3 space-y-3">
-        
         <div class="flex justify-between items-center bg-white p-3 px-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase">
             <i data-lucide="layout-grid" class="w-4 h-4 text-blue-900"></i>
@@ -213,20 +199,14 @@
           <div class="overflow-x-auto">
             <table id="tablaPrincipal" class="w-full text-left text-xs border-collapse">
               <thead class="bg-[#0f172a] text-white font-bold tracking-wider uppercase border-b border-slate-800">
-                <tr id="tablaEncabezado">
-                  <!-- Encabezados dinámicos -->
-                </tr>
+                <tr id="tablaEncabezado"></tr>
               </thead>
-              <tbody id="tablaCuerpo" class="divide-y divide-slate-200/70 font-medium text-slate-800">
-                <!-- Filas dinámicas -->
-              </tbody>
+              <tbody id="tablaCuerpo" class="divide-y divide-slate-200/70 font-medium text-slate-800"></tbody>
             </table>
           </div>
         </div>
       </main>
-
     </div>
-
   </div>
 
   <script>
@@ -239,51 +219,38 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA OFICIAL CON DNI Y USUARIOS
+    // LA DOTACIÓN OFICIAL
     const ejecutivosBaseActivos = [
       { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "fcampost", dni: "73013201", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "gguerreroe", dni: "47228079", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "msolero", dni: "9138103", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
+      { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
     ];
 
-    const ejecutivosInactivosSet = new Set([
-      "brigitte", "mtania", "tania", "maria tania", "bcontreras", "mbalza"
-    ]);
-
-    // MAPA DIRECTO DE DNI
     const dniToUsuarioMap = {
       "25844339": "illanquim",
-      "43905089": "cnoriegaf",
       "73013201": "fcampost",
       "47228079": "gguerreroe",
-      "45892011": "gguerreroe",
       "73590536": "sdionicioj",
       "71277784": "glopeza",
       "9138103": "msolero",
-      "72312477": "rtorresc"
+      "72312477": "rtorresc",
+      "43905089": "cnoriegaf"
     };
 
     const usuariosActivosSet = new Set(ejecutivosBaseActivos.map(e => e.usuario));
 
-    const feriadosChile = [
-      "01-01", "04-03", "04-04", "05-01", "05-21", "06-07", "06-20", 
-      "06-29", "07-16", "08-15", "09-18", "09-19", "10-12", "10-31", 
-      "11-01", "12-08", "12-25"
-    ];
-
-    function obtenerUsuarioPorDNI(dniRaw = "", rowStr = "", userRaw = "", nomRaw = "") {
+    function obtenerUsuarioPorDNI(dniRaw = "", userRaw = "") {
       const dniClean = String(dniRaw || "").trim().replace(/\D/g, "");
-
-      if (dniClean && dniToUsuarioMap[dniClean]) {
-        return dniToUsuarioMap[dniClean];
-      }
+      if (dniClean && dniToUsuarioMap[dniClean]) return dniToUsuarioMap[dniClean];
 
       const userClean = String(userRaw || "").toLowerCase().trim();
+      
+      // Mapeo directo por coincidencias en el ID de usuario sin @
       if (userClean === "gguerreroe" || userClean.includes("guerrero")) return "gguerreroe";
       if (userClean === "illanquim" || userClean.includes("llanqui")) return "illanquim";
       if (userClean === "cnoriegaf" || userClean.includes("noriega")) return "cnoriegaf";
@@ -292,15 +259,6 @@
       if (userClean === "glopeza" || userClean.includes("lopez")) return "glopeza";
       if (userClean === "msolero" || userClean.includes("soler")) return "msolero";
       if (userClean === "rtorresc" || userClean === "rtorresh" || userClean.includes("torres")) return "rtorresc";
-
-      const fullStr = (rowStr + " " + userRaw + " " + nomRaw + " " + dniRaw).toLowerCase();
-
-      for (const [dni, usuario] of Object.entries(dniToUsuarioMap)) {
-        if (fullStr.includes(dni)) return usuario;
-      }
-
-      if (fullStr.includes("brigitte")) return "brigitte";
-      if (fullStr.includes("tania")) return "mtania";
 
       return userClean;
     }
@@ -316,7 +274,6 @@
         const p = fStr.split(' ')[0].split(/[\/\-]/);
         return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
       }
-
       if (fStr.match(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/)) {
         const p = fStr.split(' ')[0].split(/[\/\-]/);
         return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
@@ -326,7 +283,6 @@
       if (!isNaN(parsed.getTime())) {
         return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
       }
-
       return null;
     }
 
@@ -347,7 +303,6 @@
         btnText.innerText = "Pizarra (10 AM - 9 PM)";
         tituloVista.innerText = "Vista Resumen General";
       }
-
       renderizarTabla();
     }
 
@@ -367,21 +322,11 @@
 
       ejecutivosBaseActivos.forEach(e => {
         ejecutivosMap[e.usuario] = {
-          usuario: e.usuario,
-          nombre: e.nombre,
-          dni: e.dni,
-          supervisor: e.supervisor,
-          activo: true,
-          metaCalculada: 0,
-          avance: 0,
-          horasVentas: Array(24).fill(0),
-          llamadas: 0
+          usuario: e.usuario, nombre: e.nombre, dni: e.dni, supervisor: e.supervisor,
+          activo: true, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0
         };
         supervisoresDisponibles.add(e.supervisor);
       });
-
-      ejecutivosMap['brigitte'] = { usuario: 'brigitte', nombre: 'Brigitte Contreras', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
-      ejecutivosMap['mtania'] = { usuario: 'mtania', nombre: 'Maria Tania Balza', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
 
       actualizarSelectorSupervisores();
       recalcularAvances();
@@ -395,12 +340,10 @@
     function actualizarSelectorSupervisores() {
       const select = document.getElementById('selectSupervisor');
       let html = '<option value="todos">Todos los Supervisores</option>';
-      
       supervisoresDisponibles.forEach(sup => {
         const selected = (sup === supervisorSeleccionado) ? 'selected' : '';
         html += `<option value="${sup}" ${selected}>${sup}</option>`;
       });
-
       select.innerHTML = html;
     }
 
@@ -416,46 +359,43 @@
           const worksheet = workbook.Sheets[workbook.SheetNames[0]];
           const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
 
-          if (!rawRows || rawRows.length === 0) {
-            alert("El archivo Excel está vacío.");
-            return;
-          }
+          if (!rawRows || rawRows.length === 0) return alert("El archivo Excel está vacío.");
 
-          let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, colLlamadas = -1, colDniUser = -1, colCodeUser = -1, colNomUser = -1, headerRow = -1;
+          let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, colLlamadas = -1;
+          let colDniUser = -1, colCodeUser = -1, headerRow = -1;
 
+          // BUSCADOR PRECISO DE COLUMNAS (Corrección de Bug: Separar NroOperacion de TipoOperacion)
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
             const row = rawRows[r];
             if (!row) continue;
             for (let c = 0; c < row.length; c++) {
               const val = String(row[c] || '').toUpperCase().trim();
+              
               if (val === 'TIPO OPERACION') colTipoOp = c, headerRow = r;
-              if (val === 'CONTESTADAS' || val.includes('LLAMADAS') || val.includes('MARCACIONES')) colLlamadas = c, headerRow = r;
+              else if (val === 'NRO.OPERACION' || val === 'ID OPERACION' || val === 'NUMERO OPERACION') colNroOp = c;
+              
+              if (val === 'CONTESTADAS' || val.includes('LLAMADAS')) colLlamadas = c, headerRow = r;
               if (val.includes('NUM.DOC USUARIO') || val === 'DNI') colDniUser = c;
-              if (val.includes('CODIGO USUARIO') || val === 'USER' || val === 'USUARIO') colCodeUser = c;
-              if (val.includes('NOMBRE USUARIO') || val === 'AGENTE' || val === 'NOMBRE') colNomUser = c;
+              if (val.includes('CODIGO USUARIO') || val === 'USER') colCodeUser = c;
               if (val.includes('FECHA REGISTRO') || val === 'FECHA') colFecha = c;
-              if (val.includes('HORA')) colHora = c;
-              if (val.includes('NRO.OPERACION') || val.includes('OPERACION')) colNroOp = c;
+              if (val === 'HORA') colHora = c;
             }
             if (colTipoOp !== -1 || colLlamadas !== -1) break;
           }
 
           let nuevos = 0;
 
-          // REPORTE DE LLAMADAS (LIMPIA CACHÉ PREVIO PARA NO DUPLICAR)
           if (colLlamadas !== -1) {
-            llamadasDiariasAcumuladas = []; // SEGURO PRO: Evita que se tripliquen al subir varias veces
+            llamadasDiariasAcumuladas = []; 
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
               if (!row) continue;
 
-              const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '').trim() : '';
-              const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '').trim() : '';
-              const nomVal = colNomUser !== -1 ? String(row[colNomUser] || '').trim() : '';
-              const rowText = row.join(' ');
-
-              const usuario = obtenerUsuarioPorDNI(dniVal, rowText, codeVal, nomVal);
-              if (!usuario || usuario === 'galatat') continue;
+              const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '') : '';
+              const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '') : '';
+              
+              const usuario = obtenerUsuarioPorDNI(dniVal, codeVal);
+              if (!usuario || !ejecutivosMap[usuario]) continue;
 
               const fechaRaw = colFecha !== -1 ? row[colFecha] : '';
               const cantLlamadas = parseInt(row[colLlamadas]) || 0;
@@ -465,33 +405,31 @@
                 nuevos++;
               }
             }
-            alert(`¡Éxito! Se consolidaron ${nuevos} registros diarios de llamadas (datos limpios y actualizados).`);
+            alert(`¡Éxito! Se consolidaron ${nuevos} registros de llamadas.`);
           } 
-          // REPORTE WEBFORM DE VENTAS (REEMPLAZA Y REFRESCA LIMPIO)
           else {
-            operacionesAcumuladas = {}; // SEGURO PRO: Evita que se queden ventas falsas atascadas
+            operacionesAcumuladas = {}; // Limpia datos anteriores
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
               if (!row) continue;
 
-              const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '').trim() : '';
-              const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '').trim() : '';
-              const nomVal = colNomUser !== -1 ? String(row[colNomUser] || '').trim() : '';
-              const rowText = row.join(' ');
+              const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '') : '';
+              const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '') : '';
+              
+              const usuario = obtenerUsuarioPorDNI(dniVal, codeVal);
+              if (!usuario || !ejecutivosMap[usuario]) continue;
 
-              const usuario = obtenerUsuarioPorDNI(dniVal, rowText, codeVal, nomVal);
-              if (usuario === 'galatat' || !usuario) continue;
-
-              const supervisor = "Eguilas Morales Gustavo ernesto";
               const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim().replace(/\s+/g, ' ') : '';
               const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
               const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
-              const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
+              
+              // Si no existe columna NRO.OPERACION, se genera un ID único por fila real para evitar sobreescritura
+              const nroOp = colNroOp !== -1 && row[colNroOp] ? String(row[colNroOp]).trim() : `FILA_${usuario}_${fechaStr}_${r}`;
 
-              operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr, dniVal };
+              operacionesAcumuladas[nroOp] = { nroOp, usuario, tipoOperacion, fechaStr, horaStr };
               nuevos++;
             }
-            alert(`¡Éxito! Se purgaron los registros y se cargaron ${nuevos} operaciones de ventas.`);
+            alert(`¡Bug Corregido! Se procesaron correctamente ${nuevos} operaciones únicas de ventas.`);
           }
 
           recalcularAvances();
@@ -523,27 +461,13 @@
 
     function calcularMetaAcumuladaParaRango(fInicio, fFin, metaDiaria) {
       if (!fInicio || !fFin || fInicio > fFin) return metaDiaria;
-
       let metaTotal = 0;
       let curr = new Date(fInicio.getTime());
 
       while (curr <= fFin) {
-        const dayOfWeek = curr.getDay();
-        const mm = String(curr.getMonth() + 1).padStart(2, '0');
-        const dd = String(curr.getDate()).padStart(2, '0');
-        const fechaKey = `${mm}-${dd}`;
-
-        if (dayOfWeek === 0) {
-          metaTotal += 0;
-        } else if (feriadosChile.includes(fechaKey)) {
-          metaTotal += (metaDiaria * 0.5);
-        } else {
-          metaTotal += metaDiaria;
-        }
-
+        if (curr.getDay() !== 0) metaTotal += metaDiaria;
         curr.setDate(curr.getDate() + 1);
       }
-
       return metaTotal;
     }
 
@@ -560,13 +484,12 @@
       const mesVal = document.getElementById('selectMes').value;
       const semanaVal = document.getElementById('selectSemana').value;
 
-      // SEGURO PRO: Fechas Dinámicas para que nunca falle cuando cambie el mes o año
       let fechaActual = new Date();
       let añoBase = fechaActual.getFullYear();
       let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : fechaActual.getMonth();
       
       let fInicioRango = new Date(añoBase, mesIndex, 1);
-      let fFinRango = new Date(añoBase, mesIndex + 1, 0); // Detecta dinámicamente si el mes tiene 28, 30 o 31 días.
+      let fFinRango = new Date(añoBase, mesIndex + 1, 0); 
 
       if (fDesdeVal) {
         const dSplit = fDesdeVal.split('-');
@@ -581,7 +504,7 @@
         if (semanaVal === "sem2") { fInicioRango.setDate(5); fFinRango.setDate(11); }
         if (semanaVal === "sem3") { fInicioRango.setDate(12); fFinRango.setDate(18); }
         if (semanaVal === "sem4") { fInicioRango.setDate(19); fFinRango.setDate(25); }
-        if (semanaVal === "sem5") { fInicioRango.setDate(26); fFinRango.setDate(fFinRango.getDate()); } // Hasta fin de mes dinámico
+        if (semanaVal === "sem5") { fInicioRango.setDate(26); fFinRango.setDate(fFinRango.getDate()); }
       }
 
       const metaPeriodo = calcularMetaAcumuladaParaRango(fInicioRango, fFinRango, metaDiaria);
@@ -593,21 +516,16 @@
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
       const fHasta = fHastaVal ? new Date(fHastaVal + "T23:59:59") : null;
 
-      // FILTRADO ESTRICTO DE LLAMADAS DIARIAS
-      llamadasDiariasAcumuladas.forEach(itemLlamada => {
+      llamadasDiariasAcumuladas.forEach(item => {
         let pasaFiltro = true;
-        const regFecha = parseFechaExcel(itemLlamada.fechaStr);
+        const rFecha = parseFechaExcel(item.fechaStr);
 
-        if (regFecha) {
-          if (fDesde && regFecha.getTime() < fDesde.getTime()) pasaFiltro = false;
-          if (fHasta && regFecha.getTime() > fHasta.getTime()) pasaFiltro = false;
-
-          if (pasaFiltro && mesVal !== "todos") {
-            if (regFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
-          }
-
+        if (rFecha) {
+          if (fDesde && rFecha.getTime() < fDesde.getTime()) pasaFiltro = false;
+          if (fHasta && rFecha.getTime() > fHasta.getTime()) pasaFiltro = false;
+          if (pasaFiltro && mesVal !== "todos" && rFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
           if (pasaFiltro && semanaVal !== "todos") {
-            const dia = regFecha.getDate();
+            const dia = rFecha.getDate();
             if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
             if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
             if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
@@ -615,37 +533,31 @@
             if (semanaVal === "sem5" && !(dia >= 26)) pasaFiltro = false;
           }
         }
-
-        const uNorm = itemLlamada.usuario;
-        if (pasaFiltro && ejecutivosMap[uNorm]) {
-          ejecutivosMap[uNorm].llamadas += itemLlamada.llamadas;
+        if (pasaFiltro && ejecutivosMap[item.usuario]) {
+          ejecutivosMap[item.usuario].llamadas += item.llamadas;
         }
       });
 
-      // FILTRADO DE VENTAS - LÓGICA ESTRICTA SANITIZADA
+      // CONTEO EXCLUSIVO DE VENTAS POR VOZ
       Object.values(operacionesAcumuladas).forEach(reg => {
-        // SEGURO PRO: Elimina espacios ocultos al final del string que causan falsos negativos
-        const tipo = String(reg.tipoOperacion || '').toUpperCase().trim().replace(/\s+/g, ' ');
+        const tipo = String(reg.tipoOperacion || '').toUpperCase().trim();
         
-        const esValido = (tipo === "PORTA SS-SS" || 
-                          tipo === "PORTA PP-SS" || 
+        // Reglas de negocio únicas solicitadas (Solo Voz)
+        const esValido = (tipo === "PORTA SS-SS" || tipo === "PORTA SS - SS" || 
+                          tipo === "PORTA PP-SS" || tipo === "PORTA PP - SS" ||
                           tipo === "NUEVA LINEA" || 
                           tipo === "2DA LINEA");
 
         if (esValido) {
           let pasaFiltro = true;
-          const regFecha = parseFechaExcel(reg.fechaStr);
+          const rFecha = parseFechaExcel(reg.fechaStr);
 
-          if (regFecha) {
-            if (fDesde && regFecha.getTime() < fDesde.getTime()) pasaFiltro = false;
-            if (fHasta && regFecha.getTime() > fHasta.getTime()) pasaFiltro = false;
-
-            if (pasaFiltro && mesVal !== "todos") {
-              if (regFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
-            }
-
+          if (rFecha) {
+            if (fDesde && rFecha.getTime() < fDesde.getTime()) pasaFiltro = false;
+            if (fHasta && rFecha.getTime() > fHasta.getTime()) pasaFiltro = false;
+            if (pasaFiltro && mesVal !== "todos" && rFecha.getMonth() + 1 !== parseInt(mesVal)) pasaFiltro = false;
             if (pasaFiltro && semanaVal !== "todos") {
-              const dia = regFecha.getDate();
+              const dia = rFecha.getDate();
               if (semanaVal === "sem1" && !(dia >= 1 && dia <= 4)) pasaFiltro = false;
               if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
               if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
@@ -654,12 +566,10 @@
             }
           }
 
-          const uNorm = reg.usuario;
-
-          if (pasaFiltro && ejecutivosMap[uNorm]) {
-            ejecutivosMap[uNorm].avance++;
+          if (pasaFiltro && ejecutivosMap[reg.usuario]) {
+            ejecutivosMap[reg.usuario].avance++;
             const h = extraerHoraInt(reg);
-            if (h >= 0 && h < 24) ejecutivosMap[uNorm].horasVentas[h]++;
+            if (h >= 0 && h < 24) ejecutivosMap[reg.usuario].horasVentas[h]++;
           }
         }
       });
@@ -714,9 +624,8 @@
 
       let arrEjecutivos = Object.values(ejecutivosMap).filter(item => {
         if (supervisorSeleccionado !== "todos" && item.supervisor !== supervisorSeleccionado) return false;
-        if (item.usuario.toLowerCase() === 'galatat') return false;
-
-        const esActivo = usuariosActivosSet.has(item.usuario.toLowerCase()) && !ejecutivosInactivosSet.has(item.usuario.toLowerCase()) && item.activo !== false;
+        
+        const esActivo = item.activo !== false;
         if (estadoAgente === "activos" && !esActivo) return false;
         if (estadoAgente === "inactivos" && esActivo) return false;
 
@@ -737,19 +646,14 @@
         const efecNum = item.llamadas > 0 ? (item.avance / item.llamadas) * 100 : 0;
         const efectividad = item.llamadas > 0 ? efecNum.toFixed(1) : '0.0';
 
-        let dotColor = "bg-rose-500";
-        let barColorCump = "bg-rose-500";
-        let rowBgClass = "";
-        let badgeAvanceBg = "bg-rose-100 text-rose-800 border-rose-200";
+        let dotColor = "bg-rose-500", barColorCump = "bg-rose-500", rowBgClass = "", badgeAvanceBg = "bg-rose-100 text-rose-800 border-rose-200";
 
         if (pctCump >= 85) {
-          dotColor = "bg-emerald-500";
-          barColorCump = "bg-emerald-500";
+          dotColor = "bg-emerald-500"; barColorCump = "bg-emerald-500";
           rowBgClass = "bg-emerald-50/50 hover:bg-emerald-100/60";
           badgeAvanceBg = "bg-emerald-100 text-emerald-800 border-emerald-300";
         } else if (pctCump >= 50) {
-          dotColor = "bg-amber-500";
-          barColorCump = "bg-amber-500";
+          dotColor = "bg-amber-500"; barColorCump = "bg-amber-500";
           rowBgClass = "hover:bg-amber-50/40";
           badgeAvanceBg = "bg-amber-100 text-amber-800 border-amber-300";
         } else if (item.avance === 0) {
@@ -757,11 +661,8 @@
         }
 
         let barColorEfec = "bg-rose-500";
-        if (efecNum >= 13.5) {
-          barColorEfec = "bg-emerald-500";
-        } else if (efecNum >= 7.0) {
-          barColorEfec = "bg-amber-500";
-        }
+        if (efecNum >= 13.5) barColorEfec = "bg-emerald-500";
+        else if (efecNum >= 7.0) barColorEfec = "bg-amber-500";
 
         const tr = document.createElement('tr');
         tr.className = `${rowBgClass} transition-colors border-b border-slate-100`;
@@ -780,7 +681,7 @@
                 <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
                   <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
-                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | @${item.usuario}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | ${item.usuario}</div>
                 </div>
               </div>
             </td>
@@ -795,28 +696,20 @@
                 <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
                   <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
-                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | @${item.usuario}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | ${item.usuario}</div>
                 </div>
               </div>
             </td>
-
             <td class="py-2 px-4 border-r border-slate-100">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-slate-300 shrink-0"></span>
                 <span class="text-xs text-slate-600 font-medium">${item.supervisor}</span>
               </div>
             </td>
-
-            <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-700">
-              ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
-            </td>
-
+            <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-700">${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}</td>
             <td class="py-2 px-3 border-r border-slate-100 text-center">
-              <span class="inline-block px-3 py-1 font-black text-xs rounded-lg border shadow-xs ${badgeAvanceBg}">
-                ${item.avance}
-              </span>
+              <span class="inline-block px-3 py-1 font-black text-xs rounded-lg border shadow-xs ${badgeAvanceBg}">${item.avance}</span>
             </td>
-
             <td class="py-2 px-3 border-r border-slate-100 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${pctFormateado}%</span>
@@ -825,11 +718,7 @@
                 </div>
               </div>
             </td>
-
-            <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-900 bg-slate-50">
-              ${item.llamadas}
-            </td>
-
+            <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-900 bg-slate-50">${item.llamadas}</td>
             <td class="py-2 px-3 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${efectividad}%</span>
@@ -840,7 +729,6 @@
             </td>
           `;
         }
-
         tbody.appendChild(tr);
       });
 
@@ -872,14 +760,13 @@
         kpiLabel.className = "text-xs font-semibold text-emerald-100 block mb-1";
         kpiIconBg.className = "p-3 bg-emerald-600/60 text-white rounded-2xl";
       }
-
       lucide.createIcons();
     }
 
     function limpiarFiltros() {
       document.getElementById('selectEstadoAgente').value = "activos";
       document.getElementById('selectSupervisor').value = "Eguilas Morales Gustavo ernesto";
-      document.getElementById('selectMes').value = "10";
+      document.getElementById('selectMes').value = (new Date().getMonth() + 1).toString();
       document.getElementById('selectSemana').value = "todos";
       document.getElementById('filterFechaDesde').value = "";
       document.getElementById('filterFechaHasta').value = "";
@@ -891,7 +778,6 @@
     function copiarTablaComoImagen() {
       const btnText = document.getElementById('btnCopiarText');
       btnText.innerText = "Capturando...";
-
       const elemento = document.getElementById('contenedorTablaCaptura');
 
       html2canvas(elemento, { scale: 2, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => {
@@ -901,15 +787,12 @@
             navigator.clipboard.write([item]).then(() => {
               btnText.innerText = "¡Copiado!";
               setTimeout(() => { btnText.innerText = "Copiar Imagen"; }, 2500);
-            }).catch(err => {
-              descargarImagenFallback(canvas);
-            });
+            }).catch(err => descargarImagenFallback(canvas));
           } else {
             descargarImagenFallback(canvas);
           }
         });
       }).catch(err => {
-        console.error(err);
         btnText.innerText = "Copiar Imagen";
         alert("Ocurrió un error al generar la imagen.");
       });
@@ -928,9 +811,7 @@
       const estadoAgente = document.getElementById('selectEstadoAgente').value;
       const filtrados = Object.values(ejecutivosMap).filter(e => {
         if (supervisorSeleccionado !== "todos" && e.supervisor !== supervisorSeleccionado) return false;
-        if (e.usuario.toLowerCase() === 'galatat') return false;
-        
-        const esActivo = usuariosActivosSet.has(e.usuario.toLowerCase()) && !ejecutivosInactivosSet.has(e.usuario.toLowerCase()) && e.activo !== false;
+        const esActivo = e.activo !== false;
         if (estadoAgente === "activos" && !esActivo) return false;
         if (estadoAgente === "inactivos" && esActivo) return false;
         return true;
