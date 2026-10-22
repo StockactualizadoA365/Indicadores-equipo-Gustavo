@@ -22,10 +22,8 @@
 </head>
 <body class="bg-[#f1f5f9] min-h-screen text-slate-800 font-sans pb-12">
 
-  <!-- CONTENEDOR PRINCIPAL -->
   <div class="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
 
-    <!-- SECCIÓN SUPERIOR -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
         <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
@@ -52,7 +50,7 @@
       </div>
     </div>
 
-    <!-- TARJETAS DE INDICADORES GLOBALES -->
+    <!-- TARJETAS DE INDICADORES -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
@@ -95,7 +93,7 @@
       </div>
     </div>
 
-    <!-- TABLA Y FILTROS -->
+    <!-- ESTRUCTURA TABLA Y FILTROS -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
       <aside class="lg:col-span-1 space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden sticky top-6">
@@ -174,9 +172,9 @@
               </div>
             </div>
 
-            <div class="pt-2 border-t border-slate-100">
-              <label class="font-bold text-slate-800 block mb-1">Meta Diaria Base:</label>
-              <input type="number" id="metaDiariaBase" value="5" min="1" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-bold text-center rounded-xl p-2 focus:outline-none focus:border-slate-500 shadow-sm">
+            <div class="pt-2 border-t border-slate-100 hidden">
+              <!-- Oculto para no confundir ya que ahora la meta diaria es individual por agente en el código -->
+              <input type="number" id="metaDiariaBase" value="5" class="hidden">
             </div>
           </div>
         </div>
@@ -219,22 +217,24 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // LA DOTACIÓN OFICIAL CON ACTIVOS E INACTIVOS
+    // CONFIGURACIÓN DE DOTACIÓN CON METAS PERSONALIZADAS Y FECHAS DE INICIO
     const ejecutivosBaseActivos = [
-      // ACTIVOS
-      { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "fcampost", dni: "73013201", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "gguerreroe", dni: "47228079", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "msolero", dni: "9138103", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
+      { usuario: "fcampost", dni: "73013201", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
+      { usuario: "gguerreroe", dni: "47228079", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
       
-      // INACTIVOS (Agregados según tu tabla dinámica)
-      { usuario: "galatat", dni: "", nombre: "Alata Toledo Gonzalo Andres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: false },
-      { usuario: "mhernandezb", dni: "", nombre: "Hernandez Banda Maria Tania", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: false },
-      { usuario: "bsanchez", dni: "", nombre: "Sanchez Lopez Brigitte Katheryne", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: false }
+      // NUEVOS CON META DE 3 A PARTIR DEL 19 DE OCTUBRE
+      { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 3, fechaInicio: "2026-10-19" },
+      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 3, fechaInicio: "2026-10-19" },
+
+      { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
+      { usuario: "msolero", dni: "9138103", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
+      { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
+      
+      // INACTIVOS
+      { usuario: "galatat", dni: "", nombre: "Alata Toledo Gonzalo Andres", supervisor: "Eguilas Morales Gustavo ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
+      { usuario: "mhernandezb", dni: "", nombre: "Hernandez Banda Maria Tania", supervisor: "Eguilas Morales Gustavo ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
+      { usuario: "bsanchez", dni: "", nombre: "Sanchez Lopez Brigitte Katheryne", supervisor: "Eguilas Morales Gustavo ernesto", activo: false, metaDiaria: 5, fechaInicio: null }
     ];
 
     const dniToUsuarioMap = {
@@ -255,7 +255,6 @@
       const userClean = String(userRaw || "").toLowerCase().trim();
       const nomClean = String(nomRaw || "").toLowerCase().trim();
       
-      // Mapeo directo por nombre o usuario
       if (userClean === "gguerreroe" || nomClean.includes("gypsi") || nomClean.includes("guerrero e") ) return "gguerreroe";
       if (userClean === "illanquim" || nomClean.includes("llanqui")) return "illanquim";
       if (userClean === "cnoriegaf" || nomClean.includes("noriega")) return "cnoriegaf";
@@ -265,7 +264,6 @@
       if (userClean === "msolero" || nomClean.includes("soler oberto")) return "msolero";
       if (userClean === "rtorresc" || userClean === "rtorresh" || nomClean.includes("torres heredia")) return "rtorresc";
       
-      // Inactivos
       if (userClean.includes("alata") || nomClean.includes("alata toledo")) return "galatat";
       if (userClean.includes("hernandez") || nomClean.includes("maria tania") || nomClean.includes("hernandez banda")) return "mhernandezb";
       if (userClean.includes("sanchez") || nomClean.includes("brigitte")) return "bsanchez";
@@ -333,7 +331,8 @@
       ejecutivosBaseActivos.forEach(e => {
         ejecutivosMap[e.usuario] = {
           usuario: e.usuario, nombre: e.nombre, dni: e.dni, supervisor: e.supervisor,
-          activo: e.activo, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0
+          activo: e.activo, metaDiaria: e.metaDiaria, fechaInicio: e.fechaInicio,
+          metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0
         };
         supervisoresDisponibles.add(e.supervisor);
       });
@@ -435,14 +434,13 @@
               const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
               const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
               
-              // CLAVE ÚNICA ABSOLUTA: Se añade la fila 'r' para que NUNCA sobreescriba duplicados del reporte de Entel
               const nroOp = colNroOp !== -1 && row[colNroOp] ? String(row[colNroOp]).trim() : `ID_${r}`;
               const uniqueKey = `${nroOp}_FILA_${r}`; 
 
               operacionesAcumuladas[uniqueKey] = { nroOp, usuario, tipoOperacion, fechaStr, horaStr };
               nuevos++;
             }
-            alert(`¡Bug de duplicados corregido! Se contabilizaron ${nuevos} filas de ventas de forma exacta a tu Excel.`);
+            alert(`¡Carga Exitosa! Se contabilizaron ${nuevos} ventas exclusivas de llamadas.`);
           }
 
           recalcularAvances();
@@ -472,13 +470,22 @@
       return 10;
     }
 
+    // FÓRMULA DE META PRO SIN DOMINGOS
     function calcularMetaAcumuladaParaRango(fInicio, fFin, metaDiaria) {
-      if (!fInicio || !fFin || fInicio > fFin) return metaDiaria;
+      if (!fInicio || !fFin || fInicio > fFin) return 0;
       let metaTotal = 0;
       let curr = new Date(fInicio.getTime());
+      
+      // Sanitizar horas para no contar fracciones de día erróneas
+      curr.setHours(0,0,0,0);
+      let end = new Date(fFin.getTime());
+      end.setHours(0,0,0,0);
 
-      while (curr <= fFin) {
-        if (curr.getDay() !== 0) metaTotal += metaDiaria;
+      while (curr <= end) {
+        // EXCLUIR DOMINGOS ESTRICTAMENTE (0 = Domingo)
+        if (curr.getDay() !== 0) {
+          metaTotal += metaDiaria;
+        }
         curr.setDate(curr.getDate() + 1);
       }
       return metaTotal;
@@ -491,39 +498,56 @@
         ejecutivosMap[k].llamadas = 0;
       });
 
-      const metaDiaria = parseFloat(document.getElementById('metaDiariaBase').value) || 5;
       const fDesdeVal = document.getElementById('filterFechaDesde').value;
       const fHastaVal = document.getElementById('filterFechaHasta').value;
       const mesVal = document.getElementById('selectMes').value;
       const semanaVal = document.getElementById('selectSemana').value;
+      const metaGlobalDefault = parseFloat(document.getElementById('metaDiariaBase').value) || 5;
 
       let fechaActual = new Date();
       let añoBase = fechaActual.getFullYear();
       let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : fechaActual.getMonth();
       
-      let fInicioRango = new Date(añoBase, mesIndex, 1);
-      let fFinRango = new Date(añoBase, mesIndex + 1, 0); 
+      let fInicioGlobal = new Date(añoBase, mesIndex, 1);
+      let fFinGlobal = new Date(añoBase, mesIndex + 1, 0); 
 
       if (fDesdeVal) {
         const dSplit = fDesdeVal.split('-');
-        fInicioRango = new Date(parseInt(dSplit[0]), parseInt(dSplit[1]) - 1, parseInt(dSplit[2]));
+        fInicioGlobal = new Date(parseInt(dSplit[0]), parseInt(dSplit[1]) - 1, parseInt(dSplit[2]));
       }
 
       if (fHastaVal) {
         const hSplit = fHastaVal.split('-');
-        fFinRango = new Date(parseInt(hSplit[0]), parseInt(hSplit[1]) - 1, parseInt(hSplit[2]));
+        fFinGlobal = new Date(parseInt(hSplit[0]), parseInt(hSplit[1]) - 1, parseInt(hSplit[2]));
       } else if (semanaVal !== "todos") {
-        if (semanaVal === "sem1") { fInicioRango.setDate(1); fFinRango.setDate(4); }
-        if (semanaVal === "sem2") { fInicioRango.setDate(5); fFinRango.setDate(11); }
-        if (semanaVal === "sem3") { fInicioRango.setDate(12); fFinRango.setDate(18); }
-        if (semanaVal === "sem4") { fInicioRango.setDate(19); fFinRango.setDate(25); }
-        if (semanaVal === "sem5") { fInicioRango.setDate(26); fFinRango.setDate(fFinRango.getDate()); }
+        if (semanaVal === "sem1") { fInicioGlobal.setDate(1); fFinGlobal.setDate(4); }
+        if (semanaVal === "sem2") { fInicioGlobal.setDate(5); fFinGlobal.setDate(11); }
+        if (semanaVal === "sem3") { fInicioGlobal.setDate(12); fFinGlobal.setDate(18); }
+        if (semanaVal === "sem4") { fInicioGlobal.setDate(19); fFinGlobal.setDate(25); }
+        if (semanaVal === "sem5") { fInicioGlobal.setDate(26); fFinGlobal.setDate(fFinGlobal.getDate()); }
+      } else {
+        // CÁLCULO HASTA EL MOMENTO (Si es el mes actual y no hay filtro "Hasta", corta HOY)
+        if (mesIndex === fechaActual.getMonth() && añoBase === fechaActual.getFullYear()) {
+          fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
+        }
       }
 
-      const metaPeriodo = calcularMetaAcumuladaParaRango(fInicioRango, fFinRango, metaDiaria);
-
       Object.keys(ejecutivosMap).forEach(k => {
-        ejecutivosMap[k].metaCalculada = metaPeriodo;
+        let agent = ejecutivosMap[k];
+        let mDiaria = agent.metaDiaria || metaGlobalDefault;
+        
+        let startCal = new Date(fInicioGlobal.getTime());
+        
+        // Ajuste especial por asesor nuevo
+        if (agent.fechaInicio) {
+          let parts = agent.fechaInicio.split('-');
+          let dIniAgente = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          if (dIniAgente > startCal) {
+            startCal = new Date(dIniAgente.getTime()); // Calcula desde su 1er día si es posterior al rango
+          }
+        }
+
+        agent.metaCalculada = calcularMetaAcumuladaParaRango(startCal, fFinGlobal, mDiaria);
       });
 
       const fDesde = fDesdeVal ? new Date(fDesdeVal + "T00:00:00") : null;
@@ -551,11 +575,9 @@
         }
       });
 
-      // CONTEO EXCLUSIVO DE VENTAS POR VOZ (1 a 1 como la tabla dinámica)
       Object.values(operacionesAcumuladas).forEach(reg => {
         const tipo = String(reg.tipoOperacion || '').toUpperCase().trim();
         
-        // Reglas de negocio únicas solicitadas (Solo Voz)
         const esValido = (tipo === "PORTA SS-SS" || tipo === "PORTA SS - SS" || 
                           tipo === "PORTA PP-SS" || tipo === "PORTA PP - SS" ||
                           tipo === "NUEVA LINEA" || 
@@ -649,7 +671,7 @@
       arrEjecutivos.sort((a, b) => b.avance - a.avance);
 
       arrEjecutivos.forEach((item) => {
-        const metaInd = item.metaCalculada || 5;
+        const metaInd = item.metaCalculada || 0; // Mostrar 0 si no han comenzado
         sumMeta += metaInd;
         sumAvance += parseInt(item.avance) || 0;
         sumLlamadas += parseInt(item.llamadas) || 0;
@@ -677,10 +699,7 @@
         if (efecNum >= 13.5) barColorEfec = "bg-emerald-500";
         else if (efecNum >= 7.0) barColorEfec = "bg-amber-500";
 
-        // Marcar inactivos visualmente
-        if (!item.activo) {
-          dotColor = "bg-slate-400";
-        }
+        if (!item.activo) dotColor = "bg-slate-400";
 
         const tr = document.createElement('tr');
         tr.className = `${rowBgClass} transition-colors border-b border-slate-100`;
@@ -789,7 +808,6 @@
       document.getElementById('filterFechaDesde').value = "";
       document.getElementById('filterFechaHasta').value = "";
       document.getElementById('searchInput').value = "";
-      document.getElementById('metaDiariaBase').value = "5";
       aplicarFiltrosGlobales();
     }
 
