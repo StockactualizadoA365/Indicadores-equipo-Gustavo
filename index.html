@@ -194,7 +194,7 @@
               <label class="font-bold text-slate-800 block mb-1">Buscar Asesor:</label>
               <div class="relative">
                 <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
-                <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre o @usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl pl-8 pr-2.5 py-2 focus:outline-none focus:border-slate-500 shadow-sm">
+                <input type="text" id="searchInput" onkeyup="aplicarFiltrosGlobales()" placeholder="Nombre, DNI o @usuario..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl pl-8 pr-2.5 py-2 focus:outline-none focus:border-slate-500 shadow-sm">
               </div>
             </div>
 
@@ -249,7 +249,7 @@
 
   <script>
     let operacionesAcumuladas = {};
-    let llamadasDiariasAcumuladas = []; // Historial diario de llamadas
+    let llamadasDiariasAcumuladas = [];
     let ejecutivosMap = {};
     let supervisoresDisponibles = new Set();
     let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
@@ -257,22 +257,34 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA OFICIAL DE ACTIVOS (8 ASESORES)
+    // NÓMINA OFICIAL CON DNI OFICIAL
     const ejecutivosBaseActivos = [
-      { usuario: "illanquim", nombre: "Isabel Veronica Llanqui Masias", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "cnoriegaf", nombre: "Carla Noriega Fonseca", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "fcampost", nombre: "Campos Tapia Flavio Diego", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "gguerreroe", nombre: "Gipsi Guerrero Eyzaguirre", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "sdionicioj", nombre: "Dionicio Jauregui Stephano Sebastian", dni: "73590536", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "glopeza", nombre: "Guillermo Antonio López", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "msolero", nombre: "Maritriny Patricia Soler Oberto", dni: "", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "rtorresc", nombre: "Roberto Baruc Torres", dni: "72312477", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
+      { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "fcampost", dni: "73013201", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "gguerreroe", dni: "45892011", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "msolero", dni: "9138103", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
     ];
 
     // INACTIVOS EXPLICITOS
     const ejecutivosInactivosSet = new Set([
       "brigitte", "mtania", "tania", "maria tania", "bcontreras", "mbalza"
     ]);
+
+    // MAPA DIRECTO DE DNI
+    const dniToUsuarioMap = {
+      "25844339": "illanquim",
+      "43905089": "cnoriegaf",
+      "73013201": "fcampost",
+      "45892011": "gguerreroe",
+      "73590536": "sdionicioj",
+      "71277784": "glopeza",
+      "9138103": "msolero",
+      "72312477": "rtorresc"
+    };
 
     const usuariosActivosSet = new Set(ejecutivosBaseActivos.map(e => e.usuario));
 
@@ -282,47 +294,37 @@
       "11-01", "12-08", "12-25"
     ];
 
-    function normalizarUsuario(rowStr, userRaw = "", nomRaw = "", dniRaw = "") {
-      const fullStr = (rowStr + " " + userRaw + " " + nomRaw + " " + dniRaw).toLowerCase();
-      const dniClean = String(dniRaw || "").trim();
+    function obtenerUsuarioPorDNI(dniRaw = "", rowStr = "", userRaw = "", nomRaw = "") {
+      const dniClean = String(dniRaw || "").trim().replace(/\D/g, "");
 
-      if (dniClean === "73590536" || fullStr.includes("73590536") || fullStr.includes("sdionicio") || fullStr.includes("stephano")) {
-        return "sdionicioj";
+      if (dniClean && dniToUsuarioMap[dniClean]) {
+        return dniToUsuarioMap[dniClean];
       }
-      if (dniClean === "72312477" || fullStr.includes("72312477") || fullStr.includes("rtorresc") || fullStr.includes("baruc") || fullStr.includes("roberto baruc")) {
-        return "rtorresc";
+
+      const fullStr = (rowStr + " " + userRaw + " " + nomRaw + " " + dniRaw).toLowerCase();
+
+      for (const [dni, usuario] of Object.entries(dniToUsuarioMap)) {
+        if (fullStr.includes(dni)) return usuario;
       }
+
       if (fullStr.includes("brigitte")) return "brigitte";
       if (fullStr.includes("tania")) return "mtania";
-
-      if (fullStr.includes("illanquim") || fullStr.includes("llanqui")) return "illanquim";
-      if (fullStr.includes("cnoriegaf") || fullStr.includes("noriega")) return "cnoriegaf";
-      if (fullStr.includes("fcampost") || fullStr.includes("campos tapia")) return "fcampost";
-      if (fullStr.includes("gguerreroe") || fullStr.includes("guerrero")) return "gguerreroe";
-      if (fullStr.includes("glopeza") || fullStr.includes("guillermo antonio")) return "glopeza";
-      if (fullStr.includes("msolero") || fullStr.includes("soler oberto")) return "msolero";
 
       return (userRaw || "").toLowerCase().trim();
     }
 
-    // PARSER DE FECHA ROBUSTO Y EXCLUSIVO
     function parseFechaExcel(fVal) {
       if (!fVal) return null;
-
-      if (fVal instanceof Date) {
-        return new Date(fVal.getFullYear(), fVal.getMonth(), fVal.getDate());
-      }
+      if (fVal instanceof Date) return new Date(fVal.getFullYear(), fVal.getMonth(), fVal.getDate());
 
       const fStr = String(fVal).trim();
       if (!fStr) return null;
 
-      // Si viene como string ISO YYYY-MM-DD o YYYY/MM/DD
       if (fStr.match(/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/)) {
         const p = fStr.split(' ')[0].split(/[\/\-]/);
         return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
       }
 
-      // Si viene como DD/MM/YYYY o DD-MM-YYYY
       if (fStr.match(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/)) {
         const p = fStr.split(' ')[0].split(/[\/\-]/);
         return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
@@ -360,7 +362,6 @@
     function cargarDesdeStorage() {
       const savedOps = localStorage.getItem('entel_operaciones_acumuladas');
       const savedLlamadas = localStorage.getItem('entel_llamadas_diarias_acumuladas');
-      const savedEjec = localStorage.getItem('entel_ejecutivos_map');
 
       if (savedOps) {
         try { operacionesAcumuladas = JSON.parse(savedOps); } catch(e) { operacionesAcumuladas = {}; }
@@ -390,40 +391,6 @@
       ejecutivosMap['brigitte'] = { usuario: 'brigitte', nombre: 'Brigitte Contreras', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
       ejecutivosMap['mtania'] = { usuario: 'mtania', nombre: 'Maria Tania Balza', dni: '', supervisor: 'Eguilas Morales Gustavo ernesto', activo: false, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0 };
 
-      if (savedEjec) {
-        try {
-          const parsed = JSON.parse(savedEjec);
-          Object.keys(parsed).forEach(k => {
-            const uNorm = normalizarUsuario(JSON.stringify(parsed[k]), k, parsed[k].nombre, parsed[k].dni);
-            if (uNorm !== 'galatat' && uNorm) {
-              const esActivo = usuariosActivosSet.has(uNorm) && !ejecutivosInactivosSet.has(uNorm);
-              if (ejecutivosMap[uNorm]) {
-                ejecutivosMap[uNorm].activo = esActivo;
-              } else {
-                ejecutivosMap[uNorm] = { 
-                  ...parsed[k], 
-                  usuario: uNorm, 
-                  activo: esActivo, 
-                  horasVentas: Array(24).fill(0) 
-                };
-              }
-              if (parsed[k].supervisor) supervisoresDisponibles.add(parsed[k].supervisor);
-            }
-          });
-        } catch(e) {}
-      }
-
-      ejecutivosMap['sdionicioj'].nombre = "Dionicio Jauregui Stephano Sebastian";
-      ejecutivosMap['sdionicioj'].dni = "73590536";
-      ejecutivosMap['sdionicioj'].activo = true;
-
-      ejecutivosMap['rtorresc'].nombre = "Roberto Baruc Torres";
-      ejecutivosMap['rtorresc'].dni = "72312477";
-      ejecutivosMap['rtorresc'].activo = true;
-
-      ejecutivosMap['brigitte'].activo = false;
-      ejecutivosMap['mtania'].activo = false;
-
       actualizarSelectorSupervisores();
       recalcularAvances();
     }
@@ -431,7 +398,6 @@
     function guardarEnStorage() {
       localStorage.setItem('entel_operaciones_acumuladas', JSON.stringify(operacionesAcumuladas));
       localStorage.setItem('entel_llamadas_diarias_acumuladas', JSON.stringify(llamadasDiariasAcumuladas));
-      localStorage.setItem('entel_ejecutivos_map', JSON.stringify(ejecutivosMap));
     }
 
     function actualizarSelectorSupervisores() {
@@ -463,7 +429,7 @@
             return;
           }
 
-          let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, colLlamadas = -1, colDniLlamadas = -1, colUserLlamadas = -1, colNomLlamadas = -1, headerRow = -1;
+          let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, colLlamadas = -1, colDniUser = -1, colCodeUser = -1, colNomUser = -1, headerRow = -1;
 
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
             const row = rawRows[r];
@@ -471,10 +437,10 @@
             for (let c = 0; c < row.length; c++) {
               const val = String(row[c] || '').toUpperCase().trim();
               if (val === 'TIPO OPERACION') colTipoOp = c, headerRow = r;
-              if (val === 'CONTESTADAS' || val.includes('LLAMADAS') || val.includes('MARCACIONES') || val.includes('GESTIONES')) colLlamadas = c, headerRow = r;
-              if (val === 'DNI') colDniLlamadas = c;
-              if (val === 'USER' || val === 'USUARIO') colUserLlamadas = c;
-              if (val === 'AGENTE' || val === 'NOMBRE') colNomLlamadas = c;
+              if (val === 'CONTESTADAS' || val.includes('LLAMADAS') || val.includes('MARCACIONES')) colLlamadas = c, headerRow = r;
+              if (val.includes('NUM.DOC USUARIO') || val === 'DNI') colDniUser = c;
+              if (val.includes('CODIGO USUARIO') || val === 'USER' || val === 'USUARIO') colCodeUser = c;
+              if (val.includes('NOMBRE USUARIO') || val === 'AGENTE' || val === 'NOMBRE') colNomUser = c;
               if (val.includes('FECHA REGISTRO') || val === 'FECHA') colFecha = c;
               if (val.includes('HORA')) colHora = c;
               if (val.includes('NRO.OPERACION') || val.includes('OPERACION')) colNroOp = c;
@@ -485,28 +451,28 @@
           let nuevos = 0;
 
           // ARCHIVO DE LLAMADAS DIARIAS
-          if (colLlamadas !== -1 || colDniLlamadas !== -1) {
+          if (colLlamadas !== -1) {
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
               if (!row) continue;
 
-              const dniVal = colDniLlamadas !== -1 ? String(row[colDniLlamadas] || '').trim() : '';
-              const userVal = colUserLlamadas !== -1 ? String(row[colUserLlamadas] || '').trim() : '';
-              const nomVal = colNomLlamadas !== -1 ? String(row[colNomLlamadas] || '').trim() : '';
+              const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '').trim() : '';
+              const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '').trim() : '';
+              const nomVal = colNomUser !== -1 ? String(row[colNomUser] || '').trim() : '';
               const rowText = row.join(' ');
-              
-              const usuario = normalizarUsuario(rowText, userVal, nomVal, dniVal);
+
+              const usuario = obtenerUsuarioPorDNI(dniVal, rowText, codeVal, nomVal);
               if (!usuario || usuario === 'galatat') continue;
 
               const fechaRaw = colFecha !== -1 ? row[colFecha] : '';
-              const cantLlamadas = parseInt(row[colLlamadas !== -1 ? colLlamadas : 0]) || 0;
+              const cantLlamadas = parseInt(row[colLlamadas]) || 0;
 
               if (cantLlamadas > 0) {
                 llamadasDiariasAcumuladas.push({ usuario, fechaStr: fechaRaw, llamadas: cantLlamadas });
                 nuevos++;
               }
             }
-            alert(`¡Éxito! Se consolidaron ${nuevos} registros diarios de llamadas.`);
+            alert(`¡Éxito! Se cargaron ${nuevos} registros diarios de llamadas.`);
           } 
           // ARCHIVO WEBFORM DE VENTAS
           else {
@@ -514,10 +480,13 @@
               const row = rawRows[r];
               if (!row) continue;
 
+              const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '').trim() : '';
+              const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '').trim() : '';
+              const nomVal = colNomUser !== -1 ? String(row[colNomUser] || '').trim() : '';
               const rowText = row.join(' ');
-              const usuario = normalizarUsuario(rowText);
 
-              if (usuario === 'galatat' || !usuario || usuario === 'undefined' || usuario === '0') continue;
+              const usuario = obtenerUsuarioPorDNI(dniVal, rowText, codeVal, nomVal);
+              if (usuario === 'galatat' || !usuario) continue;
 
               const supervisor = "Eguilas Morales Gustavo ernesto";
               const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim() : '';
@@ -526,14 +495,13 @@
               const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
 
               if (!operacionesAcumuladas[nroOp]) {
-                operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr };
+                operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr, dniVal };
                 nuevos++;
               }
             }
             alert(`¡Éxito! Se procesaron ${nuevos} operaciones de ventas.`);
           }
 
-          actualizarSelectorSupervisores();
           recalcularAvances();
           guardarEnStorage();
           document.getElementById('inputExcel').value = '';
@@ -659,13 +627,17 @@
         }
       });
 
-      // FILTRADO DE VENTAS
+      // FILTRADO DE VENTAS ALINEADO EXACTAMENTE A LAS 4 OPCIONES PERMITIDAS
       Object.values(operacionesAcumuladas).forEach(reg => {
-        const tipo = reg.tipoOperacion;
-        const esValido = tipo.includes('NUEVA') || tipo.includes('2DA') || tipo.includes('PORTA');
-        const esExcluido = tipo.includes('RENOVACION') || tipo.includes('FIBRA') || tipo.includes('MIGRACION');
+        const tipo = String(reg.tipoOperacion || '').toUpperCase().trim();
+        
+        // VALIDACIÓN ESTRICTA: SOLO LAS 4 OPCIONES DE LA IMAGEN
+        const esValido = (tipo === "PORTA SS-SS" || 
+                          tipo === "PORTA PP-SS" || 
+                          tipo === "NUEVA LINEA" || 
+                          tipo === "2DA LINEA");
 
-        if (esValido && !esExcluido) {
+        if (esValido) {
           let pasaFiltro = true;
           const regFecha = parseFechaExcel(reg.fechaStr);
 
@@ -687,7 +659,7 @@
             }
           }
 
-          const uNorm = normalizarUsuario(JSON.stringify(reg), reg.usuario);
+          const uNorm = reg.usuario;
 
           if (pasaFiltro && ejecutivosMap[uNorm]) {
             ejecutivosMap[uNorm].avance++;
@@ -753,7 +725,7 @@
         if (estadoAgente === "activos" && !esActivo) return false;
         if (estadoAgente === "inactivos" && esActivo) return false;
 
-        const matchQuery = item.usuario.toLowerCase().includes(query) || item.nombre.toLowerCase().includes(query);
+        const matchQuery = item.usuario.toLowerCase().includes(query) || item.nombre.toLowerCase().includes(query) || item.dni.includes(query);
         return matchQuery;
       });
 
@@ -770,7 +742,6 @@
         const efecNum = item.llamadas > 0 ? (item.avance / item.llamadas) * 100 : 0;
         const efectividad = item.llamadas > 0 ? efecNum.toFixed(1) : '0.0';
 
-        // REGLAS CUMPLIMIENTO META
         let dotColor = "bg-rose-500";
         let barColorCump = "bg-rose-500";
         let rowBgClass = "";
@@ -790,7 +761,6 @@
           rowBgClass = "bg-rose-50/40 hover:bg-rose-100/50";
         }
 
-        // REGLAS EFECTIVIDAD META >= 13.5%
         let barColorEfec = "bg-rose-500";
         if (efecNum >= 13.5) {
           barColorEfec = "bg-emerald-500";
@@ -815,7 +785,7 @@
                 <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
                   <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
-                  <div class="text-[10px] text-slate-400 font-mono leading-tight">@${item.usuario}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | @${item.usuario}</div>
                 </div>
               </div>
             </td>
@@ -825,18 +795,16 @@
           `;
         } else {
           tr.innerHTML = `
-            <!-- ASESOR -->
             <td class="py-2 px-4 pl-6 border-r border-slate-100">
               <div class="flex items-center gap-2.5">
                 <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
                   <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
-                  <div class="text-[10px] text-slate-400 font-mono leading-tight">@${item.usuario}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | @${item.usuario}</div>
                 </div>
               </div>
             </td>
 
-            <!-- SUPERVISOR -->
             <td class="py-2 px-4 border-r border-slate-100">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-slate-300 shrink-0"></span>
@@ -844,19 +812,16 @@
               </div>
             </td>
 
-            <!-- META ACO -->
             <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-700">
               ${metaInd % 1 === 0 ? metaInd : metaInd.toFixed(1)}
             </td>
 
-            <!-- AVANCE BADGE RESALTADO -->
             <td class="py-2 px-3 border-r border-slate-100 text-center">
               <span class="inline-block px-3 py-1 font-black text-xs rounded-lg border shadow-xs ${badgeAvanceBg}">
                 ${item.avance}
               </span>
             </td>
 
-            <!-- % CUMP -->
             <td class="py-2 px-3 border-r border-slate-100 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${pctFormateado}%</span>
@@ -866,12 +831,10 @@
               </div>
             </td>
 
-            <!-- LLAMADAS (FILTRADAS SEGÚN RANGO DE FECHAS SELECCIONADO) -->
             <td class="py-2 px-3 border-r border-slate-100 text-center font-bold text-slate-900 bg-slate-50">
               ${item.llamadas}
             </td>
 
-            <!-- EFECTIVIDAD REAL SELECCIONADA -->
             <td class="py-2 px-3 text-center">
               <div class="space-y-1 w-20 mx-auto">
                 <span class="font-bold text-slate-800 block text-[11px] leading-none">${efectividad}%</span>
@@ -930,7 +893,6 @@
       aplicarFiltrosGlobales();
     }
 
-    // COPIAR TABLA COMO IMAGEN AL PORTAPAPELES
     function copiarTablaComoImagen() {
       const btnText = document.getElementById('btnCopiarText');
       btnText.innerText = "Capturando...";
@@ -983,8 +945,8 @@
 
       const dataExport = filtrados.map(item => ({
         "ASESOR": item.nombre,
-        "USUARIO": item.usuario,
         "DNI": item.dni,
+        "USUARIO": item.usuario,
         "SUPERVISOR": item.supervisor,
         "ESTADO": item.activo ? "Activo" : "Inactivo",
         "META ACO": item.metaCalculada,
