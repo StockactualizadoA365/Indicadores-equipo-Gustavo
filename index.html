@@ -29,7 +29,7 @@
   <!-- CONTENEDOR PRINCIPAL -->
   <div class="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
 
-    <!-- SECCIÓN SUPERIOR: TÍTULO Y BOTONES DE ACCIÓN -->
+    <!-- SECCIÓN SUPERIOR -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
         <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
@@ -38,20 +38,17 @@
       </div>
 
       <div class="flex items-center gap-3 flex-wrap">
-        <!-- BOTÓN IMPORTAR EXCEL (VENTAS O LLAMADAS) -->
         <label class="bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-300 shadow-sm cursor-pointer transition-all flex items-center gap-2">
           <i data-lucide="upload" class="w-4 h-4 text-slate-600"></i>
           <span>Cargar Excel (Ventas / Llamadas)</span>
           <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="hidden" onchange="procesarExcel(event)">
         </label>
 
-        <!-- BOTÓN COPIAR COMO IMAGEN -->
         <button onclick="copiarTablaComoImagen()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
           <i data-lucide="camera" class="w-4 h-4 text-emerald-200"></i>
           <span id="btnCopiarText">Copiar Imagen</span>
         </button>
 
-        <!-- BOTÓN EXPORTAR EXCEL -->
         <button onclick="exportarExcel()" class="bg-[#0f172a] hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4 text-slate-300"></i>
           <span>Exportar</span>
@@ -62,7 +59,6 @@
     <!-- TARJETAS DE INDICADORES GLOBALES (KPIs) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       
-      <!-- KPI 1: TOTAL DE ASESORES -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <span class="text-xs font-semibold text-slate-500 block mb-1">Total de Asesores</span>
@@ -73,7 +69,6 @@
         </div>
       </div>
 
-      <!-- KPI 2: TOTAL DE META ACOGIDA -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <span class="text-xs font-semibold text-slate-500 block mb-1">Total de Meta Acogida</span>
@@ -84,7 +79,6 @@
         </div>
       </div>
 
-      <!-- KPI 3: TOTAL VENTAS REALIZADAS -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <span class="text-xs font-semibold text-slate-500 block mb-1">Total Ventas Realizadas</span>
@@ -95,7 +89,6 @@
         </div>
       </div>
 
-      <!-- KPI 4: CUMPLIMIENTO DE META TOTAL -->
       <div id="kpiCumplimientoCard" class="p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between transition-colors bg-white">
         <div>
           <span id="kpiCumplimientoLabel" class="text-xs font-semibold text-slate-500 block mb-1">Cumplimiento de Meta</span>
@@ -115,7 +108,6 @@
       <aside class="lg:col-span-1 space-y-4">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden sticky top-6">
           
-          <!-- ENCABEZADO PANEL DE FILTROS (AZUL MARINO) -->
           <div class="bg-[#0f172a] text-white p-4 font-bold tracking-wider uppercase text-xs flex items-center justify-between border-b border-slate-800">
             <div class="flex items-center gap-2">
               <i data-lucide="filter" class="w-4 h-4 text-blue-400"></i>
@@ -126,7 +118,6 @@
 
           <div class="p-5 space-y-4 text-xs font-medium text-slate-700">
 
-            <!-- FILTRO POR ESTADO DEL AGENTE -->
             <div>
               <label class="font-bold text-slate-800 block mb-1">Estado del Agente:</label>
               <select id="selectEstadoAgente" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -136,7 +127,6 @@
               </select>
             </div>
 
-            <!-- FILTRO POR SUPERVISOR -->
             <div>
               <label class="font-bold text-slate-800 block mb-1">Supervisor:</label>
               <select id="selectSupervisor" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -144,7 +134,6 @@
               </select>
             </div>
 
-            <!-- FILTRO POR MES -->
             <div>
               <label class="font-bold text-slate-800 block mb-1">Mes:</label>
               <select id="selectMes" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -164,7 +153,6 @@
               </select>
             </div>
 
-            <!-- FILTRO POR SEMANA -->
             <div>
               <label class="font-bold text-slate-800 block mb-1">Semana del Mes:</label>
               <select id="selectSemana" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-semibold rounded-xl p-2.5 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -177,7 +165,6 @@
               </select>
             </div>
 
-            <!-- FILTROS POR FECHA EXACTA -->
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="font-bold text-slate-800 block mb-1">Desde:</label>
@@ -189,7 +176,6 @@
               </div>
             </div>
 
-            <!-- BÚSQUEDA POR ASESOR -->
             <div>
               <label class="font-bold text-slate-800 block mb-1">Buscar Asesor:</label>
               <div class="relative">
@@ -198,7 +184,6 @@
               </div>
             </div>
 
-            <!-- META DIARIA DE REFERENCIA -->
             <div class="pt-2 border-t border-slate-100">
               <label class="font-bold text-slate-800 block mb-1">Meta Diaria Base:</label>
               <input type="number" id="metaDiariaBase" value="5" min="1" onchange="aplicarFiltrosGlobales()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 font-bold text-center rounded-xl p-2 focus:outline-none focus:border-slate-500 shadow-sm">
@@ -212,14 +197,12 @@
       <!-- COLUMNA DERECHA: TABLA PRINCIPAL CON AZUL MARINO Y COLORES DINÁMICOS -->
       <main class="lg:col-span-3 space-y-3">
         
-        <!-- BARRA SUPERIOR DE LA TABLA -->
         <div class="flex justify-between items-center bg-white p-3 px-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase">
             <i data-lucide="layout-grid" class="w-4 h-4 text-blue-900"></i>
             <span id="tituloVistaTabla">Vista Resumen General</span>
           </div>
 
-          <!-- BOTÓN PIZARRA -->
           <button onclick="toggleVistaPizarra()" id="btnVistaPizarra" class="bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold text-xs px-4 py-2 rounded-xl transition-all flex items-center gap-2 border border-blue-200 shadow-sm">
             <i data-lucide="columns" class="w-4 h-4 text-blue-700"></i>
             <span id="btnPizarraText">Pizarra (10 AM - 9 PM)</span>
@@ -229,7 +212,6 @@
         <div id="contenedorTablaCaptura" class="bg-white rounded-2xl border border-slate-200/80 shadow-md overflow-hidden p-1">
           <div class="overflow-x-auto">
             <table id="tablaPrincipal" class="w-full text-left text-xs border-collapse">
-              <!-- ENCABEZADO AZUL MARINO -->
               <thead class="bg-[#0f172a] text-white font-bold tracking-wider uppercase border-b border-slate-800">
                 <tr id="tablaEncabezado">
                   <!-- Encabezados dinámicos -->
@@ -257,7 +239,7 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA OFICIAL CON DNI CORREGIDO (GIPSI GUERRERO: 47228079)
+    // NÓMINA OFICIAL CON DNI Y USUARIOS
     const ejecutivosBaseActivos = [
       { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
@@ -269,18 +251,17 @@
       { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
     ];
 
-    // INACTIVOS EXPLICITOS
     const ejecutivosInactivosSet = new Set([
       "brigitte", "mtania", "tania", "maria tania", "bcontreras", "mbalza"
     ]);
 
-    // MAPA DIRECTO DE DNI COMPATIBLE
+    // MAPA DIRECTO DE DNI
     const dniToUsuarioMap = {
       "25844339": "illanquim",
       "43905089": "cnoriegaf",
       "73013201": "fcampost",
       "47228079": "gguerreroe",
-      "45892011": "gguerreroe", // Compatibilidad
+      "45892011": "gguerreroe",
       "73590536": "sdionicioj",
       "71277784": "glopeza",
       "9138103": "msolero",
@@ -461,8 +442,9 @@
 
           let nuevos = 0;
 
-          // ARCHIVO DE LLAMADAS DIARIAS
+          // REPORTE DE LLAMADAS (LIMPIA CACHÉ PREVIO PARA NO DUPLICAR)
           if (colLlamadas !== -1) {
+            llamadasDiariasAcumuladas = []; // SEGURO PRO: Evita que se tripliquen al subir varias veces
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
               if (!row) continue;
@@ -483,10 +465,11 @@
                 nuevos++;
               }
             }
-            alert(`¡Éxito! Se cargaron ${nuevos} registros diarios de llamadas.`);
+            alert(`¡Éxito! Se consolidaron ${nuevos} registros diarios de llamadas (datos limpios y actualizados).`);
           } 
-          // ARCHIVO WEBFORM DE VENTAS
+          // REPORTE WEBFORM DE VENTAS (REEMPLAZA Y REFRESCA LIMPIO)
           else {
+            operacionesAcumuladas = {}; // SEGURO PRO: Evita que se queden ventas falsas atascadas
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
               if (!row) continue;
@@ -500,17 +483,15 @@
               if (usuario === 'galatat' || !usuario) continue;
 
               const supervisor = "Eguilas Morales Gustavo ernesto";
-              const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim() : '';
+              const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim().replace(/\s+/g, ' ') : '';
               const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
               const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
               const nroOp = colNroOp !== -1 ? String(row[colNroOp] || '').trim() : `AUTO_${usuario}_${fechaStr}_${r}`;
 
-              if (!operacionesAcumuladas[nroOp]) {
-                operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr, dniVal };
-                nuevos++;
-              }
+              operacionesAcumuladas[nroOp] = { nroOp, usuario, supervisor, tipoOperacion, fechaStr, horaStr, dniVal };
+              nuevos++;
             }
-            alert(`¡Éxito! Se procesaron ${nuevos} operaciones de ventas.`);
+            alert(`¡Éxito! Se purgaron los registros y se cargaron ${nuevos} operaciones de ventas.`);
           }
 
           recalcularAvances();
@@ -579,10 +560,13 @@
       const mesVal = document.getElementById('selectMes').value;
       const semanaVal = document.getElementById('selectSemana').value;
 
-      let añoBase = 2026;
-      let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : 9;
+      // SEGURO PRO: Fechas Dinámicas para que nunca falle cuando cambie el mes o año
+      let fechaActual = new Date();
+      let añoBase = fechaActual.getFullYear();
+      let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : fechaActual.getMonth();
+      
       let fInicioRango = new Date(añoBase, mesIndex, 1);
-      let fFinRango = new Date(añoBase, mesIndex, 21);
+      let fFinRango = new Date(añoBase, mesIndex + 1, 0); // Detecta dinámicamente si el mes tiene 28, 30 o 31 días.
 
       if (fDesdeVal) {
         const dSplit = fDesdeVal.split('-');
@@ -597,7 +581,7 @@
         if (semanaVal === "sem2") { fInicioRango.setDate(5); fFinRango.setDate(11); }
         if (semanaVal === "sem3") { fInicioRango.setDate(12); fFinRango.setDate(18); }
         if (semanaVal === "sem4") { fInicioRango.setDate(19); fFinRango.setDate(25); }
-        if (semanaVal === "sem5") { fInicioRango.setDate(26); fFinRango.setDate(31); }
+        if (semanaVal === "sem5") { fInicioRango.setDate(26); fFinRango.setDate(fFinRango.getDate()); } // Hasta fin de mes dinámico
       }
 
       const metaPeriodo = calcularMetaAcumuladaParaRango(fInicioRango, fFinRango, metaDiaria);
@@ -628,7 +612,7 @@
             if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
             if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
             if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
-            if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+            if (semanaVal === "sem5" && !(dia >= 26)) pasaFiltro = false;
           }
         }
 
@@ -638,9 +622,10 @@
         }
       });
 
-      // FILTRADO DE VENTAS ALINEADO A LAS 4 OPCIONES
+      // FILTRADO DE VENTAS - LÓGICA ESTRICTA SANITIZADA
       Object.values(operacionesAcumuladas).forEach(reg => {
-        const tipo = String(reg.tipoOperacion || '').toUpperCase().trim();
+        // SEGURO PRO: Elimina espacios ocultos al final del string que causan falsos negativos
+        const tipo = String(reg.tipoOperacion || '').toUpperCase().trim().replace(/\s+/g, ' ');
         
         const esValido = (tipo === "PORTA SS-SS" || 
                           tipo === "PORTA PP-SS" || 
@@ -665,7 +650,7 @@
               if (semanaVal === "sem2" && !(dia >= 5 && dia <= 11)) pasaFiltro = false;
               if (semanaVal === "sem3" && !(dia >= 12 && dia <= 18)) pasaFiltro = false;
               if (semanaVal === "sem4" && !(dia >= 19 && dia <= 25)) pasaFiltro = false;
-              if (semanaVal === "sem5" && !(dia >= 26 && dia <= 31)) pasaFiltro = false;
+              if (semanaVal === "sem5" && !(dia >= 26)) pasaFiltro = false;
             }
           }
 
