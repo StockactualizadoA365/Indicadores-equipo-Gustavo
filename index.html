@@ -219,8 +219,9 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // LA DOTACIÓN OFICIAL
+    // LA DOTACIÓN OFICIAL CON ACTIVOS E INACTIVOS
     const ejecutivosBaseActivos = [
+      // ACTIVOS
       { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "fcampost", dni: "73013201", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "gguerreroe", dni: "47228079", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
@@ -228,7 +229,12 @@
       { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "msolero", dni: "9138103", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true }
+      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      
+      // INACTIVOS (Agregados según tu tabla dinámica)
+      { usuario: "galatat", dni: "", nombre: "Alata Toledo Gonzalo Andres", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: false },
+      { usuario: "mhernandezb", dni: "", nombre: "Hernandez Banda Maria Tania", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: false },
+      { usuario: "bsanchez", dni: "", nombre: "Sanchez Lopez Brigitte Katheryne", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: false }
     ];
 
     const dniToUsuarioMap = {
@@ -242,23 +248,27 @@
       "43905089": "cnoriegaf"
     };
 
-    const usuariosActivosSet = new Set(ejecutivosBaseActivos.map(e => e.usuario));
-
-    function obtenerUsuarioPorDNI(dniRaw = "", userRaw = "") {
+    function obtenerUsuarioPorDNI(dniRaw = "", userRaw = "", nomRaw = "") {
       const dniClean = String(dniRaw || "").trim().replace(/\D/g, "");
       if (dniClean && dniToUsuarioMap[dniClean]) return dniToUsuarioMap[dniClean];
 
       const userClean = String(userRaw || "").toLowerCase().trim();
+      const nomClean = String(nomRaw || "").toLowerCase().trim();
       
-      // Mapeo directo por coincidencias en el ID de usuario sin @
-      if (userClean === "gguerreroe" || userClean.includes("guerrero")) return "gguerreroe";
-      if (userClean === "illanquim" || userClean.includes("llanqui")) return "illanquim";
-      if (userClean === "cnoriegaf" || userClean.includes("noriega")) return "cnoriegaf";
-      if (userClean === "fcampost" || userClean.includes("campos")) return "fcampost";
-      if (userClean === "sdionicioj" || userClean.includes("dionicio")) return "sdionicioj";
-      if (userClean === "glopeza" || userClean.includes("lopez")) return "glopeza";
-      if (userClean === "msolero" || userClean.includes("soler")) return "msolero";
-      if (userClean === "rtorresc" || userClean === "rtorresh" || userClean.includes("torres")) return "rtorresc";
+      // Mapeo directo por nombre o usuario
+      if (userClean === "gguerreroe" || nomClean.includes("gypsi") || nomClean.includes("guerrero e") ) return "gguerreroe";
+      if (userClean === "illanquim" || nomClean.includes("llanqui")) return "illanquim";
+      if (userClean === "cnoriegaf" || nomClean.includes("noriega")) return "cnoriegaf";
+      if (userClean === "fcampost" || nomClean.includes("campos tapia")) return "fcampost";
+      if (userClean === "sdionicioj" || nomClean.includes("dionicio")) return "sdionicioj";
+      if (userClean === "glopeza" || nomClean.includes("lopez abanto")) return "glopeza";
+      if (userClean === "msolero" || nomClean.includes("soler oberto")) return "msolero";
+      if (userClean === "rtorresc" || userClean === "rtorresh" || nomClean.includes("torres heredia")) return "rtorresc";
+      
+      // Inactivos
+      if (userClean.includes("alata") || nomClean.includes("alata toledo")) return "galatat";
+      if (userClean.includes("hernandez") || nomClean.includes("maria tania") || nomClean.includes("hernandez banda")) return "mhernandezb";
+      if (userClean.includes("sanchez") || nomClean.includes("brigitte")) return "bsanchez";
 
       return userClean;
     }
@@ -323,7 +333,7 @@
       ejecutivosBaseActivos.forEach(e => {
         ejecutivosMap[e.usuario] = {
           usuario: e.usuario, nombre: e.nombre, dni: e.dni, supervisor: e.supervisor,
-          activo: true, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0
+          activo: e.activo, metaCalculada: 0, avance: 0, horasVentas: Array(24).fill(0), llamadas: 0
         };
         supervisoresDisponibles.add(e.supervisor);
       });
@@ -362,9 +372,8 @@
           if (!rawRows || rawRows.length === 0) return alert("El archivo Excel está vacío.");
 
           let colTipoOp = -1, colFecha = -1, colHora = -1, colNroOp = -1, colLlamadas = -1;
-          let colDniUser = -1, colCodeUser = -1, headerRow = -1;
+          let colDniUser = -1, colCodeUser = -1, colNomUser = -1, headerRow = -1;
 
-          // BUSCADOR PRECISO DE COLUMNAS (Corrección de Bug: Separar NroOperacion de TipoOperacion)
           for (let r = 0; r < Math.min(25, rawRows.length); r++) {
             const row = rawRows[r];
             if (!row) continue;
@@ -372,11 +381,12 @@
               const val = String(row[c] || '').toUpperCase().trim();
               
               if (val === 'TIPO OPERACION') colTipoOp = c, headerRow = r;
-              else if (val === 'NRO.OPERACION' || val === 'ID OPERACION' || val === 'NUMERO OPERACION') colNroOp = c;
+              else if (val === 'NRO.OPERACION' || val === 'ID OPERACION') colNroOp = c;
               
               if (val === 'CONTESTADAS' || val.includes('LLAMADAS')) colLlamadas = c, headerRow = r;
               if (val.includes('NUM.DOC USUARIO') || val === 'DNI') colDniUser = c;
               if (val.includes('CODIGO USUARIO') || val === 'USER') colCodeUser = c;
+              if (val.includes('NOMBRE USUARIO') || val.includes('NOMBRE')) colNomUser = c;
               if (val.includes('FECHA REGISTRO') || val === 'FECHA') colFecha = c;
               if (val === 'HORA') colHora = c;
             }
@@ -393,8 +403,9 @@
 
               const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '') : '';
               const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '') : '';
+              const nomVal = colNomUser !== -1 ? String(row[colNomUser] || '') : '';
               
-              const usuario = obtenerUsuarioPorDNI(dniVal, codeVal);
+              const usuario = obtenerUsuarioPorDNI(dniVal, codeVal, nomVal);
               if (!usuario || !ejecutivosMap[usuario]) continue;
 
               const fechaRaw = colFecha !== -1 ? row[colFecha] : '';
@@ -408,28 +419,30 @@
             alert(`¡Éxito! Se consolidaron ${nuevos} registros de llamadas.`);
           } 
           else {
-            operacionesAcumuladas = {}; // Limpia datos anteriores
+            operacionesAcumuladas = {}; 
             for (let r = headerRow + 1; r < rawRows.length; r++) {
               const row = rawRows[r];
               if (!row) continue;
 
               const dniVal = colDniUser !== -1 ? String(row[colDniUser] || '') : '';
               const codeVal = colCodeUser !== -1 ? String(row[colCodeUser] || '') : '';
+              const nomVal = colNomUser !== -1 ? String(row[colNomUser] || '') : '';
               
-              const usuario = obtenerUsuarioPorDNI(dniVal, codeVal);
+              const usuario = obtenerUsuarioPorDNI(dniVal, codeVal, nomVal);
               if (!usuario || !ejecutivosMap[usuario]) continue;
 
               const tipoOperacion = colTipoOp !== -1 ? String(row[colTipoOp] || '').toUpperCase().trim().replace(/\s+/g, ' ') : '';
               const fechaStr = colFecha !== -1 ? String(row[colFecha] || '').trim() : '';
               const horaStr = colHora !== -1 ? String(row[colHora] || '').trim() : '';
               
-              // Si no existe columna NRO.OPERACION, se genera un ID único por fila real para evitar sobreescritura
-              const nroOp = colNroOp !== -1 && row[colNroOp] ? String(row[colNroOp]).trim() : `FILA_${usuario}_${fechaStr}_${r}`;
+              // CLAVE ÚNICA ABSOLUTA: Se añade la fila 'r' para que NUNCA sobreescriba duplicados del reporte de Entel
+              const nroOp = colNroOp !== -1 && row[colNroOp] ? String(row[colNroOp]).trim() : `ID_${r}`;
+              const uniqueKey = `${nroOp}_FILA_${r}`; 
 
-              operacionesAcumuladas[nroOp] = { nroOp, usuario, tipoOperacion, fechaStr, horaStr };
+              operacionesAcumuladas[uniqueKey] = { nroOp, usuario, tipoOperacion, fechaStr, horaStr };
               nuevos++;
             }
-            alert(`¡Bug Corregido! Se procesaron correctamente ${nuevos} operaciones únicas de ventas.`);
+            alert(`¡Bug de duplicados corregido! Se contabilizaron ${nuevos} filas de ventas de forma exacta a tu Excel.`);
           }
 
           recalcularAvances();
@@ -538,7 +551,7 @@
         }
       });
 
-      // CONTEO EXCLUSIVO DE VENTAS POR VOZ
+      // CONTEO EXCLUSIVO DE VENTAS POR VOZ (1 a 1 como la tabla dinámica)
       Object.values(operacionesAcumuladas).forEach(reg => {
         const tipo = String(reg.tipoOperacion || '').toUpperCase().trim();
         
@@ -664,6 +677,11 @@
         if (efecNum >= 13.5) barColorEfec = "bg-emerald-500";
         else if (efecNum >= 7.0) barColorEfec = "bg-amber-500";
 
+        // Marcar inactivos visualmente
+        if (!item.activo) {
+          dotColor = "bg-slate-400";
+        }
+
         const tr = document.createElement('tr');
         tr.className = `${rowBgClass} transition-colors border-b border-slate-100`;
 
@@ -680,8 +698,8 @@
               <div class="flex items-center gap-2.5">
                 <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
-                  <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
-                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | ${item.usuario}</div>
+                  <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre} ${item.activo ? '' : '<span class="text-[9px] bg-slate-200 text-slate-600 px-1 py-0.5 rounded ml-1">INACTIVO</span>'}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni || 'N/A'} | ${item.usuario}</div>
                 </div>
               </div>
             </td>
@@ -695,8 +713,8 @@
               <div class="flex items-center gap-2.5">
                 <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white shadow-sm"></span>
                 <div>
-                  <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre}</div>
-                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni} | ${item.usuario}</div>
+                  <div class="font-bold text-slate-900 text-xs leading-tight">${item.nombre} ${item.activo ? '' : '<span class="text-[9px] bg-slate-200 text-slate-600 px-1 py-0.5 rounded ml-1">INACTIVO</span>'}</div>
+                  <div class="text-[10px] text-slate-400 font-mono leading-tight">DNI: ${item.dni || 'N/A'} | ${item.usuario}</div>
                 </div>
               </div>
             </td>
