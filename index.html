@@ -257,12 +257,12 @@
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // NÓMINA OFICIAL CON DNI OFICIAL
+    // NÓMINA OFICIAL CON DNI CORREGIDO (GIPSI GUERRERO: 47228079)
     const ejecutivosBaseActivos = [
       { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "fcampost", dni: "73013201", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
-      { usuario: "gguerreroe", dni: "45892011", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
+      { usuario: "gguerreroe", dni: "47228079", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
       { usuario: "msolero", dni: "9138103", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", llamadas: 0, activo: true },
@@ -274,12 +274,13 @@
       "brigitte", "mtania", "tania", "maria tania", "bcontreras", "mbalza"
     ]);
 
-    // MAPA DIRECTO DE DNI
+    // MAPA DIRECTO DE DNI COMPATIBLE
     const dniToUsuarioMap = {
       "25844339": "illanquim",
       "43905089": "cnoriegaf",
       "73013201": "fcampost",
-      "45892011": "gguerreroe",
+      "47228079": "gguerreroe",
+      "45892011": "gguerreroe", // Compatibilidad
       "73590536": "sdionicioj",
       "71277784": "glopeza",
       "9138103": "msolero",
@@ -301,6 +302,16 @@
         return dniToUsuarioMap[dniClean];
       }
 
+      const userClean = String(userRaw || "").toLowerCase().trim();
+      if (userClean === "gguerreroe" || userClean.includes("guerrero")) return "gguerreroe";
+      if (userClean === "illanquim" || userClean.includes("llanqui")) return "illanquim";
+      if (userClean === "cnoriegaf" || userClean.includes("noriega")) return "cnoriegaf";
+      if (userClean === "fcampost" || userClean.includes("campos")) return "fcampost";
+      if (userClean === "sdionicioj" || userClean.includes("dionicio")) return "sdionicioj";
+      if (userClean === "glopeza" || userClean.includes("lopez")) return "glopeza";
+      if (userClean === "msolero" || userClean.includes("soler")) return "msolero";
+      if (userClean === "rtorresc" || userClean === "rtorresh" || userClean.includes("torres")) return "rtorresc";
+
       const fullStr = (rowStr + " " + userRaw + " " + nomRaw + " " + dniRaw).toLowerCase();
 
       for (const [dni, usuario] of Object.entries(dniToUsuarioMap)) {
@@ -310,7 +321,7 @@
       if (fullStr.includes("brigitte")) return "brigitte";
       if (fullStr.includes("tania")) return "mtania";
 
-      return (userRaw || "").toLowerCase().trim();
+      return userClean;
     }
 
     function parseFechaExcel(fVal) {
@@ -571,7 +582,7 @@
       let añoBase = 2026;
       let mesIndex = mesVal !== "todos" ? parseInt(mesVal) - 1 : 9;
       let fInicioRango = new Date(añoBase, mesIndex, 1);
-      let fFinRango = new Date(añoBase, mesIndex, 19);
+      let fFinRango = new Date(añoBase, mesIndex, 21);
 
       if (fDesdeVal) {
         const dSplit = fDesdeVal.split('-');
@@ -627,11 +638,10 @@
         }
       });
 
-      // FILTRADO DE VENTAS ALINEADO EXACTAMENTE A LAS 4 OPCIONES PERMITIDAS
+      // FILTRADO DE VENTAS ALINEADO A LAS 4 OPCIONES
       Object.values(operacionesAcumuladas).forEach(reg => {
         const tipo = String(reg.tipoOperacion || '').toUpperCase().trim();
         
-        // VALIDACIÓN ESTRICTA: SOLO LAS 4 OPCIONES DE LA IMAGEN
         const esValido = (tipo === "PORTA SS-SS" || 
                           tipo === "PORTA PP-SS" || 
                           tipo === "NUEVA LINEA" || 
