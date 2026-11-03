@@ -218,7 +218,7 @@
 
     // CONFIGURACIÓN ACTUALIZADA DE DOTACIÓN
     const ejecutivosBaseActivos = [
-      // ACTIVOS (Según nueva dotación)
+      // ACTIVOS
       { usuario: "illanquim", dni: "25844339", nombre: "Isabel Llanqui Masias", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: null },
       { usuario: "fcampost", dni: "73013201", nombre: "Flavio Diego Campos Tapia", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: null },
       { usuario: "gguerreroe", dni: "47228079", nombre: "Gypsi Giannina Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: null },
@@ -228,7 +228,7 @@
       { usuario: "cnoriegaf", dni: "43905089", nombre: "Noriega Fonseca Carla Carolina", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: "2026-10-19" },
       { usuario: "aguevarag", dni: "47675835", nombre: "Guevara Guerra Andrea Gisela", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 3, fechaInicio: null },
 
-      // INACTIVOS (Antiguos miembros que salieron de la dotación y pasados)
+      // INACTIVOS
       { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 3, fechaInicio: "2026-10-19" },
       { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
       { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
@@ -305,7 +305,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
-      // Ajustar filtro del mes automáticamente al mes actual
       document.getElementById('selectMes').value = (new Date().getMonth() + 1).toString();
       cargarDesdeStorage();
     });
@@ -481,7 +480,6 @@
       return 10;
     }
 
-    // FÓRMULA DE META PRO SIN DOMINGOS
     function calcularMetaAcumuladaParaRango(fInicio, fFin, metaDiaria) {
       if (!fInicio || !fFin || fInicio > fFin) return 0;
       let metaTotal = 0;
@@ -535,9 +533,10 @@
         if (semanaVal === "sem4") { fInicioGlobal.setDate(19); fFinGlobal.setDate(25); }
         if (semanaVal === "sem5") { fInicioGlobal.setDate(26); fFinGlobal.setDate(fFinGlobal.getDate()); }
       } else {
-        // CÁLCULO HASTA EL MOMENTO HOY
+        // CÁLCULO ESTRICTO HASTA AYER (Evita cobrar meta doble si hoy no ha terminado)
         if (mesIndex === fechaActual.getMonth() && añoBase === fechaActual.getFullYear()) {
-          fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
+          const diaAyer = Math.max(1, fechaActual.getDate() - 1);
+          fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), diaAyer);
         }
       }
 
