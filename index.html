@@ -135,8 +135,8 @@
                 <option value="7">Julio</option>
                 <option value="8">Agosto</option>
                 <option value="9">Septiembre</option>
-                <option value="10" selected>Octubre</option>
-                <option value="11">Noviembre</option>
+                <option value="10">Octubre</option>
+                <option value="11" selected>Noviembre</option>
                 <option value="12">Diciembre</option>
               </select>
             </div>
@@ -173,8 +173,7 @@
             </div>
 
             <div class="pt-2 border-t border-slate-100 hidden">
-              <!-- Oculto para no confundir ya que ahora la meta diaria es individual por agente en el código -->
-              <input type="number" id="metaDiariaBase" value="5" class="hidden">
+              <input type="number" id="metaDiariaBase" value="4" class="hidden">
             </div>
           </div>
         </div>
@@ -212,40 +211,45 @@
     let llamadasDiariasAcumuladas = [];
     let ejecutivosMap = {};
     let supervisoresDisponibles = new Set();
-    let supervisorSeleccionado = "Eguilas Morales Gustavo ernesto";
+    let supervisorSeleccionado = "Eguilas Morales Gustavo Ernesto";
     let mostrarPizarra = false;
 
     const horasRango = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
-    // CONFIGURACIÓN DE DOTACIÓN CON METAS PERSONALIZADAS Y FECHAS DE INICIO
+    // CONFIGURACIÓN ACTUALIZADA DE DOTACIÓN
     const ejecutivosBaseActivos = [
-      { usuario: "illanquim", dni: "25844339", nombre: "Isabel Veronica Llanqui Masias", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
-      { usuario: "fcampost", dni: "73013201", nombre: "Campos Tapia Flavio Diego", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
-      { usuario: "gguerreroe", dni: "47228079", nombre: "Gipsi Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
-      
-      // NUEVOS CON META DE 3 A PARTIR DEL 19 DE OCTUBRE
-      { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 3, fechaInicio: "2026-10-19" },
-      { usuario: "cnoriegaf", dni: "43905089", nombre: "Carla Noriega Fonseca", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 3, fechaInicio: "2026-10-19" },
+      // ACTIVOS (Según nueva dotación)
+      { usuario: "illanquim", dni: "25844339", nombre: "Isabel Llanqui Masias", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: null },
+      { usuario: "fcampost", dni: "73013201", nombre: "Flavio Diego Campos Tapia", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: null },
+      { usuario: "gguerreroe", dni: "47228079", nombre: "Gypsi Giannina Guerrero Eyzaguirre", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: null },
+      { usuario: "vquispev", dni: "74965515", nombre: "Quispe Vargas Variña Isabel", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 3, fechaInicio: null },
+      { usuario: "msolero", dni: "9138103", nombre: "Soler Oberto Maritriny Patricia", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: null },
+      { usuario: "yespinozac", dni: "73103559", nombre: "Espinoza Colina Yefri Efrain", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 3, fechaInicio: null },
+      { usuario: "cnoriegaf", dni: "43905089", nombre: "Noriega Fonseca Carla Carolina", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 4, fechaInicio: "2026-10-19" },
+      { usuario: "aguevarag", dni: "47675835", nombre: "Guevara Guerra Andrea Gisela", supervisor: "Eguilas Morales Gustavo Ernesto", activo: true, metaDiaria: 3, fechaInicio: null },
 
-      { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
-      { usuario: "msolero", dni: "9138103", nombre: "Maritriny Patricia Soler Oberto", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
-      { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo ernesto", activo: true, metaDiaria: 5, fechaInicio: null },
-      
-      // INACTIVOS
-      { usuario: "galatat", dni: "", nombre: "Alata Toledo Gonzalo Andres", supervisor: "Eguilas Morales Gustavo ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
-      { usuario: "mhernandezb", dni: "", nombre: "Hernandez Banda Maria Tania", supervisor: "Eguilas Morales Gustavo ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
-      { usuario: "bsanchez", dni: "", nombre: "Sanchez Lopez Brigitte Katheryne", supervisor: "Eguilas Morales Gustavo ernesto", activo: false, metaDiaria: 5, fechaInicio: null }
+      // INACTIVOS (Antiguos miembros que salieron de la dotación y pasados)
+      { usuario: "sdionicioj", dni: "73590536", nombre: "Dionicio Jauregui Stephano Sebastian", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 3, fechaInicio: "2026-10-19" },
+      { usuario: "glopeza", dni: "71277784", nombre: "Guillermo Antonio López", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
+      { usuario: "rtorresc", dni: "72312477", nombre: "Roberto Baruc Torres", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
+      { usuario: "galatat", dni: "", nombre: "Alata Toledo Gonzalo Andres", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
+      { usuario: "mhernandezb", dni: "", nombre: "Hernandez Banda Maria Tania", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 5, fechaInicio: null },
+      { usuario: "bsanchez", dni: "", nombre: "Sanchez Lopez Brigitte Katheryne", supervisor: "Eguilas Morales Gustavo Ernesto", activo: false, metaDiaria: 5, fechaInicio: null }
     ];
 
     const dniToUsuarioMap = {
       "25844339": "illanquim",
       "73013201": "fcampost",
       "47228079": "gguerreroe",
+      "74965515": "vquispev",
+      "9138103": "msolero",
+      "73103559": "yespinozac",
+      "43905089": "cnoriegaf",
+      "47675835": "aguevarag",
+      // INACTIVOS
       "73590536": "sdionicioj",
       "71277784": "glopeza",
-      "9138103": "msolero",
-      "72312477": "rtorresc",
-      "43905089": "cnoriegaf"
+      "72312477": "rtorresc"
     };
 
     function obtenerUsuarioPorDNI(dniRaw = "", userRaw = "", nomRaw = "") {
@@ -255,15 +259,20 @@
       const userClean = String(userRaw || "").toLowerCase().trim();
       const nomClean = String(nomRaw || "").toLowerCase().trim();
       
-      if (userClean === "gguerreroe" || nomClean.includes("gypsi") || nomClean.includes("guerrero e") ) return "gguerreroe";
+      // Activos
+      if (userClean === "gguerreroe" || nomClean.includes("gypsi") || nomClean.includes("guerrero e")) return "gguerreroe";
       if (userClean === "illanquim" || nomClean.includes("llanqui")) return "illanquim";
       if (userClean === "cnoriegaf" || nomClean.includes("noriega")) return "cnoriegaf";
       if (userClean === "fcampost" || nomClean.includes("campos tapia")) return "fcampost";
+      if (userClean === "msolero" || nomClean.includes("soler oberto")) return "msolero";
+      if (userClean === "vquispev" || nomClean.includes("variña") || nomClean.includes("quispe vargas")) return "vquispev";
+      if (userClean === "yespinozac" || nomClean.includes("yefri") || nomClean.includes("espinoza colina")) return "yespinozac";
+      if (userClean === "aguevarag" || nomClean.includes("andrea gisela") || nomClean.includes("guevara guerra")) return "aguevarag";
+      
+      // Inactivos
       if (userClean === "sdionicioj" || nomClean.includes("dionicio")) return "sdionicioj";
       if (userClean === "glopeza" || nomClean.includes("lopez abanto")) return "glopeza";
-      if (userClean === "msolero" || nomClean.includes("soler oberto")) return "msolero";
       if (userClean === "rtorresc" || userClean === "rtorresh" || nomClean.includes("torres heredia")) return "rtorresc";
-      
       if (userClean.includes("alata") || nomClean.includes("alata toledo")) return "galatat";
       if (userClean.includes("hernandez") || nomClean.includes("maria tania") || nomClean.includes("hernandez banda")) return "mhernandezb";
       if (userClean.includes("sanchez") || nomClean.includes("brigitte")) return "bsanchez";
@@ -296,6 +305,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
+      // Ajustar filtro del mes automáticamente al mes actual
+      document.getElementById('selectMes').value = (new Date().getMonth() + 1).toString();
       cargarDesdeStorage();
     });
 
@@ -476,14 +487,12 @@
       let metaTotal = 0;
       let curr = new Date(fInicio.getTime());
       
-      // Sanitizar horas para no contar fracciones de día erróneas
       curr.setHours(0,0,0,0);
       let end = new Date(fFin.getTime());
       end.setHours(0,0,0,0);
 
       while (curr <= end) {
-        // EXCLUIR DOMINGOS ESTRICTAMENTE (0 = Domingo)
-        if (curr.getDay() !== 0) {
+        if (curr.getDay() !== 0) { // EXCLUYE DOMINGOS
           metaTotal += metaDiaria;
         }
         curr.setDate(curr.getDate() + 1);
@@ -502,7 +511,7 @@
       const fHastaVal = document.getElementById('filterFechaHasta').value;
       const mesVal = document.getElementById('selectMes').value;
       const semanaVal = document.getElementById('selectSemana').value;
-      const metaGlobalDefault = parseFloat(document.getElementById('metaDiariaBase').value) || 5;
+      const metaGlobalDefault = parseFloat(document.getElementById('metaDiariaBase').value) || 4;
 
       let fechaActual = new Date();
       let añoBase = fechaActual.getFullYear();
@@ -526,7 +535,7 @@
         if (semanaVal === "sem4") { fInicioGlobal.setDate(19); fFinGlobal.setDate(25); }
         if (semanaVal === "sem5") { fInicioGlobal.setDate(26); fFinGlobal.setDate(fFinGlobal.getDate()); }
       } else {
-        // CÁLCULO HASTA EL MOMENTO (Si es el mes actual y no hay filtro "Hasta", corta HOY)
+        // CÁLCULO HASTA EL MOMENTO HOY
         if (mesIndex === fechaActual.getMonth() && añoBase === fechaActual.getFullYear()) {
           fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
         }
@@ -538,12 +547,11 @@
         
         let startCal = new Date(fInicioGlobal.getTime());
         
-        // Ajuste especial por asesor nuevo
         if (agent.fechaInicio) {
           let parts = agent.fechaInicio.split('-');
           let dIniAgente = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
           if (dIniAgente > startCal) {
-            startCal = new Date(dIniAgente.getTime()); // Calcula desde su 1er día si es posterior al rango
+            startCal = new Date(dIniAgente.getTime()); 
           }
         }
 
@@ -671,7 +679,7 @@
       arrEjecutivos.sort((a, b) => b.avance - a.avance);
 
       arrEjecutivos.forEach((item) => {
-        const metaInd = item.metaCalculada || 0; // Mostrar 0 si no han comenzado
+        const metaInd = item.metaCalculada || 0; 
         sumMeta += metaInd;
         sumAvance += parseInt(item.avance) || 0;
         sumLlamadas += parseInt(item.llamadas) || 0;
@@ -802,7 +810,7 @@
 
     function limpiarFiltros() {
       document.getElementById('selectEstadoAgente').value = "activos";
-      document.getElementById('selectSupervisor').value = "Eguilas Morales Gustavo ernesto";
+      document.getElementById('selectSupervisor').value = "Eguilas Morales Gustavo Ernesto";
       document.getElementById('selectMes').value = (new Date().getMonth() + 1).toString();
       document.getElementById('selectSemana').value = "todos";
       document.getElementById('filterFechaDesde').value = "";
