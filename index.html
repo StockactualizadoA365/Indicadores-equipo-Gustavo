@@ -480,6 +480,7 @@
       return 10;
     }
 
+    // FÓRMULA DE META PRO SIN DOMINGOS
     function calcularMetaAcumuladaParaRango(fInicio, fFin, metaDiaria) {
       if (!fInicio || !fFin || fInicio > fFin) return 0;
       let metaTotal = 0;
@@ -518,25 +519,36 @@
       let fInicioGlobal = new Date(añoBase, mesIndex, 1);
       let fFinGlobal = new Date(añoBase, mesIndex + 1, 0); 
 
-      if (fDesdeVal) {
-        const dSplit = fDesdeVal.split('-');
-        fInicioGlobal = new Date(parseInt(dSplit[0]), parseInt(dSplit[1]) - 1, parseInt(dSplit[2]));
+      // 1. REGLA: APLICAR FILTROS EXACTOS (INCLUYE DÍA ACTUAL)
+      if (fDesdeVal || fHastaVal) {
+        if (fDesdeVal) {
+          const dSplit = fDesdeVal.split('-');
+          fInicioGlobal = new Date(parseInt(dSplit[0]), parseInt(dSplit[1]) - 1, parseInt(dSplit[2]));
+        }
+        if (fHastaVal) {
+          const hSplit = fHastaVal.split('-');
+          fFinGlobal = new Date(parseInt(hSplit[0]), parseInt(hSplit[1]) - 1, parseInt(hSplit[2]));
+        } else {
+            // Si hay un "Desde" pero no un "Hasta", cortamos estrictamente hoy para no sobrefacturar la meta.
+            fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
+        }
+      } 
+      // 2. REGLA: MES EN CURSO
+      else if (mesIndex === fechaActual.getMonth() && añoBase === fechaActual.getFullYear() && semanaVal === "todos") {
+         // Si es el mes en curso por defecto, la meta se calcula EXCTAMENTE HASTA HOY.
+         fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
       }
-
-      if (fHastaVal) {
-        const hSplit = fHastaVal.split('-');
-        fFinGlobal = new Date(parseInt(hSplit[0]), parseInt(hSplit[1]) - 1, parseInt(hSplit[2]));
-      } else if (semanaVal !== "todos") {
+      // 3. REGLA: SEMANAS
+      else if (semanaVal !== "todos") {
         if (semanaVal === "sem1") { fInicioGlobal.setDate(1); fFinGlobal.setDate(4); }
         if (semanaVal === "sem2") { fInicioGlobal.setDate(5); fFinGlobal.setDate(11); }
         if (semanaVal === "sem3") { fInicioGlobal.setDate(12); fFinGlobal.setDate(18); }
         if (semanaVal === "sem4") { fInicioGlobal.setDate(19); fFinGlobal.setDate(25); }
         if (semanaVal === "sem5") { fInicioGlobal.setDate(26); fFinGlobal.setDate(fFinGlobal.getDate()); }
-      } else {
-        // CÁLCULO ESTRICTO HASTA AYER (Evita cobrar meta doble si hoy no ha terminado)
-        if (mesIndex === fechaActual.getMonth() && añoBase === fechaActual.getFullYear()) {
-          const diaAyer = Math.max(1, fechaActual.getDate() - 1);
-          fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), diaAyer);
+        
+        // Si el filtro de semana se cruza con el futuro de este mes, cortar en el día de hoy
+        if (mesIndex === fechaActual.getMonth() && fFinGlobal > fechaActual) {
+             fFinGlobal = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
         }
       }
 
